@@ -403,7 +403,7 @@ class Reinforcement_Env(gym.Env):
         self.action_space = spaces.Box( np.array([-1.,-1.]), np.array([+1.,+1.])) 
         self.observation_space = spaces.Discrete(1)
         self._seed()
-        self.reset()
+        self._reset()
         self.viewer = None
         self.steps_beyond_done = None
         self._configure()

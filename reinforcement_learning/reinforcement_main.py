@@ -25,7 +25,7 @@ from chainerrl import experiments
 from chainerrl import misc
 from chainerrl import links, policy, v_function
 from chainerrl.optimizers import rmsprop_async
-from dqn_phi import dqn_phi
+# from dqn_phi import dqn_phi
 
 import sys
 import numpy as np
@@ -94,14 +94,14 @@ class SimulationLoop(QThread):
         
         if args.train:
             for i in range(1, n_episodes + 1):
-                observation = self.env.reset()
+                observation = self.env._reset()
                 reward = 0
                 R = 0
                 for t in range(max_episode_len):
-                    self.env.render()
+                    self.env._render()
                     
                     act = self.agent.act_and_train(observation, reward)
-                    observation, reward, done, info = self.env.step(act)
+                    observation, reward, done, info = self.env._step(act)
                     R += reward
                     
                     if done:
@@ -128,10 +128,10 @@ class SimulationLoop(QThread):
                 reward = 0
                 R = 0
                 for t in range(max_episode_len):
-                    self.env.render()
+                    self.env._render()
                     
                     act = self.agent.act_and_train(observation, reward)
-                    observation, reward, done, info = self.env.step(act)
+                    observation, reward, done, info = self.env._step(act)
                     R += reward
                     
                     if done:
@@ -154,13 +154,13 @@ class SimulationLoop(QThread):
             self.agent.load(args.load)
             
             for i in range(100):
-                observation = self.env.reset()
+                observation = self.env._reset()
                 reward = 0
                 R = 0
                 for t in range(max_episode_len):
-                    self.env.render()
+                    self.env._render()
                     act = self.agent.act(observation)
-                    observation, reward, done, info = self.env.step(act)
+                    observation, reward, done, info = self.env._step(act)
                     R += reward
                     if done:
                         print("Test Episode {} finished after {} timesteps".format(i, t+1))
@@ -274,14 +274,14 @@ if __name__ == '__main__':
     
     print(args.obsagent)
     if args.train:
-        #S = SimulationLoop(agent, env)
-        #S.run()
-        app = 0
-        app = QApplication(sys.argv)
+        S = SimulationLoop(agent, env)
+        S.run()
+        # app = 0
+        # app = QApplication(sys.argv)
         
-        w = APPWINDOW(args.obsagent, SimulationLoop(agent, env) , title='Obstacle Acoidace')
-        w.SetWorld(env)
-        w.show()
+        # w = APPWINDOW(args.obsagent, SimulationLoop(agent, env) , title='Obstacle Acoidace')
+        # w.SetWorld(env)
+        # w.show()
     
     if args.load_train:
         S = SimulationLoop(agent, env)
