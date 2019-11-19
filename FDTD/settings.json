@@ -1,0 +1,35 @@
+{
+ "field": {
+         "xaxis": 3000,
+         "yaxis": 2400
+          },
+ "wall": {
+        "length_x": 10,
+        "length_y": 1000,
+        "point": "[(2500, 100), (2000, 1300), (1500, 100)]"
+        },
+ "resolution": {
+         "distance": 10.0e-4,
+         "time": 20.0e-7
+         },
+ "signal": {
+         "type": "gaussian",
+         "frequency": 1.0e4,
+         "amplitude": 5,
+         "duration": 100,
+         "sigma": 7,
+         "point": "(2800,1200)"
+         },
+ "density":{"air": 1.293,
+          "acrylic": 1180},
+ "kappa": {"air": 142.0e3,
+           "acrylic": 322.0e4},
+ "PML": {"flag": true,
+         "number_of_layers": 16,
+         "taper_multiplier": 4,
+         "max_attenuation_constant": 1.2},
+ "ear_point_from_signal" : 20,
+ "cycle_number": 1000,
+ "save_step": 10,
+ "GPU": false
+ }
