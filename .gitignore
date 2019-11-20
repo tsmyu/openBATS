@@ -1,1 +1,7 @@
 openbats/
+reinforcement_learning/__pycache__/
+*.py[cod]
+*$py.class
+FDTD/__pycache__/
+*.py[cod]
+*$py.class
