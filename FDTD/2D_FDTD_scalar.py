@@ -5,9 +5,13 @@ import time
 import numpy as np
 import math
 from scipy import signal
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-import chainer
+
+if not __debug__:
+    debug_flag = True
+    import matplotlib.pyplot as plt
+    import matplotlib.animation as animation
+else:
+    debug_flag = False
 
 components_dir = os.path.dirname(os.path.realpath(__file__)) + "/"
 setting_file_path = components_dir + "settings.json"
@@ -30,7 +34,9 @@ with open(setting_file_path, "r") as setting_file_obj:
     gpu_flag = config_param["GPU"]
 
 if gpu_flag:
+    import chainer
     import cupy as cp
+
 
 def MakeFigure(P):
     if gpu_flag:
@@ -39,9 +45,8 @@ def MakeFigure(P):
     else:
         P_to_img = np.round(np.abs(P)/np.max(abs(P)), 2)
         im = plt.imshow(P_to_img, cmap="jet")
-    
-    return im
 
+    return im
 
 
 def CreatePulse(i):
@@ -54,34 +59,40 @@ def Calc(P1, P2):
     ims = []
     tim = 0
     for i in range(nmax):
+        print("step:{}".format(i))
         time_start = time.perf_counter()
         if i < sig_duration:
             sig = CreatePulse(i)
             P1[signal_point[0], signal_point[1]
                ] = P1[signal_point[0], signal_point[1]] + sig
-        print("step:{}".format(i))
         P1[1:nx-1, 1:ny-1] = 2*P2[1:nx-1, 1:ny-1] - P1[1:nx-1, 1:ny-1]+(sound_speed_air*dt/dx)**2 * (
             (P2[2:nx, 1:ny - 1] + P2[:nx-2, 1:ny - 1] + P2[1:nx-1, 2:ny] +
              P2[1:nx - 1, :ny - 2])) - 4 * (sound_speed_air * dt / dx) ** 2 * P2[1:nx - 1, 1:ny - 1]
         time_end = time.perf_counter()
         tim += (time_end - time_start)
-        im = MakeFigure(P1)
-        ims.append([im])
+        if debug_flag:
+            im = MakeFigure(P1)
+            ims.append([im])
         P1, P2 = P2, P1
 
-    print("calc time:", tim)
+    print(f'calc time:{np.round(tim,2)}[s]')
     return ims
 
 
 if __name__ == "__main__":
-    fig = plt.figure()
     if gpu_flag:
         cp.cuda.set_allocator(cp.cuda.MemoryPool().malloc)
         P1 = cp.zeros((nx + 1, ny + 1))
         P2 = cp.zeros((nx + 1, ny + 1))
+        if debug_flag:
+            fig = plt.figure()
+        image_list = Calc(P1, P2)
     else:
         P1 = np.zeros((nx + 1, ny + 1))
         P2 = np.zeros((nx + 1, ny + 1))
-    image_list = Calc(P1, P2)
-    ani = animation.ArtistAnimation(fig, image_list, interval=100, blit=True)
-    plt.show()
+        if debug_flag:
+            fig = plt.figure()
+        image_list = Calc(P1, P2)
+    if debug_flag:
+        ani = animation.ArtistAnimation(fig, image_list, interval=100, blit=True)
+        plt.show()

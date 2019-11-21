@@ -1,4 +1,6 @@
 openbats/
+FDTD/fdtd_env
+FDTD/python_base
 reinforcement_learning/__pycache__/
 *.py[cod]
 *$py.class
