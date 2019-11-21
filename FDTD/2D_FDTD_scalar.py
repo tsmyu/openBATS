@@ -1,4 +1,3 @@
-
 import os
 import json
 import time
@@ -30,7 +29,7 @@ with open(setting_file_path, "r") as setting_file_obj:
     sig_duration = config_param["signal"]["duration"]
     sigma = config_param["signal"]["sigma"]
     signal_point = eval(config_param["signal"]["point"])
-    receive_point = int(config_param["ear_point_from_signal"]/1000 / dx)
+    receive_point = int(config_param["ear_point_from_signal"] / 1000 / dx)
     gpu_flag = config_param["GPU"]
 
 if gpu_flag:
@@ -40,17 +39,17 @@ if gpu_flag:
 
 def MakeFigure(P):
     if gpu_flag:
-        P_to_img = cp.abs(P)/cp.max(abs(P))
+        P_to_img = cp.abs(P) / cp.max(abs(P))
         im = plt.imshow(chainer.cuda.to_cpu(P_to_img), cmap="jet")
     else:
-        P_to_img = np.round(np.abs(P)/np.max(abs(P)), 2)
+        P_to_img = np.round(np.abs(P) / np.max(abs(P)), 2)
         im = plt.imshow(P_to_img, cmap="jet")
 
     return im
 
 
 def CreatePulse(i):
-    sig_wave = sig_amp * math.sin(2*math.pi*sig_freq*i*dt)
+    sig_wave = sig_amp * math.sin(2 * math.pi * sig_freq * i * dt)
     sig = sig_wave * signal.gaussian(sig_duration, std=sigma)[i]
     return sig
 
@@ -63,23 +62,26 @@ def Calc(P1, P2):
         time_start = time.perf_counter()
         if i < sig_duration:
             sig = CreatePulse(i)
-            P1[signal_point[0], signal_point[1]
-               ] = P1[signal_point[0], signal_point[1]] + sig
-        P1[1:nx-1, 1:ny-1] = 2*P2[1:nx-1, 1:ny-1] - P1[1:nx-1, 1:ny-1]+(sound_speed_air*dt/dx)**2 * (
-            (P2[2:nx, 1:ny - 1] + P2[:nx-2, 1:ny - 1] + P2[1:nx-1, 2:ny] +
-             P2[1:nx - 1, :ny - 2])) - 4 * (sound_speed_air * dt / dx) ** 2 * P2[1:nx - 1, 1:ny - 1]
+            P2[signal_point[0], signal_point[1]] = P1[signal_point[0], signal_point[1]] + sig
+        P1[1 : nx - 1, 1 : ny - 1] = (
+            2 * P2[1 : nx - 1, 1 : ny - 1]
+            - P1[1 : nx - 1, 1 : ny - 1]
+            + (sound_speed_air * dt / dx) ** 2
+            * ((P2[2:nx, 1 : ny - 1] + P2[: nx - 2, 1 : ny - 1] + P2[1 : nx - 1, 2:ny] + P2[1 : nx - 1, : ny - 2]))
+            - 4 * (sound_speed_air * dt / dx) ** 2 * P2[1 : nx - 1, 1 : ny - 1]
+        )
         time_end = time.perf_counter()
-        tim += (time_end - time_start)
+        tim += time_end - time_start
         if debug_flag:
             im = MakeFigure(P1)
             ims.append([im])
         P1, P2 = P2, P1
 
-    print(f'calc time:{np.round(tim,2)}[s]')
+    print(f"calc time:{np.round(tim,2)}[s]")
     return ims
 
 
-if __name__ == "__main__":
+def main():
     if gpu_flag:
         cp.cuda.set_allocator(cp.cuda.MemoryPool().malloc)
         P1 = cp.zeros((nx + 1, ny + 1))
@@ -96,3 +98,7 @@ if __name__ == "__main__":
     if debug_flag:
         ani = animation.ArtistAnimation(fig, image_list, interval=100, blit=True)
         plt.show()
+
+
+if __name__ == "__main__":
+    main()
