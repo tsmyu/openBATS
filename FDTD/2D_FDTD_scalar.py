@@ -84,14 +84,14 @@ def Calc(P1, P2):
 def main():
     if gpu_flag:
         cp.cuda.set_allocator(cp.cuda.MemoryPool().malloc)
-        P1 = cp.zeros((nx + 1, ny + 1))
-        P2 = cp.zeros((nx + 1, ny + 1))
+        P1 = cp.zeros((nx + 1, ny + 1), dtype=cp.float32)
+        P2 = cp.zeros((nx + 1, ny + 1), dtype=cp.float32)
         if debug_flag:
             fig = plt.figure()
         image_list = Calc(P1, P2)
     else:
-        P1 = np.zeros((nx + 1, ny + 1))
-        P2 = np.zeros((nx + 1, ny + 1))
+        P1 = np.zeros((nx + 1, ny + 1), dtype=np.float32)
+        P2 = np.zeros((nx + 1, ny + 1), dtype=np.float32)
         if debug_flag:
             fig = plt.figure()
         image_list = Calc(P1, P2)
