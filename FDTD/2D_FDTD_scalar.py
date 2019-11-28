@@ -4,7 +4,6 @@ import time
 import numpy as np
 import math
 from scipy import signal
-import Mur1
 
 if not __debug__:
     debug_flag = True
@@ -35,8 +34,9 @@ with open(setting_file_path, "r") as setting_file_obj:
     receive_point = int(config_param["ear_point_from_signal"] / 1000 / dx)
     gpu_flag = config_param["GPU"]
 
-# eval(f"import {abc_name} as abc")
-abc_field = Mur1.Mur1(0, nx, 0, ny, sound_speed_air, dt, dx)
+if abc_name == "Mur1":
+    import Mur1
+    abc_field = Mur1.Mur1(0, nx+1, 0, ny+1, sound_speed_air, dt, dx)
 
 if gpu_flag:
     import chainer
