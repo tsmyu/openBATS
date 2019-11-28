@@ -4,6 +4,7 @@ import time
 import numpy as np
 import math
 from scipy import signal
+import Mur1
 
 if not __debug__:
     debug_flag = True
@@ -22,6 +23,8 @@ with open(setting_file_path, "r") as setting_file_obj:
     dt = config_param["resolution"]["time"]
     nmax = config_param["cycle_number"]
     savestep = config_param["save_step"]
+    abcs = config_param["ABC"]
+    abc_name = [key for key, value in abcs.items() if value][0]
     sound_speed = config_param["soundspeed"]
     sound_speed_air = sound_speed["air"]
     sig_freq = config_param["signal"]["frequency"]
@@ -31,6 +34,9 @@ with open(setting_file_path, "r") as setting_file_obj:
     signal_point = eval(config_param["signal"]["point"])
     receive_point = int(config_param["ear_point_from_signal"] / 1000 / dx)
     gpu_flag = config_param["GPU"]
+
+# eval(f"import {abc_name} as abc")
+abc_field = Mur1.Mur1(0, nx, 0, ny, sound_speed_air, dt, dx)
 
 if gpu_flag:
     import chainer
@@ -70,6 +76,7 @@ def Calc(P1, P2):
             * ((P2[2:nx, 1 : ny - 1] + P2[: nx - 2, 1 : ny - 1] + P2[1 : nx - 1, 2:ny] + P2[1 : nx - 1, : ny - 2]))
             - 4 * (sound_speed_air * dt / dx) ** 2 * P2[1 : nx - 1, 1 : ny - 1]
         )
+        P1 = abc_field.calc(P2, P1)
         time_end = time.perf_counter()
         tim += time_end - time_start
         if debug_flag:

@@ -15,6 +15,9 @@
          "sigma": 7,
          "point": "(300,300)"
          },
+"ABC": {
+        "Mur1":true
+        },
 "soundspeed":{"air": 331.5,
         "acrylic": 2730},
  "ear_point_from_signal" : 20,
