@@ -1,7 +1,7 @@
 {
  "field": {
-         "xaxis": 600,
-         "yaxis": 600
+         "xaxis": 5000,
+         "yaxis": 5000
           },
  "resolution": {
          "distance": 10.0e-4,
@@ -23,5 +23,5 @@
  "ear_point_from_signal" : 20,
  "cycle_number": 1000,
  "save_step": 10,
- "GPU": false
+ "GPU": true
  }

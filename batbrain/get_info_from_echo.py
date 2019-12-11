@@ -24,12 +24,12 @@ class DataField:
         self.threash = 0.05
         self.base_name = input_data
         file_name = os.path.basename(input_data)
-        self.pixel_area = (
-            int(file_name.split("_")[0]), int(file_name.split("_")[1]))
+        # self.pixel_area = (
+        #     int(file_name.split("_")[-3]), int(file_name.split("_")[-2]))
         self.emit_angle = int(
             re.split("[g]", file_name.split("_")[-1].split(".")[0])[-1])
-        self.emit_point = (int(os.path.basename(input_data).split("_")[6]), int(
-            os.path.basename(input_data).split("_")[7]))
+        self.emit_point = (int(os.path.basename(input_data).split("_")[-3]), int(
+            os.path.basename(input_data).split("_")[-2]))
         emit_data_list = np.genfromtxt(emit_csv, usecols=(
             0, 1, 2, 3), skip_header=1, skip_footer=1, delimiter=",")
 
@@ -123,7 +123,7 @@ class DataField:
                     pre_point = r_point
                 elif pre_point != 0:
                     echo_point = round((pre_point+r_point)/2)
-                    right_echo_list.append(echo_point)
+                    right_echo_list.append(int(echo_point))
                     pre_point = 0
             pre_r_point = r_point
         pre_l_point = 0
@@ -134,7 +134,7 @@ class DataField:
                     pre_point = l_point
                 elif pre_point != 0:
                     echo_point = round((pre_point+l_point)/2)
-                    left_echo_list.append(echo_point)
+                    left_echo_list.append(int(echo_point))
                     pre_point = 0
             pre_l_point = l_point
 

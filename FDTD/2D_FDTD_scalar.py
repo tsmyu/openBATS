@@ -1,6 +1,8 @@
 import os
+import sys
 import json
 import time
+import field
 import numpy as np
 import math
 from scipy import signal
@@ -26,6 +28,7 @@ with open(setting_file_path, "r") as setting_file_obj:
     abc_name = [key for key, value in abcs.items() if value][0]
     sound_speed = config_param["soundspeed"]
     sound_speed_air = sound_speed["air"]
+    sound_speed_acrylic = sound_speed["acrylic"]
     sig_freq = config_param["signal"]["frequency"]
     sig_amp = config_param["signal"]["amplitude"]
     sig_duration = config_param["signal"]["duration"]
@@ -33,10 +36,6 @@ with open(setting_file_path, "r") as setting_file_obj:
     signal_point = eval(config_param["signal"]["point"])
     receive_point = int(config_param["ear_point_from_signal"] / 1000 / dx)
     gpu_flag = config_param["GPU"]
-
-if abc_name == "Mur1":
-    import Mur1
-    abc_field = Mur1.Mur1(0, nx+1, 0, ny+1, sound_speed_air, dt, dx)
 
 if gpu_flag:
     import chainer
@@ -60,7 +59,7 @@ def CreatePulse(i):
     return sig
 
 
-def Calc(P1, P2):
+def Calc(field_data, P1, P2):
     ims = []
     tim = 0
     for i in range(nmax):
@@ -68,15 +67,16 @@ def Calc(P1, P2):
         time_start = time.perf_counter()
         if i < sig_duration:
             sig = CreatePulse(i)
-            P2[signal_point[0], signal_point[1]] = P1[signal_point[0], signal_point[1]] + sig
-        P1[1 : nx - 1, 1 : ny - 1] = (
-            2 * P2[1 : nx - 1, 1 : ny - 1]
-            - P1[1 : nx - 1, 1 : ny - 1]
+            P2[signal_point[0], signal_point[1]
+               ] = P1[signal_point[0], signal_point[1]] + sig
+        P1[1: nx - 1, 1: ny - 1] = (
+            2 * P2[1: nx - 1, 1: ny - 1]
+            - P1[1: nx - 1, 1: ny - 1]
             + (sound_speed_air * dt / dx) ** 2
-            * ((P2[2:nx, 1 : ny - 1] + P2[: nx - 2, 1 : ny - 1] + P2[1 : nx - 1, 2:ny] + P2[1 : nx - 1, : ny - 2]))
-            - 4 * (sound_speed_air * dt / dx) ** 2 * P2[1 : nx - 1, 1 : ny - 1]
+            * ((P2[2:nx, 1: ny - 1] + P2[: nx - 2, 1: ny - 1] + P2[1: nx - 1, 2:ny] + P2[1: nx - 1, : ny - 2]))
+            - 4 * (sound_speed_air * dt / dx) ** 2 * P2[1: nx - 1, 1: ny - 1]
         )
-        P1 = abc_field.calc(P2, P1)
+        P1 = field_data.update(P2, P1)
         time_end = time.perf_counter()
         tim += time_end - time_start
         if debug_flag:
@@ -88,24 +88,40 @@ def Calc(P1, P2):
     return ims
 
 
-def main():
+def main(field_image):
+    field_data = field(field_image,
+                       abc_name,
+                       sound_speed_air,
+                       dt,
+                       dx)
+    width = field_data.width
+    height = field_data.height
+
+    if abc_name == "Mur1":
+        import mur1
+        abc_field = mur1.Mur1(0, width, 0, height, sound_speed_air, dt, dx)
+
     if gpu_flag:
         cp.cuda.set_allocator(cp.cuda.MemoryPool().malloc)
-        P1 = cp.zeros((nx + 1, ny + 1), dtype=cp.float32)
-        P2 = cp.zeros((nx + 1, ny + 1), dtype=cp.float32)
+        P1 = cp.zeros((width, height), dtype=cp.float32)
+        P2 = cp.zeros((width, height), dtype=cp.float32)
         if debug_flag:
             fig = plt.figure()
-        image_list = Calc(P1, P2)
+        image_list = Calc(field_data, P1, P2)
     else:
-        P1 = np.zeros((nx + 1, ny + 1), dtype=np.float32)
-        P2 = np.zeros((nx + 1, ny + 1), dtype=np.float32)
+        P1 = np.zeros((width, height), dtype=np.float32)
+        P2 = np.zeros((width, height), dtype=np.float32)
         if debug_flag:
             fig = plt.figure()
-        image_list = Calc(P1, P2)
+        image_list = Calc(field_data, P1, P2)
     if debug_flag:
-        ani = animation.ArtistAnimation(fig, image_list, interval=100, blit=True)
+        ani = animation.ArtistAnimation(
+            fig, image_list, interval=100, blit=True)
         plt.show()
 
 
 if __name__ == "__main__":
-    main()
+    argvs = sys.argv
+    if len(argvs) < 2:
+        print(f"Usage: python {argvs[0]} [field image]")
+    main(field_image)
