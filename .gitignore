@@ -1,4 +1,5 @@
 openbats/
+reinforcement_env/
 FDTD/fdtd_env
 FDTD/python_base
 reinforcement_learning/__pycache__/
