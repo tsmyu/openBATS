@@ -18,8 +18,8 @@ components_dir = os.path.dirname(os.path.realpath(__file__)) + "/"
 setting_file_path = components_dir + "settings.json"
 with open(setting_file_path, "r") as setting_file_obj:
     config_param = json.load(setting_file_obj)
-    nx = config_param["field"]["xaxis"]
-    ny = config_param["field"]["yaxis"]
+    # nx = config_param["field"]["xaxis"]
+    # ny = config_param["field"]["yaxis"]
     dx = config_param["resolution"]["distance"]
     dt = config_param["resolution"]["time"]
     nmax = config_param["cycle_number"]
@@ -62,19 +62,27 @@ def CreatePulse(i):
 def Calc(field_data, P1, P2):
     ims = []
     tim = 0
+    width = field_data.width
+    height = field_data.height
     for i in range(nmax):
         print("step:{}".format(i))
         time_start = time.perf_counter()
         if i < sig_duration:
             sig = CreatePulse(i)
-            P2[signal_point[0], signal_point[1]
-               ] = P1[signal_point[0], signal_point[1]] + sig
-        P1[1: nx - 1, 1: ny - 1] = (
-            2 * P2[1: nx - 1, 1: ny - 1]
-            - P1[1: nx - 1, 1: ny - 1]
+            P2[signal_point[0], signal_point[1]] = P1[signal_point[0], signal_point[1]] + sig
+        P1[1 : width - 1, 1 : height - 1] = (
+            2 * P2[1 : width - 1, 1 : height - 1]
+            - P1[1 : width - 1, 1 : height - 1]
             + (sound_speed_air * dt / dx) ** 2
-            * ((P2[2:nx, 1: ny - 1] + P2[: nx - 2, 1: ny - 1] + P2[1: nx - 1, 2:ny] + P2[1: nx - 1, : ny - 2]))
-            - 4 * (sound_speed_air * dt / dx) ** 2 * P2[1: nx - 1, 1: ny - 1]
+            * (
+                (
+                    P2[2:width, 1 : height - 1]
+                    + P2[: width - 2, 1 : height - 1]
+                    + P2[1 : width - 1, 2:height]
+                    + P2[1 : width - 1, : height - 2]
+                )
+            )
+            - 4 * (sound_speed_air * dt / dx) ** 2 * P2[1 : width - 1, 1 : height - 1]
         )
         P1 = field_data.update(P2, P1)
         time_end = time.perf_counter()
@@ -89,16 +97,15 @@ def Calc(field_data, P1, P2):
 
 
 def main(field_image):
-    field_data = field(field_image,
-                       abc_name,
-                       sound_speed_air,
-                       dt,
-                       dx)
+    print("field setting....")
+    field_data = field.Field(field_image, abc_name, sound_speed_air, dt, dx)
+    print("done")
     width = field_data.width
     height = field_data.height
 
     if abc_name == "Mur1":
         import mur1
+
         abc_field = mur1.Mur1(0, width, 0, height, sound_speed_air, dt, dx)
 
     if gpu_flag:
@@ -115,8 +122,7 @@ def main(field_image):
             fig = plt.figure()
         image_list = Calc(field_data, P1, P2)
     if debug_flag:
-        ani = animation.ArtistAnimation(
-            fig, image_list, interval=100, blit=True)
+        ani = animation.ArtistAnimation(fig, image_list, interval=100, blit=True)
         plt.show()
 
 
@@ -124,4 +130,5 @@ if __name__ == "__main__":
     argvs = sys.argv
     if len(argvs) < 2:
         print(f"Usage: python {argvs[0]} [field image]")
+    field_image = argvs[1]
     main(field_image)

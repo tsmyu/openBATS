@@ -23,5 +23,5 @@
  "ear_point_from_signal" : 20,
  "cycle_number": 1000,
  "save_step": 10,
- "GPU": true
+ "GPU": false
  }
