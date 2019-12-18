@@ -17,7 +17,7 @@ from PyQt5.QtCore import *
 
 
 Poly = 16
-obj_num = 20
+obj_num = 3
 obstacle_agent_num = 3
 NUM_EYES = 16
 
@@ -34,26 +34,26 @@ class Walls(object):
 
     def Draw_Course(self, dc, i):
         dc.setPen(self.P_color)
+        dc.drawLine(self.xList[i], self.yList[i], self.xList[i + 1], self.yList[i + 1])
 
-        for j in range((i-1)*2*Poly+(i-1), i*2*Poly+(i-1)):
-            dc.drawLine(self.xList[j], self.yList[j],
-                        self.xList[j+1], self.yList[j+1])
+        # for j in range((i-1)*2*Poly+(i-1), i*2*Poly+(i-1)):
+        #     dc.drawLine(self.xList[j], self.yList[j],
+        #                 self.xList[j+1], self.yList[j+1])
 
     def Draw(self, dc):
-        for i in range(0, len(self.xList)-1):
-            dc.drawLine(self.xList[i], self.yList[i],
-                        self.xList[i+1], self.yList[i+1])
+        for i in range(0, len(self.xList) - 1):
+            dc.drawLine(self.xList[i], self.yList[i], self.xList[i + 1], self.yList[i + 1])
 
     def IntersectLine(self, p0, v0, i):
         dp = [p0[0] - self.xList[i], p0[1] - self.yList[i]]
-        v1 = [self.xList[i+1] - self.xList[i], self.yList[i+1] - self.yList[i]]
+        v1 = [self.xList[i + 1] - self.xList[i], self.yList[i + 1] - self.yList[i]]
 
-        denom = float(v1[1]*v0[0] - v1[0]*v0[1])
+        denom = float(v1[1] * v0[0] - v1[0] * v0[1])
         if denom == 0.0:
             return [False, 1.0]
 
-        ua = (v1[0] * dp[1] - v1[1] * dp[0])/denom
-        ub = (v0[0]*dp[1] - v0[1] * dp[0])/denom
+        ua = (v1[0] * dp[1] - v1[1] * dp[0]) / denom
+        ub = (v0[0] * dp[1] - v0[1] * dp[0]) / denom
 
         if 0 < ua and ua < 1.0 and 0 < ub and ub < 1.0:
             return [True, ua]
@@ -64,7 +64,7 @@ class Walls(object):
 
         tmpt = 1.0
         tmpf = False
-        for i in range(0, len(self.xList)-1):
+        for i in range(0, len(self.xList) - 1):
             f, t = self.IntersectLine(p0, v0, i)
             if f:
                 tmpt = min(tmpt, t)
@@ -75,29 +75,33 @@ class Walls(object):
     def adLine(self, p0, i):
         dp = [p0[0] - self.xList[i], p0[1] - self.yList[i]]
 
-        v = [self.xList[i+1] - self.xList[i], self.yList[i+1] - self.yList[i]]
-        vl = (v[0]**2+v[1]**2)
+        v = [self.xList[i + 1] - self.xList[i], self.yList[i + 1] - self.yList[i]]
+        vl = v[0] ** 2 + v[1] ** 2
 
-        if(vl == 0.0):
-            p1l = (dp[0]**2+dp[1]**2)**0.5
+        if vl == 0.0:
+            p1l = (dp[0] ** 2 + dp[1] ** 2) ** 0.5
         else:
-            t = max(0.0, min(1.0, (dp[0]*v[0] + dp[1]*v[1])/vl))
+            t = max(0.0, min(1.0, (dp[0] * v[0] + dp[1] * v[1]) / vl))
 
-            p1 = [self.xList[i] + t * v[0] - p0[0],
-                  self.yList[i] + t * v[1] - p0[1]]
-            p1l = (p1[0]**2+p1[1]**2)**0.5
+            p1 = [self.xList[i] + t * v[0] - p0[0], self.yList[i] + t * v[1] - p0[1]]
+            p1l = (p1[0] ** 2 + p1[1] ** 2) ** 0.5
 
         return p1l
 
     def adLines(self, p0, d):
+        for i in range(obj_num):
+            j = 2*(i-1)
+            if self.adLine(p0, j) <= d:
+                return True
 
-        for i in range(1, obj_num + 1):
-            for j in range((i-1)*2*Poly+(i-1), i*2*Poly+(i-1)):
-                if self.adLine(p0, j) <= d:
-                    return True
-#        for i in range(0, len(self.xList)-1):
-#            if self.adLine( p0, i) <= d:
-#                return True
+        # for i in range(1, obj_num + 1):
+        #     for j in range((i-1)*2*Poly+(i-1), i*2*Poly+(i-1)):
+        #         if self.adLine(p0, j) <= d:
+        #             return True
+
+        #        for i in range(0, len(self.xList)-1):
+        #            if self.adLine( p0, i) <= d:
+        #                return True
         return False
 
     def adLines_wall(self, p0, d):
@@ -109,30 +113,27 @@ class Walls(object):
 
     def adLines_obstacle(self, p0, d):
 
-        for i in range(1, obstacle_agent_num + 1):
-            for j in range((i-1)*2*Poly+(i-1), i*2*Poly+(i-1)):
-                if self.adLine(p0, j) <= d:
-                    return True
+        for i in range(obstacle_agent_num):
+            if self.adLine(p0, i) <= d:
+                return True
 
         return False
 
     def crossLine(self, x, y, p0, j):
-        xpb = (p0[0]-x)
-        y21 = (self.yList[j+1] - self.yList[j])
-        x21 = (self.xList[j+1] - self.xList[j])
-        ypb = (p0[1]-y)
+        xpb = p0[0] - x
+        y21 = self.yList[j + 1] - self.yList[j]
+        x21 = self.xList[j + 1] - self.xList[j]
+        ypb = p0[1] - y
 
-        denominator = xpb*y21 - x21*ypb
+        denominator = xpb * y21 - x21 * ypb
         if denominator == 0:
             r = 2.0
             s = 2
 
         else:
 
-            r = (self.xList[j]*y21 + y*x21 - x*y21 -
-                 self.yList[j]*x21) / denominator
-            s = (x*ypb - self.xList[j]*ypb + self.yList[j]
-                 * xpb - y*xpb) / (-1 * denominator)
+            r = (self.xList[j] * y21 + y * x21 - x * y21 - self.yList[j] * x21) / denominator
+            s = (x * ypb - self.xList[j] * ypb + self.yList[j] * xpb - y * xpb) / (-1 * denominator)
 
             r = np.round(r, 1)
 
@@ -140,12 +141,12 @@ class Walls(object):
 
     def crossLines(self, x, y, p0):
         R = []
-        for i in range(1, obj_num + 1):
-            for j in range((i-1)*2*Poly+(i-1), i*2*Poly+(i-1)):
-                r, s = self.crossLine(x, y, p0, j)
-                r = np.round(r, 1)
-                if 0 <= r <= 1 and 0 <= s <= 1:
-                    R.append(r)
+        for i in range(obj_num):
+            j = 2*(i-1)
+            r, s = self.crossLine(x, y, p0, j)
+            r = np.round(r, 1)
+            if 0 <= r <= 1 and 0 <= s <= 1:
+                R.append(r)
 
         if len(R) >= 1:
             return True, min(R)
@@ -169,12 +170,11 @@ class Walls(object):
 
     def crossLines_obstacle(self, x, y, p0):
         R = []
-        for i in range(1, obstacle_agent_num + 1):
-            for j in range((i-1)*2*Poly+(i-1), i*2*Poly+(i-1)):
-                r, s = self.crossLine(x, y, p0, j)
-                r = np.round(r, 1)
-                if 0 <= r <= 1 and 0 <= s <= 1:
-                    R.append(r)
+        for i in range(obstacle_agent_num):
+            r, s = self.crossLine(x, y, p0, i)
+            r = np.round(r, 1)
+            if 0 <= r <= 1 and 0 <= s <= 1:
+                R.append(r)
 
         if len(R) >= 1:
             return True, min(R)
@@ -214,7 +214,7 @@ class Ball(object):
         o = [-self.pos_x + p0[0], -self.pos_y + p0[1]]
 
         a = v0[0] ** 2 + v0[1] ** 2
-        b = 2 * (o[0]*v0[0]+o[1]*v0[1])
+        b = 2 * (o[0] * v0[0] + o[1] * v0[1])
         c = o[0] ** 2 + o[1] ** 2 - self.rad ** 2
 
         discriminant = float(b * b - 4 * a * c)
@@ -224,8 +224,8 @@ class Ball(object):
 
         discriminant = discriminant ** 0.5
 
-        t1 = (- b - discriminant)/(2*a)
-        t2 = (- b + discriminant)/(2*a)
+        t1 = (-b - discriminant) / (2 * a)
+        t2 = (-b + discriminant) / (2 * a)
 
         if t1 >= 0 and t1 <= 1.0:
             return [True, t1]
@@ -238,18 +238,16 @@ class Ball(object):
 
 class Sens(object):
     def __init__(self, i):
-        #        self.OffSetAngle   = - math.pi/3 + i * math.pi*2/3/NUM_EYES
-        self.OffSetAngle = 2*math.pi*i/NUM_EYES
-#        self.SightDistance = 0
+        self.OffSetAngle = -math.pi / 3 + i * math.pi * 2 / 3 / NUM_EYES
+        # self.OffSetAngle = 2*math.pi*i/NUM_EYES
+        #        self.SightDistance = 0
         self.OverHang = 100.0
         self.obj = -1
 
 
 class Agent(Ball):
     def __init__(self, canvasSize, x, y, epsilon=0.99, model=None):
-        super(Agent, self).__init__(
-            x, y, QColor(1, 1, 190)
-        )
+        super(Agent, self).__init__(x, y, QColor(1, 1, 190))
         self.dir_Angle = 0.0  # -math.pi/2.0
         self.speed = 10.0
 
@@ -260,8 +258,10 @@ class Agent(Ball):
 
     def Sens(self, Course, BBox, obstacle=None, i=0):
         self.EYE = self.EYEs[i]
-        p = [self.pos_x + self.EYE.OverHang*math.cos(self.dir_Angle + self.EYE.OffSetAngle),
-             self.pos_y - self.EYE.OverHang*math.sin(self.dir_Angle + self.EYE.OffSetAngle)]
+        p = [
+            self.pos_x + self.EYE.OverHang * math.cos(self.dir_Angle + self.EYE.OffSetAngle),
+            self.pos_y - self.EYE.OverHang * math.sin(self.dir_Angle + self.EYE.OffSetAngle),
+        ]
 
         # Line Width = 6.0
         C, rC = Course.crossLines(self.pos_x, self.pos_y, p)
@@ -298,17 +298,18 @@ class Agent(Ball):
         dc.setPen(self.P_color)
         for EYE in self.EYEs:
 
-            dc.drawLine(self.pos_x, self.pos_y,
-                        self.pos_x + EYE.OverHang *
-                        math.cos(self.dir_Angle + EYE.OffSetAngle),
-                        self.pos_y - EYE.OverHang*math.sin(self.dir_Angle + EYE.OffSetAngle))
+            dc.drawLine(
+                self.pos_x,
+                self.pos_y,
+                self.pos_x + EYE.OverHang * math.cos(self.dir_Angle + EYE.OffSetAngle),
+                self.pos_y - EYE.OverHang * math.sin(self.dir_Angle + EYE.OffSetAngle),
+            )
         super(Agent, self).Draw(dc)
 
     def Move(self, WallsList):
         HitBoundary = False
 
-        dp = [self.speed * math.cos(self.dir_Angle),
-              -self.speed * math.sin(self.dir_Angle)]
+        dp = [self.speed * math.cos(self.dir_Angle), -self.speed * math.sin(self.dir_Angle)]
 
         for w in WallsList:
             if w.IntersectLines([self.pos_x, self.pos_y], dp)[0]:
@@ -318,8 +319,7 @@ class Agent(Ball):
         self.pos_x += dp[0]
         self.pos_y += dp[1]
 
-        if not(self.pos_x > 0 and self.pos_x < self.pos_x_max
-                and self.pos_y > 0 and self.pos_y < self.pos_y_max):
+        if not (self.pos_x > 0 and self.pos_x < self.pos_x_max and self.pos_y > 0 and self.pos_y < self.pos_y_max):
             HitBoundary = True
 
         return HitBoundary
@@ -327,19 +327,17 @@ class Agent(Ball):
     def Move_obstacle(self, WallsList):
         r = np.random.rand(1)
 
-        action = [r, 1-r]
-        self.speed = (action[0] + action[1])/2.0 * 10.0
-        self.dir_Angle += math.atan((action[0] - action[1])
-                                    * self.speed / 2.0 / 5.0)
-        dp = [self.speed * math.cos(self.dir_Angle),
-              -self.speed * math.sin(self.dir_Angle)]
+        action = [r, 1 - r]
+        self.speed = (action[0] + action[1]) / 2.0 * 10.0
+        self.dir_Angle += math.atan((action[0] - action[1]) * self.speed / 2.0 / 5.0)
+        dp = [self.speed * math.cos(self.dir_Angle), -self.speed * math.sin(self.dir_Angle)]
         self.pos_x += dp[0]
         self.pos_y += dp[1]
         self.pos_x = max(0, min(self.pos_x, self.pos_x_max))
         self.pos_y = max(0, min(self.pos_y, self.pos_y_max))
 
     def HitBall(self, b):
-        if ((b.pos_x - self.pos_x)**2+(b.pos_y - self.pos_y)**2)**0.5 < (self.rad + b.rad):
+        if ((b.pos_x - self.pos_x) ** 2 + (b.pos_y - self.pos_y) ** 2) ** 0.5 < (self.rad + b.rad):
             return True
         return False
 
@@ -348,10 +346,7 @@ logger = logging.getLogger(__name__)
 
 
 class Reinforcement_Env(gym.Env):
-    metadata = {
-        'render.modes': ['human', 'rgb_array'],
-        'video.frames_per_second': 50
-    }
+    metadata = {"render.modes": ["human", "rgb_array"], "video.frames_per_second": 50}
 
     def __init__(self, obs_agent):
         # Angle at which to fail the episode
@@ -360,32 +355,40 @@ class Reinforcement_Env(gym.Env):
         Rad = 20.0
         self.obs_agent = obs_agent
 
-        self.Course = Walls(Rad*math.cos(np.pi * -16 / Poly) + 100, Rad*math.sin(np.pi * -16 / Poly) + 100,
-                            Rad*math.cos(np.pi * -16 / Poly) + 100, Rad*math.sin(np.pi * -16 / Poly) + 100)
+        self.Course = Walls(400, 0, 400, 300)
+        self.Course.addPoint(400, 0)
+        self.Course.addPoint(400, 300)
+        self.Course.addPoint(800, 600)
+        self.Course.addPoint(800, 300)
+        self.Course.addPoint(1200, 0)
+        self.Course.addPoint(1200, 300)
 
-        for i in range(1, obj_num + 1):
-            if i <= 4:
-                for j in range(-Poly, Poly+1):
-                    self.Course.addPoint(Rad*math.cos(np.pi * j / Poly) + 100,
-                                         Rad*math.sin(np.pi * j / Poly) + i*100)
-            elif 4 < i <= 8:
-                for j in range(-Poly, Poly+1):
-                    self.Course.addPoint(Rad*math.cos(np.pi * j / Poly) + 200,
-                                         Rad*math.sin(np.pi * j / Poly) + (i-4)*100)
-            elif 8 < i <= 12:
-                for j in range(-Poly, Poly+1):
-                    self.Course.addPoint(Rad*math.cos(np.pi * j / Poly) + 300,
-                                         Rad*math.sin(np.pi * j / Poly) + (i-8)*100)
-            elif 12 < i <= 16:
-                for j in range(-Poly, Poly+1):
-                    self.Course.addPoint(Rad*math.cos(np.pi * j / Poly) + 400,
-                                         Rad*math.sin(np.pi * j / Poly) + (i-12)*100)
-            elif 16 < i <= 20:
-                for j in range(-Poly, Poly+1):
-                    self.Course.addPoint(Rad*math.cos(np.pi * j / Poly) + 500,
-                                         Rad*math.sin(np.pi * j / Poly) + (i-16)*100)
-            else:
-                pass
+        # self.Course = Walls(Rad*math.cos(np.pi * -16 / Poly) + 100, Rad*math.sin(np.pi * -16 / Poly) + 100,
+        #                     Rad*math.cos(np.pi * -16 / Poly) + 100, Rad*math.sin(np.pi * -16 / Poly) + 100)
+
+        # for i in range(1, obj_num + 1):
+        #     if i <= 4:
+        #         for j in range(-Poly, Poly+1):
+        #             self.Course.addPoint(Rad*math.cos(np.pi * j / Poly) + 100,
+        #                                  Rad*math.sin(np.pi * j / Poly) + i*100)
+        #     elif 4 < i <= 8:
+        #         for j in range(-Poly, Poly+1):
+        #             self.Course.addPoint(Rad*math.cos(np.pi * j / Poly) + 200,
+        #                                  Rad*math.sin(np.pi * j / Poly) + (i-4)*100)
+        #     elif 8 < i <= 12:
+        #         for j in range(-Poly, Poly+1):
+        #             self.Course.addPoint(Rad*math.cos(np.pi * j / Poly) + 300,
+        #                                  Rad*math.sin(np.pi * j / Poly) + (i-8)*100)
+        #     elif 12 < i <= 16:
+        #         for j in range(-Poly, Poly+1):
+        #             self.Course.addPoint(Rad*math.cos(np.pi * j / Poly) + 400,
+        #                                  Rad*math.sin(np.pi * j / Poly) + (i-12)*100)
+        #     elif 16 < i <= 20:
+        #         for j in range(-Poly, Poly+1):
+        #             self.Course.addPoint(Rad*math.cos(np.pi * j / Poly) + 500,
+        #                                  Rad*math.sin(np.pi * j / Poly) + (i-16)*100)
+        #     else:
+        #         pass
         self.Course.xList = self.Course.xList[2:]
         self.Course.yList = self.Course.yList[2:]
 
@@ -406,13 +409,12 @@ class Reinforcement_Env(gym.Env):
             self.obstacle.yList = self.obstacle.yList[2:]
 
         # Outr Boundary Box
-        self.BBox = Walls(630, 460, 10, 460)
-        self.BBox.addPoint(10, 10)
-        self.BBox.addPoint(630, 10)
-        self.BBox.addPoint(630, 460)
+        self.BBox = Walls(1800, 600, 0, 600)
+        self.BBox.addPoint(0, 0)
+        self.BBox.addPoint(1800, 0)
+        self.BBox.addPoint(1800, 600)
 
-        self.action_space = spaces.Box(
-            np.array([-1., -1.]), np.array([+1., +1.]))
+        self.action_space = spaces.Box(np.array([-1.0, -1.0]), np.array([+1.0, +1.0]))
         self.observation_space = spaces.Discrete(1)
         self._seed()
         self.reset()
@@ -429,22 +431,22 @@ class Reinforcement_Env(gym.Env):
         return [seed]
 
     def step(self, action):
-        assert self.action_space.contains(
-            action), "%r (%s) invalid" % (action, type(action))
+        assert self.action_space.contains(action), "%r (%s) invalid" % (action, type(action))
 
         # moving obstacle
         if self.obs_agent:
             for OAgent in self.obstacle_agent:
                 OAgent.Sens(self.Course, self.BBox)
                 OAgent.Move_obstacle([self.BBox])
-                for j in range(-Poly, Poly+1):
-                    self.obstacle.addPoint(OAgent.rad*math.cos(np.pi * j / Poly) + OAgent.pos_x,
-                                           OAgent.rad*math.sin(np.pi * j / Poly) + OAgent.pos_y)
+                for j in range(-Poly, Poly + 1):
+                    self.obstacle.addPoint(
+                        OAgent.rad * math.cos(np.pi * j / Poly) + OAgent.pos_x,
+                        OAgent.rad * math.sin(np.pi * j / Poly) + OAgent.pos_y,
+                    )
 
         # Action Step
-        self.A.speed = (action[0]+action[1])/2.0 * 10.0
-        self.A.dir_Angle += math.atan((action[0] - action[1])
-                                      * self.A.speed / 2.0 / 5.0)
+        self.A.speed = (action[0] + action[1]) / 2.0 * 10.0
+        self.A.dir_Angle += math.atan((action[0] - action[1]) * self.A.speed / 2.0 / 5.0)
         self.A.dir_Angle = (self.A.dir_Angle + np.pi) % (2 * np.pi) - np.pi
         done = self.A.Move([self.BBox])
         self.states = []
@@ -464,12 +466,11 @@ class Reinforcement_Env(gym.Env):
         # Reward
         proximity_reward = 0.0
 
-
-#        elif self.Course.adLines([self.A.pos_x, self.A.pos_y], 10.0):
-#            proximity_reward -= 5.0
+        #        elif self.Course.adLines([self.A.pos_x, self.A.pos_y], 10.0):
+        #            proximity_reward -= 5.0
         # 壁にぶつかったら罰則
-#        if self.BBox.adLines_wall([self.A.pos_x, self.A.pos_y], 3.0):
-#            proximity_reward -= 10.0
+        #        if self.BBox.adLines_wall([self.A.pos_x, self.A.pos_y], 3.0):
+        #            proximity_reward -= 10.0
 
         if done:
             proximity_reward -= 10.0
@@ -480,15 +481,20 @@ class Reinforcement_Env(gym.Env):
             proximity_reward -= 10.0
             done = True
 
-#        if self.obstacle.adLines_obstacle([self.A.pos_x, self.A.pos_y], 5.0):
-#            proximity_reward -= 10.0
-#            done = True
+        #        if self.obstacle.adLines_obstacle([self.A.pos_x, self.A.pos_y], 5.0):
+        #            proximity_reward -= 10.0
+        #            done = True
         if self.obs_agent:
             self.obstacle.reset()
 
         reward = proximity_reward + self.step_num
 
-        return np.array(self.distance), reward, done, {'AgentPos': (self.A.pos_x, self.A.pos_y), 'AgentDir': self.A.dir_Angle}
+        return (
+            np.array(self.distance),
+            reward,
+            done,
+            {"AgentPos": (self.A.pos_x, self.A.pos_y), "AgentDir": self.A.dir_Angle},
+        )
 
     def reset(self):
         self.state = (1,)
@@ -498,7 +504,7 @@ class Reinforcement_Env(gym.Env):
         self.steps_beyond_done = None
         return np.array(self.state)
 
-    def render(self, mode='human', close=False):
+    def render(self, mode="human", close=False):
         if close:
             if self.viewer is not None:
                 self.viewer.close()
@@ -512,7 +518,7 @@ class APPWINDOW(QWidget):
         super().__init__()
 
         self.obs_agent = obs_agent
-        self.resize(640, 480)
+        self.resize(1800, 600)
         self.setWindowTitle(title)
         self.setStyleSheet("background-color : white;")
 
@@ -537,7 +543,7 @@ class APPWINDOW(QWidget):
 
             qp.setPen(QColor(Qt.white))
             qp.setBrush(QColor(Qt.white))
-            qp.drawRect(0, 0, 640, 480)
+            qp.drawRect(0, 0, 1800, 600)
 
             for ag in [self.World.A]:
                 ag.Draw(qp)
@@ -547,8 +553,9 @@ class APPWINDOW(QWidget):
                 self.World.C.Draw(qp)
                 self.World.D.Draw(qp)
             self.World.BBox.Draw(qp)
-            for i in range(1, obj_num + 1):
-                self.World.Course.Draw_Course(qp, i)
+            for i in range(obj_num):
+                j = 2*(i-1)
+                self.World.Course.Draw_Course(qp, j)
 
     def OnTimer(self):
         self.update()
