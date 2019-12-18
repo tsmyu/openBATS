@@ -15,12 +15,19 @@ class Field:
 
         self.ref_points = []
         field_arr = np.array(img).T
-        self.ref_points = self.__read_field(field_arr)
+        (self.wall_points,
+         self.ref_points_w,
+         self.ref_points_h) = self.__read_field(field_arr)
 
         self.coef = 1
 
     def __read_field(self, field_arr):
+        # 障害物のエリア
+        wall_points = []
+        # 障害物の反射面
         ref_points = []
+
+        wall_points = np.where(field_arr == 255)
         width_diff = field_arr[:-1, :] - field_arr[1:, :]
         height_diff = field_arr[:, :-1] - field_arr[:, 1:]
         # -255の箇所は-1したポイントが反射地点
@@ -38,19 +45,21 @@ class Field:
         ref_points_w_m = list(zip(*ref_points_w_m))
         ref_points_h_p = list(zip(*ref_points_h_p))
         ref_points_h_m = list(zip(*ref_points_h_m))
-        ref_points = set(ref_points_w_p + ref_points_w_m + ref_points_h_p + ref_points_h_m)
+        ref_points_w = set(ref_points_w_p + ref_points_w_m)
+        ref_points_h = set(ref_points_h_p + ref_points_h_m)
 
-        return ref_points
+        return wall_points, ref_points_w, ref_points_h
 
     def update(self, Pn, Pn1):
-        for (x, y) in self.ref_points:
-            x = x - 1
-            y = y - 1
+        for (x, y) in self.ref_points_w:
             Pn1[x, y] = Pn[x - 1, y] + self.coef * (Pn1[x - 1, y] - Pn[x, y])
+        for (x, y) in self.ref_points_h:
             Pn1[x, y] = Pn[x, y - 1] + self.coef * (Pn1[x, y - 1] - Pn[x, y])
-            Pn1[x, y] = Pn[x + 1, y] + self.coef * (Pn1[x + 1, y] - Pn[x, y])
-            Pn1[x, y] = Pn[x, y + 1] + self.coef * (Pn1[x, y + 1] - Pn[x, y])
+            # Pn1[x, y] = Pn[x + 1, y] + self.coef * (Pn1[x + 1, y] - Pn[x, y])
+            # Pn1[x, y] = Pn[x, y + 1] + self.coef * (Pn1[x, y + 1] - Pn[x, y])
 
         Pn1 = self.abc_field.calc(Pn, Pn1)
+
+        Pn1[self.wall_points] = 0
 
         return Pn1
