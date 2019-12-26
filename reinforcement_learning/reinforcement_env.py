@@ -244,7 +244,7 @@ class Sens(object):
         self.OffSetAngle = -math.pi / 3 + i * math.pi * 2 / 3 / NUM_EYES
         # self.OffSetAngle = 2*math.pi*i/NUM_EYES
         #        self.SightDistance = 0
-        self.OverHang = 100.0
+        self.OverHang = 1000.0
         self.obj = -1
 
 
