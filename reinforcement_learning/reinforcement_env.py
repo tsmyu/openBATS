@@ -64,13 +64,16 @@ class Walls(object):
 
         tmpt = 1.0
         tmpf = False
+        target_wall = False
         for i in range(0, len(self.xList) - 1):
             f, t = self.IntersectLine(p0, v0, i)
             if f:
                 tmpt = min(tmpt, t)
                 tmpf = True
+                if i == len(self.xList) - 1:
+                    target_wall = True
 
-        return [tmpf, tmpt]
+        return [tmpf, tmpt, target_wall]
 
     def adLine(self, p0, i):
         dp = [p0[0] - self.xList[i], p0[1] - self.yList[i]]
@@ -308,6 +311,7 @@ class Agent(Ball):
 
     def Move(self, WallsList):
         HitBoundary = False
+        target_wall = False
 
         dp = [self.speed * math.cos(self.dir_Angle), -self.speed * math.sin(self.dir_Angle)]
 
@@ -315,6 +319,8 @@ class Agent(Ball):
             if w.IntersectLines([self.pos_x, self.pos_y], dp)[0]:
                 dp = [0.0, 0.0]
                 HitBoundary = True
+            if w.IntersectLines([self.pos_x, self.pos_y], dp)[2]:
+                target_wall = True
 
         self.pos_x += dp[0]
         self.pos_y += dp[1]
@@ -322,7 +328,7 @@ class Agent(Ball):
         if not (self.pos_x > 0 and self.pos_x < self.pos_x_max and self.pos_y > 0 and self.pos_y < self.pos_y_max):
             HitBoundary = True
 
-        return HitBoundary
+        return HitBoundary, target_wall
 
     def Move_obstacle(self, WallsList):
         r = np.random.rand(1)
@@ -448,7 +454,7 @@ class Reinforcement_Env(gym.Env):
         self.A.speed = (action[0] + action[1]) / 2.0 * 10.0
         self.A.dir_Angle += math.atan((action[0] - action[1]) * self.A.speed / 2.0 / 5.0)
         self.A.dir_Angle = (self.A.dir_Angle + np.pi) % (2 * np.pi) - np.pi
-        done = self.A.Move([self.BBox])
+        done, flag_target_wall = self.A.Move([self.BBox])
         self.states = []
         self.distance = []
         for i in range(0, NUM_EYES):
@@ -472,13 +478,13 @@ class Reinforcement_Env(gym.Env):
         #        if self.BBox.adLines_wall([self.A.pos_x, self.A.pos_y], 3.0):
         #            proximity_reward -= 10.0
 
-        if done:
-            proximity_reward -= 10.0
+        if done and not flag_target_wall:
+            proximity_reward -= 1000.0
         else:
-            self.step_num = 0.1
+            self.step_num -= 0.1
 
         if self.Course.adLines([self.A.pos_x, self.A.pos_y], 5.0):
-            proximity_reward -= 10.0
+            proximity_reward -= 1000.0
             done = True
 
         #        if self.obstacle.adLines_obstacle([self.A.pos_x, self.A.pos_y], 5.0):
