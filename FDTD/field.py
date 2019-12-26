@@ -51,15 +51,15 @@ class Field:
         return wall_points, ref_points_w, ref_points_h
 
     def update(self, Pn, Pn1):
+        # x方向の反射
         for (x, y) in self.ref_points_w:
             Pn1[x, y] = Pn[x - 1, y] + self.coef * (Pn1[x - 1, y] - Pn[x, y])
+        # y方向の反射
         for (x, y) in self.ref_points_h:
             Pn1[x, y] = Pn[x, y - 1] + self.coef * (Pn1[x, y - 1] - Pn[x, y])
-            # Pn1[x, y] = Pn[x + 1, y] + self.coef * (Pn1[x + 1, y] - Pn[x, y])
-            # Pn1[x, y] = Pn[x, y + 1] + self.coef * (Pn1[x, y + 1] - Pn[x, y])
-
+        # 境界条件（現在mur1）
         Pn1 = self.abc_field.calc(Pn, Pn1)
-
+        # 障害物内音圧0
         Pn1[self.wall_points] = 0
 
         return Pn1
