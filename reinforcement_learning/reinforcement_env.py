@@ -34,7 +34,8 @@ class Walls(object):
 
     def Draw_Course(self, dc, i):
         dc.setPen(self.P_color)
-        dc.drawLine(self.xList[i], self.yList[i], self.xList[i + 1], self.yList[i + 1])
+        dc.drawLine(self.xList[i], self.yList[i],
+                    self.xList[i + 1], self.yList[i + 1])
 
         # for j in range((i-1)*2*Poly+(i-1), i*2*Poly+(i-1)):
         #     dc.drawLine(self.xList[j], self.yList[j],
@@ -42,11 +43,13 @@ class Walls(object):
 
     def Draw(self, dc):
         for i in range(0, len(self.xList) - 1):
-            dc.drawLine(self.xList[i], self.yList[i], self.xList[i + 1], self.yList[i + 1])
+            dc.drawLine(self.xList[i], self.yList[i],
+                        self.xList[i + 1], self.yList[i + 1])
 
     def IntersectLine(self, p0, v0, i):
         dp = [p0[0] - self.xList[i], p0[1] - self.yList[i]]
-        v1 = [self.xList[i + 1] - self.xList[i], self.yList[i + 1] - self.yList[i]]
+        v1 = [self.xList[i + 1] - self.xList[i],
+              self.yList[i + 1] - self.yList[i]]
 
         denom = float(v1[1] * v0[0] - v1[0] * v0[1])
         if denom == 0.0:
@@ -78,7 +81,8 @@ class Walls(object):
     def adLine(self, p0, i):
         dp = [p0[0] - self.xList[i], p0[1] - self.yList[i]]
 
-        v = [self.xList[i + 1] - self.xList[i], self.yList[i + 1] - self.yList[i]]
+        v = [self.xList[i + 1] - self.xList[i],
+             self.yList[i + 1] - self.yList[i]]
         vl = v[0] ** 2 + v[1] ** 2
 
         if vl == 0.0:
@@ -86,7 +90,8 @@ class Walls(object):
         else:
             t = max(0.0, min(1.0, (dp[0] * v[0] + dp[1] * v[1]) / vl))
 
-            p1 = [self.xList[i] + t * v[0] - p0[0], self.yList[i] + t * v[1] - p0[1]]
+            p1 = [self.xList[i] + t * v[0] - p0[0],
+                  self.yList[i] + t * v[1] - p0[1]]
             p1l = (p1[0] ** 2 + p1[1] ** 2) ** 0.5
 
         return p1l
@@ -135,8 +140,10 @@ class Walls(object):
 
         else:
 
-            r = (self.xList[j] * y21 + y * x21 - x * y21 - self.yList[j] * x21) / denominator
-            s = (x * ypb - self.xList[j] * ypb + self.yList[j] * xpb - y * xpb) / (-1 * denominator)
+            r = (self.xList[j] * y21 + y * x21 - x *
+                 y21 - self.yList[j] * x21) / denominator
+            s = (x * ypb - self.xList[j] * ypb + self.yList[j]
+                 * xpb - y * xpb) / (-1 * denominator)
 
             r = np.round(r, 1)
 
@@ -281,8 +288,10 @@ class Agent(Ball):
     def Sens(self, Course, BBox, obstacle=None, i=0):
         self.EYE = self.EYEs[i]
         p = [
-            self.pos_x + self.EYE.OverHang * math.cos(self.dir_Angle + self.EYE.OffSetAngle),
-            self.pos_y - self.EYE.OverHang * math.sin(self.dir_Angle + self.EYE.OffSetAngle),
+            self.pos_x + self.EYE.OverHang *
+            math.cos(self.dir_Angle + self.EYE.OffSetAngle),
+            self.pos_y - self.EYE.OverHang *
+            math.sin(self.dir_Angle + self.EYE.OffSetAngle),
         ]
 
         # Line Width = 6.0
@@ -323,8 +332,10 @@ class Agent(Ball):
             dc.drawLine(
                 self.pos_x,
                 self.pos_y,
-                self.pos_x + EYE.OverHang * math.cos(self.dir_Angle + EYE.OffSetAngle),
-                self.pos_y - EYE.OverHang * math.sin(self.dir_Angle + EYE.OffSetAngle),
+                self.pos_x + EYE.OverHang *
+                math.cos(self.dir_Angle + EYE.OffSetAngle),
+                self.pos_y - EYE.OverHang *
+                math.sin(self.dir_Angle + EYE.OffSetAngle),
             )
         super(Agent, self).Draw(dc)
 
@@ -332,7 +343,8 @@ class Agent(Ball):
         HitBoundary = False
         target_wall = False
 
-        dp = [self.speed * math.cos(self.dir_Angle), -self.speed * math.sin(self.dir_Angle)]
+        dp = [self.speed * math.cos(self.dir_Angle), -
+              self.speed * math.sin(self.dir_Angle)]
 
         for w in WallsList:
             if w.IntersectLines([self.pos_x, self.pos_y], dp)[0]:
@@ -354,8 +366,10 @@ class Agent(Ball):
 
         action = [r, 1 - r]
         self.speed = (action[0] + action[1]) / 2.0 * 10.0
-        self.dir_Angle += math.atan((action[0] - action[1]) * self.speed / 2.0 / 5.0)
-        dp = [self.speed * math.cos(self.dir_Angle), -self.speed * math.sin(self.dir_Angle)]
+        self.dir_Angle += math.atan((action[0] - action[1])
+                                    * self.speed / 2.0 / 5.0)
+        dp = [self.speed * math.cos(self.dir_Angle), -
+              self.speed * math.sin(self.dir_Angle)]
         self.pos_x += dp[0]
         self.pos_y += dp[1]
         self.pos_x = max(0, min(self.pos_x, self.pos_x_max))
@@ -371,7 +385,8 @@ logger = logging.getLogger(__name__)
 
 
 class Reinforcement_Env(gym.Env):
-    metadata = {"render.modes": ["human", "rgb_array"], "video.frames_per_second": 50}
+    metadata = {"render.modes": [
+        "human", "rgb_array"], "video.frames_per_second": 50}
 
     def __init__(self, obs_agent):
         # Angle at which to fail the episode
@@ -439,7 +454,8 @@ class Reinforcement_Env(gym.Env):
         self.BBox.addPoint(1800, 0)
         self.BBox.addPoint(1800, 600)
 
-        self.action_space = spaces.Box(np.array([-1.0, -1.0]), np.array([+1.0, +1.0]))
+        self.action_space = spaces.Box(
+            np.array([-1.0, -1.0]), np.array([+1.0, +1.0]))
         self.observation_space = spaces.Discrete(1)
         self._seed()
         self.reset()
@@ -456,7 +472,8 @@ class Reinforcement_Env(gym.Env):
         return [seed]
 
     def step(self, action):
-        assert self.action_space.contains(action), "%r (%s) invalid" % (action, type(action))
+        assert self.action_space.contains(
+            action), "%r (%s) invalid" % (action, type(action))
 
         # moving obstacle
         if self.obs_agent:
@@ -471,7 +488,8 @@ class Reinforcement_Env(gym.Env):
 
         # Action Step
         self.A.speed = (action[0] + action[1]) / 2.0 * 10.0
-        self.A.dir_Angle += math.atan((action[0] - action[1]) * self.A.speed / 2.0 / 5.0)
+        self.A.dir_Angle += math.atan((action[0] - action[1])
+                                      * self.A.speed / 2.0 / 5.0)
         self.A.dir_Angle = (self.A.dir_Angle + np.pi) % (2 * np.pi) - np.pi
         done, flag_target_wall = self.A.Move([self.BBox])
         self.states = []
@@ -518,7 +536,8 @@ class Reinforcement_Env(gym.Env):
             np.array(self.distance),
             reward,
             done,
-            {"AgentPos": (self.A.pos_x, self.A.pos_y), "AgentDir": self.A.dir_Angle},
+            {"AgentPos": (self.A.pos_x, self.A.pos_y),
+             "AgentDir": self.A.dir_Angle},
         )
 
     def reset(self):
