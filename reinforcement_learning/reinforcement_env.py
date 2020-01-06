@@ -241,10 +241,29 @@ class Ball(object):
 
 class Sens(object):
     def __init__(self, i):
-        self.OffSetAngle = -math.pi / 3 + i * math.pi * 2 / 3 / NUM_EYES
+        # 進行方向に対して左右30°，16本（NUM_EYES）
+        self.OffSetAngle = -math.pi / 6 + i * math.pi * 2 / 6 / (NUM_EYES-1)
         # self.OffSetAngle = 2*math.pi*i/NUM_EYES
         #        self.SightDistance = 0
-        self.OverHang = 1000.0
+
+        # TODO:NUM_EYES are 16 now.
+        if i == 7 or i == 8:
+            self.OverHang = 1000.0
+        elif i == 6 or i == 9:
+            self.OverHang = 900.0
+        elif i == 5 or i == 10:
+            self.OverHang = 800.0
+        elif i == 4 or i == 11:
+            self.OverHang = 700.0
+        elif i == 3 or i == 12:
+            self.OverHang = 600.0
+        elif i == 2 or i == 13:
+            self.OverHang = 500.0
+        elif i == 1 or i == 14:
+            self.OverHang = 400.0
+        elif i == 0 or i == 15:
+            self.OverHang = 300.0
+
         self.obj = -1
 
 
@@ -255,7 +274,7 @@ class Agent(Ball):
         self.speed = 10.0
 
         self.pos_x_max, self.pos_y_max = canvasSize
-        self.pos_y_max = 460
+        self.pos_y_max = 600
 
         self.EYEs = [Sens(i) for i in range(0, NUM_EYES)]
 
