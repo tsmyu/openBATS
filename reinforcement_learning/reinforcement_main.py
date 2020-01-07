@@ -92,7 +92,7 @@ class SimulationLoop(QThread):
 
     def run(self):
         n_episodes = 10000
-        max_episode_len = 5000
+        max_episode_len = 10000
 
         if args.train:
             for i in range(1, n_episodes + 1):

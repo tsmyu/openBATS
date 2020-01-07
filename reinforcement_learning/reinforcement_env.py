@@ -395,13 +395,13 @@ class Reinforcement_Env(gym.Env):
         Rad = 20.0
         self.obs_agent = obs_agent
 
-        self.Course = Walls(400, 0, 400, 300)
+        self.Course = Walls(400, 0, 400, 264)
         self.Course.addPoint(400, 0)
-        self.Course.addPoint(400, 300)
+        self.Course.addPoint(400, 264)
         self.Course.addPoint(800, 600)
-        self.Course.addPoint(800, 300)
+        self.Course.addPoint(800, 336)
         self.Course.addPoint(1200, 0)
-        self.Course.addPoint(1200, 300)
+        self.Course.addPoint(1200, 264)
 
         # self.Course = Walls(Rad*math.cos(np.pi * -16 / Poly) + 100, Rad*math.sin(np.pi * -16 / Poly) + 100,
         #                     Rad*math.cos(np.pi * -16 / Poly) + 100, Rad*math.sin(np.pi * -16 / Poly) + 100)
