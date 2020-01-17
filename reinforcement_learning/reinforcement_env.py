@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Oct  3 13:30:56 2017
 
-@author: p000526832
-"""
 import logging
 import math
 import gym
 from gym import spaces
 from gym.utils import seeding
 import numpy as np
+import random
 
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import QWidget
@@ -73,7 +70,7 @@ class Walls(object):
             if f:
                 tmpt = min(tmpt, t)
                 tmpf = True
-                if i == len(self.xList) - 1:
+                if i == len(self.xList) - 2:
                     target_wall = True
 
         return [tmpf, tmpt, target_wall]
@@ -97,7 +94,7 @@ class Walls(object):
         return p1l
 
     def adLines(self, p0, d):
-        for i in range(obj_num):
+        for i in range(1, obj_num+1):
             j = 2*(i-1)
             if self.adLine(p0, j) <= d:
                 return True
@@ -151,7 +148,7 @@ class Walls(object):
 
     def crossLines(self, x, y, p0):
         R = []
-        for i in range(obj_num):
+        for i in range(1, obj_num+1):
             j = 2*(i-1)
             r, s = self.crossLine(x, y, p0, j)
             r = np.round(r, 1)
@@ -170,6 +167,8 @@ class Walls(object):
             r, s = self.crossLine(x, y, p0, i)
             r = np.round(r, 1)
             if 0 <= r <= 1 and 0 <= s <= 1:
+                if i == len(self.xList) - 2:
+                    r = -5.0
                 R.append(r)
 
         if len(R) >= 1:
@@ -201,7 +200,7 @@ class Ball(object):
     def __init__(self, x, y, color, property=0):
         self.pos_x = x
         self.pos_y = y
-        self.rad = 10
+        self.rad = 20
 
         self.property = property
 
@@ -255,21 +254,21 @@ class Sens(object):
 
         # TODO:NUM_EYES are 16 now.
         if i == 7 or i == 8:
-            self.OverHang = 1000.0
-        elif i == 6 or i == 9:
-            self.OverHang = 900.0
-        elif i == 5 or i == 10:
-            self.OverHang = 800.0
-        elif i == 4 or i == 11:
             self.OverHang = 700.0
+        elif i == 6 or i == 9:
+            self.OverHang = 665.0
+        elif i == 5 or i == 10:
+            self.OverHang = 630.0
+        elif i == 4 or i == 11:
+            self.OverHang = 595.0
         elif i == 3 or i == 12:
-            self.OverHang = 600.0
+            self.OverHang = 560.0
         elif i == 2 or i == 13:
-            self.OverHang = 500.0
+            self.OverHang = 525.0
         elif i == 1 or i == 14:
-            self.OverHang = 400.0
+            self.OverHang = 490.0
         elif i == 0 or i == 15:
-            self.OverHang = 300.0
+            self.OverHang = 450.0
 
         self.obj = -1
 
@@ -281,9 +280,12 @@ class Agent(Ball):
         self.speed = 10.0
 
         self.pos_x_max, self.pos_y_max = canvasSize
-        self.pos_y_max = 600
+        self.pos_x_max = 900
+        self.pos_y_max = 300
 
         self.EYEs = [Sens(i) for i in range(0, NUM_EYES)]
+
+        self.sens_active = True
 
     def Sens(self, Course, BBox, obstacle=None, i=0):
         self.EYE = self.EYEs[i]
@@ -325,18 +327,23 @@ class Agent(Ball):
                 self.EYE.obj = -1
                 self.r = rC
 
+    def set_active_sens(self, active_flag):
+        self.sens_active = active_flag
+
     def Draw(self, dc):
         dc.setPen(self.P_color)
-        for EYE in self.EYEs:
-
-            dc.drawLine(
-                self.pos_x,
-                self.pos_y,
-                self.pos_x + EYE.OverHang *
-                math.cos(self.dir_Angle + EYE.OffSetAngle),
-                self.pos_y - EYE.OverHang *
-                math.sin(self.dir_Angle + EYE.OffSetAngle),
-            )
+        if self.sens_active:
+            for EYE in self.EYEs:
+                dc.drawLine(
+                    self.pos_x,
+                    self.pos_y,
+                    self.pos_x + EYE.OverHang *
+                    math.cos(self.dir_Angle + EYE.OffSetAngle),
+                    self.pos_y - EYE.OverHang *
+                    math.sin(self.dir_Angle + EYE.OffSetAngle),
+                )
+        else:
+            pass
         super(Agent, self).Draw(dc)
 
     def Move(self, WallsList):
@@ -347,10 +354,11 @@ class Agent(Ball):
               self.speed * math.sin(self.dir_Angle)]
 
         for w in WallsList:
-            if w.IntersectLines([self.pos_x, self.pos_y], dp)[0]:
+            to_wall = w.IntersectLines([self.pos_x, self.pos_y], dp)
+            if to_wall[0]:
                 dp = [0.0, 0.0]
                 HitBoundary = True
-            if w.IntersectLines([self.pos_x, self.pos_y], dp)[2]:
+            if to_wall[2]:
                 target_wall = True
 
         self.pos_x += dp[0]
@@ -358,6 +366,7 @@ class Agent(Ball):
 
         if not (self.pos_x > 0 and self.pos_x < self.pos_x_max and self.pos_y > 0 and self.pos_y < self.pos_y_max):
             HitBoundary = True
+            print("irreglar boundary")
 
         return HitBoundary, target_wall
 
@@ -395,13 +404,13 @@ class Reinforcement_Env(gym.Env):
         Rad = 20.0
         self.obs_agent = obs_agent
 
-        self.Course = Walls(400, 0, 400, 264)
-        self.Course.addPoint(400, 0)
-        self.Course.addPoint(400, 264)
-        self.Course.addPoint(800, 600)
-        self.Course.addPoint(800, 336)
-        self.Course.addPoint(1200, 0)
-        self.Course.addPoint(1200, 264)
+        self.Course = Walls(200, 0, 200, 132)
+        self.Course.addPoint(200, 0)
+        self.Course.addPoint(200, 132)
+        self.Course.addPoint(400, 300)
+        self.Course.addPoint(400, 168)
+        self.Course.addPoint(600, 0)
+        self.Course.addPoint(600, 132)
 
         # self.Course = Walls(Rad*math.cos(np.pi * -16 / Poly) + 100, Rad*math.sin(np.pi * -16 / Poly) + 100,
         #                     Rad*math.cos(np.pi * -16 / Poly) + 100, Rad*math.sin(np.pi * -16 / Poly) + 100)
@@ -437,11 +446,11 @@ class Reinforcement_Env(gym.Env):
         # Mono Sensor moving obstacle
         self.obstacle = []
         if self.obs_agent:
-            self.B = Agent((600, 400), 50, 240)
+            self.B = Agent((300, 400), 50, 240)
             self.B.B_color = QColor(0, 0, 0)
-            self.C = Agent((600, 400), 40, 240)
+            self.C = Agent((300, 400), 40, 240)
             self.C.B_color = QColor(0, 0, 0)
-            self.D = Agent((600, 400), 30, 240)
+            self.D = Agent((300, 400), 30, 240)
             self.D.B_color = QColor(0, 0, 0)
             self.obstacle_agent = [self.B, self.C, self.D]
             self.obstacle = Walls(320, 240, 320, 240)
@@ -449,10 +458,10 @@ class Reinforcement_Env(gym.Env):
             self.obstacle.yList = self.obstacle.yList[2:]
 
         # Outr Boundary Box
-        self.BBox = Walls(1800, 600, 0, 600)
+        self.BBox = Walls(900, 300, 0, 300)
         self.BBox.addPoint(0, 0)
-        self.BBox.addPoint(1800, 0)
-        self.BBox.addPoint(1800, 600)
+        self.BBox.addPoint(900, 0)
+        self.BBox.addPoint(900, 300)
 
         self.action_space = spaces.Box(
             np.array([-1.0, -1.0]), np.array([+1.0, +1.0]))
@@ -472,8 +481,8 @@ class Reinforcement_Env(gym.Env):
         return [seed]
 
     def step(self, action):
-        assert self.action_space.contains(
-            action), "%r (%s) invalid" % (action, type(action))
+        # assert self.action_space.contains(
+        #     action), "%r (%s) invalid" % (action, type(action))
 
         # moving obstacle
         if self.obs_agent:
@@ -494,34 +503,43 @@ class Reinforcement_Env(gym.Env):
         done, flag_target_wall = self.A.Move([self.BBox])
         self.states = []
         self.distance = []
-        for i in range(0, NUM_EYES):
-
-            #            self.A.Sens(self.Course,self.BBox, self.obstacle, i)
-            self.A.Sens(self.Course, self.BBox, None, i)
-
-            if self.A.EYE.obj == 1:
-                self.state = 1
-            else:
-                self.state = 0
-            self.states.append(self.state)
-            self.distance.append(self.A.r)
-
         # Reward
         proximity_reward = 0.0
+        proximity_reward -= (2-action[0]-action[1])
+        if action[2]:
+            for i in range(0, NUM_EYES):
+
+                #            self.A.Sens(self.Course,self.BBox, self.obstacle, i)
+                self.A.Sens(self.Course, self.BBox, None, i)
+
+                if self.A.EYE.obj == 1:
+                    self.state = 1
+                else:
+                    self.state = 0
+                self.states.append(self.state)
+                self.distance.append(self.A.r)
+            proximity_reward -= 0.1
+        else:
+            for i in range(0, NUM_EYES):
+                self.states.append(0)
+                self.distance.append(2.0)
+        self.A.set_active_sens(bool(action[2]))
 
         #        elif self.Course.adLines([self.A.pos_x, self.A.pos_y], 10.0):
         #            proximity_reward -= 5.0
         # 壁にぶつかったら罰則
         #        if self.BBox.adLines_wall([self.A.pos_x, self.A.pos_y], 3.0):
         #            proximity_reward -= 10.0
-
         if done and not flag_target_wall:
             proximity_reward -= 1000.0
+            # proximity_reward += int(self.A.pos_x)*10
         else:
-            self.step_num -= 0.1
+            pass
+            # self.step_num -= 0.01
 
-        if self.Course.adLines([self.A.pos_x, self.A.pos_y], 5.0):
+        if self.Course.adLines([self.A.pos_x, self.A.pos_y], 20.0):
             proximity_reward -= 1000.0
+            # proximity_reward += int(self.A.pos_x)*10
             done = True
 
         #        if self.obstacle.adLines_obstacle([self.A.pos_x, self.A.pos_y], 5.0):
@@ -532,6 +550,7 @@ class Reinforcement_Env(gym.Env):
 
         reward = proximity_reward + self.step_num
 
+
         return (
             np.array(self.distance),
             reward,
@@ -541,10 +560,16 @@ class Reinforcement_Env(gym.Env):
         )
 
     def reset(self):
+        n = random.randrange(10)
+        m = random.randrange(10)
+        l = random.randrange(10)
         self.state = (1,)
-        self.A.pos_x = 320.0
-        self.A.pos_y = 240.0
-        self.A.dir_Angle = 0.0
+        self.step_num = 0
+        self.A.pos_x = 80.0 * n
+        self.A.pos_y = 20.0 * m + 10
+        # self.A.pos_x = 850
+        # self.A.pos_y = 150
+        self.A.dir_Angle = 10.0 * l *(-1)**n
         self.steps_beyond_done = None
         return np.array(self.state)
 
@@ -562,7 +587,7 @@ class APPWINDOW(QWidget):
         super().__init__()
 
         self.obs_agent = obs_agent
-        self.resize(1800, 600)
+        self.resize(900, 300)
         self.setWindowTitle(title)
         self.setStyleSheet("background-color : white;")
 
@@ -587,7 +612,7 @@ class APPWINDOW(QWidget):
 
             qp.setPen(QColor(Qt.white))
             qp.setBrush(QColor(Qt.white))
-            qp.drawRect(0, 0, 1800, 600)
+            qp.drawRect(0, 0, 900, 300)
 
             for ag in [self.World.A]:
                 ag.Draw(qp)
