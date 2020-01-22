@@ -3,6 +3,7 @@ import sys
 import glob
 import numpy as np
 from scipy import signal
+from scipy.signal import argrelmax
 import itertools
 import math
 import re
@@ -43,6 +44,17 @@ class DataField:
         left_wave = echo_data_list[:, 3] - \
             emit_data_list[:, 3][:len(echo_data_list[:, 3])]
         self.echo_without_emit_wave = [right_wave, left_wave]
+
+        # 取得・計算する内部変数
+        self.data_len = 0
+        self.right_corr = None
+        self.left_corr = None
+        self.right_echo_time = None
+        self.left_echo_time = None
+        self.right_echo_power = None
+        self.left_echo_power = None
+        self.distance_list = None
+        self.angle_list = None
 
     def preprocessing(self):
         # correlation
@@ -111,34 +123,49 @@ class DataField:
         self.echo_points = self.__get_echo_points()
 
     def __get_echo_point(self):
-        right_echo_point_raw = np.where(self.right_corr >= self.threash)[0]
-        left_echo_point_raw = np.where(self.left_corr >= self.threash)[0]
-        right_echo_list = []
-        left_echo_list = []
-        pre_r_point = 0
-        pre_point = 0
-        for r_point in right_echo_point_raw:
-            if r_point - pre_r_point != 1:
-                if pre_point == 0:
-                    pre_point = r_point
-                elif pre_point != 0:
-                    echo_point = round((pre_point+r_point)/2)
-                    right_echo_list.append(int(echo_point))
-                    pre_point = 0
-            pre_r_point = r_point
-        pre_l_point = 0
-        pre_point = 0
-        for l_point in left_echo_point_raw:
-            if l_point - pre_l_point != 1:
-                if pre_point == 0:
-                    pre_point = l_point
-                elif pre_point != 0:
-                    echo_point = round((pre_point+l_point)/2)
-                    left_echo_list.append(int(echo_point))
-                    pre_point = 0
-            pre_l_point = l_point
+        # right_echo_point_raw = np.where(self.right_corr >= self.threash)[0]
+        # left_echo_point_raw = np.where(self.left_corr >= self.threash)[0]
+        right_echo_point_raw = self.right_corr
+        left_echo_point_raw = self.left_corr
 
-        return right_echo_list, left_echo_list
+        # pre_r_point = 0
+        # pre_point = 0
+        # for r_point in right_echo_point_raw:
+        #     if r_point - pre_r_point != 1:
+        #         if pre_point == 0:
+        #             pre_point = r_point
+        #         elif pre_point != 0:
+        #             echo_point = round((pre_point+r_point)/2)
+        #             right_echo_list.append(int(echo_point))
+        #             pre_point = 0
+        #     pre_r_point = r_point
+        # pre_l_point = 0
+        # pre_point = 0
+        # for l_point in left_echo_point_raw:
+        #     if l_point - pre_l_point != 1:
+        #         if pre_point == 0:
+        #             pre_point = l_point
+        #         elif pre_point != 0:
+        #             echo_point = round((pre_point+l_point)/2)
+        #             left_echo_list.append(int(echo_point))
+        #             pre_point = 0
+        #     pre_l_point = l_point
+        peaks_right = argrelmax(right_echo_point_raw, order=50)
+        peak_power_right = right_echo_point_raw[peaks_right]
+        peak_right = peaks_right[0][np.where(peak_power_right > 0)[0]]
+        peaks_left = argrelmax(left_echo_point_raw, order=50)
+        peak_power_left = left_echo_point_raw[peaks_left]
+        peak_left = peaks_left[0][np.where(peak_power_left > 0)[0]]
+        # import matplotlib as mpl
+        # mpl.use('tkagg')
+        # import matplotlib.pyplot as plt
+        # fig = plt.figure()
+        # ax = fig.add_subplot(111)
+        # ax.plot(right_echo_point_raw)
+        # ax.scatter(peak_right, right_echo_point_raw[peak_right])
+        # plt.show()
+
+        return peak_right, peak_left
 
     def __get_echo_time(self, right_points, left_points):
 
@@ -189,7 +216,6 @@ class DataField:
         return pixel_points
 
     def save(self):
-        print(self.right_echo_time)
         with open("./echo_point_{}/echo_point_{}.csv".format(os.path.basename(os.path.dirname(self.base_name)),
                                                              os.path.splitext(self.base_name)[0].split("/")[-1]), "a") as f:
             writer = csv.writer(f, lineterminator='\n')
