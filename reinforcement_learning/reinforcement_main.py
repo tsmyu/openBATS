@@ -29,7 +29,7 @@ standard_library.install_aliases()
 
 
 NUM_EYES = 16
-STATE_PAST_NUM = 15
+STATE_PAST_NUM = 10
 
 
 class SState(object):
@@ -58,7 +58,7 @@ class Reinforcement_Env_Discrete(Reinforcement_Env):
         super().__init__(obs_agent)
         self.actions = np.array([[0.3, 1.0, False], [0.5, 1.0, False], [0.7, 1.0, False], [1.0, 1.0, False], [1.0, 0.7, False], [1.0, 0.5, False], [1.0, 0.3, False],
                                  [0.3, 1.0, True], [0.5, 1.0, True], [0.7, 1.0, True], [1.0, 1.0, True], [1.0, 0.7, True], [1.0, 0.5, True], [1.0, 0.3, True]])
-        self.OBSDIM= 15
+        self.OBSDIM= 10
         self.action_space_d= spaces.Discrete(self.actions.shape[0])
         self.observation_space_d= spaces.Discrete(self.OBSDIM)
         self.MyState= SState(self.OBSDIM, NUM_EYES)
@@ -98,13 +98,13 @@ class SimulationLoop(QThread):
                 R= 0
                 for t in range(max_episode_len):
                     self.env.render()
-                    act= self.agent.act_and_train(observation, reward)
+                    act = self.agent.act_and_train(observation, reward)
                     observation, reward, done, info= self.env._step(act)
                     R += reward
                     if done:
                         break
-                print(
-                    "Episode {} finished after {} timesteps. reward {}".format(i, t+1, R))
+                # print(
+                #     "Episode {} finished after {} timesteps. reward {}".format(i, t+1, R))
 
                 if i % 10 == 0:
                     print("episode:", i,
@@ -128,7 +128,8 @@ class SimulationLoop(QThread):
                 for t in range(max_episode_len):
                     self.env._render()
 
-                    act= self.agent.act_and_train(observation, reward)
+                    act = self.agent.act_and_train(observation, reward)
+
                     observation, reward, done, info= self.env._step(act)
                     R += reward
 
@@ -179,10 +180,10 @@ class QFunction(chainer.Chain):
         )
 
     def __call__(self, x, test=False):
-        h= F.tanh(self.l0(x))
-        h= F.tanh(self.l1(h))
-        h= F.tanh(self.l2(h))
-        h= F.tanh(self.l3(h))
+        h= F.leaky_relu(self.l0(x))
+        h= F.leaky_relu(self.l1(h))
+        h= F.leaky_relu(self.l2(h))
+        h= F.leaky_relu(self.l3(h))
 
         return chainerrl.action_value.DiscreteActionValue(self.l4(h))
 
@@ -197,9 +198,9 @@ class A3C_HEAD(chainer.Chain):
         )
 
     def __call__(self, x, test=False):
-        h= F.tanh(self.l0(x))
-        h= F.tanh(self.l1(h))
-        h= F.tanh(self.l2(h))
+        h= F.leaky_relu(self.l0(x))
+        h= F.leaky_relu(self.l1(h))
+        h= F.leaky_relu(self.l2(h))
 
         return self.l3(h)
 
@@ -238,7 +239,7 @@ def CREATE_AGENT(env, agent_name):
         #     epsilon=0.3, random_action_func=env.action_space_d.sample)
 
         explorer= chainerrl.explorers.LinearDecayEpsilonGreedy(
-            start_epsilon=0.5, end_epsilon=0.01, decay_steps=10000, random_action_func=env.action_space_d.sample)
+            start_epsilon=0.5, end_epsilon=0.1, decay_steps=10000, random_action_func=env.action_space_d.sample)
 
         replay_buffer= chainerrl.replay_buffer.ReplayBuffer(capacity=10 ** 6)
 

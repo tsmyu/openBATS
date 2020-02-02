@@ -6,10 +6,10 @@ import field
 import numpy as np
 import math
 from scipy import signal
+import matplotlib.pyplot as plt
 
 if not __debug__:
     debug_flag = True
-    import matplotlib.pyplot as plt
     import matplotlib.animation as animation
 else:
     debug_flag = False
@@ -41,6 +41,9 @@ if gpu_flag:
     import chainer
     import cupy as cp
 
+recived_wave1 = []
+recived_wave2 = []
+
 
 def MakeFigure(P):
     if gpu_flag:
@@ -55,8 +58,9 @@ def MakeFigure(P):
 
 def CreatePulse(i):
     sig_wave = sig_amp * math.sin(2 * math.pi * sig_freq * i * dt)
-    sig = sig_wave * signal.gaussian(sig_duration, std=sigma)[i]
-    return sig
+    # sig = sig_wave * signal.gaussian(sig_duration, std=sigma)[i]
+    
+    return sig_wave
 
 
 def Calc(field_data, P1, P2):
@@ -69,31 +73,58 @@ def Calc(field_data, P1, P2):
         time_start = time.perf_counter()
         if i < sig_duration:
             sig = CreatePulse(i)
-            P2[signal_point[0], signal_point[1]] = P1[signal_point[0], signal_point[1]] + sig
-        P1[1 : width - 1, 1 : height - 1] = (
-            2 * P2[1 : width - 1, 1 : height - 1]
-            - P1[1 : width - 1, 1 : height - 1]
+            P2[signal_point[0], signal_point[1]
+               ] = P2[signal_point[0], signal_point[1]] + sig
+        P1[1: width - 1, 1: height - 1] = (
+            2 * P2[1: width - 1, 1: height - 1]
+            - P1[1: width - 1, 1: height - 1]
             + (sound_speed_air * dt / dx) ** 2
             * (
                 (
-                    P2[2:width, 1 : height - 1]
-                    + P2[: width - 2, 1 : height - 1]
-                    + P2[1 : width - 1, 2:height]
-                    + P2[1 : width - 1, : height - 2]
+                    P2[2:width, 1: height - 1]
+                    + P2[: width - 2, 1: height - 1]
+                    + P2[1: width - 1, 2:height]
+                    + P2[1: width - 1, : height - 2]
                 )
             )
-            - 4 * (sound_speed_air * dt / dx) ** 2 * P2[1 : width - 1, 1 : height - 1]
+            - 4 * (sound_speed_air * dt / dx) ** 2 *
+            P2[1: width - 1, 1: height - 1]
         )
         P1 = field_data.update(P2, P1)
         time_end = time.perf_counter()
         tim += time_end - time_start
+        get_wave(P1)
         if debug_flag:
             im = MakeFigure(P1)
             ims.append([im])
         P1, P2 = P2, P1
+    # plt.plot(recived_wave1)
+    recived_wave_arr_1 = abs(np.array(recived_wave1))
+    recived_wave_arr_2 = abs(np.array(recived_wave2))
+    # plt.plot(recived_wave_arr_1)
+    plt.plot(recived_wave_arr_2)
+    plt.savefig("recived_wave_raw.png")
+    plt.close()
+    recived_wave1_max = max(recived_wave_arr_1)
+    recived_wave2_max = max(recived_wave_arr_2)
+    recived_wave1_log = 20 * np.log(recived_wave_arr_1 / recived_wave1_max)
+    recived_wave2_log = 20 * np.log(recived_wave_arr_2 / recived_wave2_max)
+    # recived_wave1_log = [20 * np.log(20e-6/20e-6) if recived_wave <= 0 else 20 * np.log(recived_wave / 20e-6) for recived_wave in recived_wave1]
+    # recived_wave2_log=[20 * np.log(20e-6/20e-6) if recived_wave <= 0 else 20 * np.log(recived_wave / 20e-6) for recived_wave in recived_wave2]
+    # plt.plot(recived_wave1_log)
+    plt.plot(recived_wave2_log)
+    plt.ylim(-200, 0)
+    plt.xlabel("time [2e-6 s]")
+    plt.ylabel("P [dB]")
+    plt.savefig("recived_wave_num.png")
 
     print(f"calc time:{np.round(tim,2)}[s]")
     return ims
+
+
+def get_wave(p):
+    recived_wave1.append(p[200, 300])
+    recived_wave2.append(p[400, 300])
 
 
 def main(field_image):
@@ -122,7 +153,8 @@ def main(field_image):
             fig = plt.figure()
         image_list = Calc(field_data, P1, P2)
     if debug_flag:
-        ani = animation.ArtistAnimation(fig, image_list, interval=100, blit=True)
+        ani = animation.ArtistAnimation(
+            fig, image_list, interval=100, blit=True)
         plt.show()
 
 

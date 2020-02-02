@@ -13,7 +13,7 @@
          "amplitude": 5,
          "duration": 100,
          "sigma": 7,
-         "point": "(300,300)"
+         "point": "(500,300)"
          },
 "ABC": {
         "Mur1":true
@@ -21,7 +21,7 @@
 "soundspeed":{"air": 331.5,
         "acrylic": 2730},
  "ear_point_from_signal" : 20,
- "cycle_number": 1000,
+ "cycle_number": 5000,
  "save_step": 10,
  "GPU": false
  }

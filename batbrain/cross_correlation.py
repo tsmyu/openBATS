@@ -3,7 +3,6 @@ import sys
 import glob
 import numpy as np
 from scipy import signal
-from scipy.signal import argrelmax
 import itertools
 import math
 import re
@@ -18,16 +17,11 @@ distance_ears = 0.002
 velocity_air = 331.5
 limit_time = distance_ears / velocity_air
 
-# not delete area
-# ignore area : 5cm(5)
-ignore_time = 100e-3*2/velocity_air
-ignore_points = round(ignore_time/dt/10)
-
 
 class DataField:
-    def __init__(self, input_data, emit_csv_list):
+    def __init__(self, input_data, emit_csv):
         # threash
-        self.threash = 0.3
+        self.threash = 0.05
         self.base_name = input_data
         file_name = os.path.basename(input_data)
         # self.pixel_area = (
@@ -36,34 +30,22 @@ class DataField:
             re.split("[g]", file_name.split("_")[-1].split(".")[0])[-1])
         self.emit_point = (int(os.path.basename(input_data).split("_")[-3]), int(
             os.path.basename(input_data).split("_")[-2]))
-        for emit_csv in emit_csv_list:
-            emit_name = os.path.basename(emit_csv)
-            _emit_angle = int(re.split("[g]", emit_name.split("_")[-1].split(".")[0])[-1])
-            if self.emit_angle == _emit_angle:
-                emit_data_list = np.genfromtxt(emit_csv, usecols=(
-                    0, 1, 2, 3), skip_header=1, skip_footer=1, delimiter=",")
-                break
+        emit_data_list = np.genfromtxt(emit_csv, usecols=(
+            0, 1, 2, 3), skip_header=1, skip_footer=1, delimiter=",")
+
         echo_data_list = np.genfromtxt(input_data, usecols=(
             0, 1, 2, 3), skip_header=1, skip_footer=1, delimiter=",")
 
         self.time_line = echo_data_list[:, 0]
         self.emit_wave = echo_data_list[:, 1]
-        right_wave = echo_data_list[:, 3] - \
-            emit_data_list[:, 3][:len(echo_data_list[:, 3])]
-        left_wave = echo_data_list[:, 2] - \
+        right_wave = echo_data_list[:, 2] - \
             emit_data_list[:, 2][:len(echo_data_list[:, 2])]
+        left_wave = echo_data_list[:, 3] - \
+            emit_data_list[:, 3][:len(echo_data_list[:, 3])]
         self.echo_without_emit_wave = [right_wave, left_wave]
-
-        # 取得・計算する内部変数
         self.data_len = 0
         self.right_corr = None
         self.left_corr = None
-        self.right_echo_time = None
-        self.left_echo_time = None
-        self.right_echo_power = None
-        self.left_echo_power = None
-        self.distance_list = None
-        self.angle_list = None
 
     def preprocessing(self):
         # correlation
@@ -73,7 +55,6 @@ class DataField:
         # notmalize
         corr_wave_envelop_norm = self.__normalization(
             corr_wave_envelop, "echo")
-        
         # set length of data
         self.data_len = min(len(self.echo_without_emit_wave[0]), len(
             corr_wave[1]), len(self.time_line))
@@ -107,11 +88,10 @@ class DataField:
         """
         norm_list = []
         if base == "emit":
-            for idx, wave in enumerate(wave_list):
-                if idx == 0:
-                    wave_max = max(np.array(wave))
+            for wave in wave_list:
                 wave = np.array(wave)
                 wave = wave - wave.mean()
+                wave_max = max(np.array(self.emit_wave))
                 wave_n = wave / wave_max
                 norm_list.append(wave_n)
         elif base == "echo":
@@ -132,61 +112,36 @@ class DataField:
             right_echo_point, left_echo_point)
         self.distance_list, self.angle_list = self.__get_distance_angle()
         self.echo_points = self.__get_echo_points()
-        # tmp
-        # import matplotlib.pyplot as plt
-        # fig = plt.figure()
-        # ax1 = fig.add_subplot(211)
-        # ax2 = fig.add_subplot(212)
-        # ax1.plot(self.right_corr)
-        # ax1.scatter(right_echo_point, self.right_echo_power, c="r")
-        # ax2.plot(self.left_corr)
-        # ax2.scatter(left_echo_point, self.left_echo_power,c="r")
-        # plt.savefig(f"{self.base_name}.png")
 
     def __get_echo_point(self):
-        # right_echo_point_raw = np.where(self.right_corr >= self.threash)[0]
-        # left_echo_point_raw = np.where(self.left_corr >= self.threash)[0]
-        right_echo_point_raw = self.right_corr
-        left_echo_point_raw = self.left_corr
+        right_echo_point_raw = np.where(self.right_corr >= self.threash)[0]
+        left_echo_point_raw = np.where(self.left_corr >= self.threash)[0]
+        right_echo_list = []
+        left_echo_list = []
+        pre_r_point = 0
+        pre_point = 0
+        for r_point in right_echo_point_raw:
+            if r_point - pre_r_point != 1:
+                if pre_point == 0:
+                    pre_point = r_point
+                elif pre_point != 0:
+                    echo_point = round((pre_point+r_point)/2)
+                    right_echo_list.append(int(echo_point))
+                    pre_point = 0
+            pre_r_point = r_point
+        pre_l_point = 0
+        pre_point = 0
+        for l_point in left_echo_point_raw:
+            if l_point - pre_l_point != 1:
+                if pre_point == 0:
+                    pre_point = l_point
+                elif pre_point != 0:
+                    echo_point = round((pre_point+l_point)/2)
+                    left_echo_list.append(int(echo_point))
+                    pre_point = 0
+            pre_l_point = l_point
 
-        # pre_r_point = 0
-        # pre_point = 0
-        # for r_point in right_echo_point_raw:
-        #     if r_point - pre_r_point != 1:
-        #         if pre_point == 0:
-        #             pre_point = r_point
-        #         elif pre_point != 0:
-        #             echo_point = round((pre_point+r_point)/2)
-        #             right_echo_list.append(int(echo_point))
-        #             pre_point = 0
-        #     pre_r_point = r_point
-        # pre_l_point = 0
-        # pre_point = 0
-        # for l_point in left_echo_point_raw:
-        #     if l_point - pre_l_point != 1:
-        #         if pre_point == 0:
-        #             pre_point = l_point
-        #         elif pre_point != 0:
-        #             echo_point = round((pre_point+l_point)/2)
-        #             left_echo_list.append(int(echo_point))
-        #             pre_point = 0
-        #     pre_l_point = l_point
-        peaks_right = argrelmax(right_echo_point_raw, order=100)
-        peak_power_right = right_echo_point_raw[peaks_right]
-        peak_right = peaks_right[0][np.where(peak_power_right > self.threash)[0]]
-        peaks_left = argrelmax(left_echo_point_raw, order=100)
-        peak_power_left = left_echo_point_raw[peaks_left]
-        peak_left = peaks_left[0][np.where(peak_power_left > self.threash)[0]]
-        # import matplotlib as mpl
-        # mpl.use('tkagg')
-        # import matplotlib.pyplot as plt
-        # fig = plt.figure()
-        # ax = fig.add_subplot(111)
-        # ax.plot(right_echo_point_raw)
-        # ax.scatter(peak_right, right_echo_point_raw[peak_right])
-        # plt.show()
-
-        return peak_right, peak_left
+        return right_echo_list, left_echo_list
 
     def __get_echo_time(self, right_points, left_points):
 
@@ -215,10 +170,8 @@ class DataField:
                 if abs(right_tim - left_tim) < limit_time:
                     distance = (right_tim + left_tim) * velocity_air / 4
                     if -1 < (right_tim-left_tim)*velocity_air/distance_ears < 1:
-                        angle = math.asin(abs((right_tim-left_tim)) *
+                        angle = math.asin((right_tim-left_tim) *
                                           velocity_air / distance_ears)
-                        if right_tim - left_tim > 0:
-                            angle = -angle
                         tmp_angle_list.append(math.degrees(angle))
                         tmp_distance_list.append(distance)
             distance_list.append(tmp_distance_list)
@@ -239,6 +192,7 @@ class DataField:
         return pixel_points
 
     def save(self):
+        print(self.right_echo_time)
         with open("./echo_point_{}/echo_point_{}.csv".format(os.path.basename(os.path.dirname(self.base_name)),
                                                              os.path.splitext(self.base_name)[0].split("/")[-1]), "a") as f:
             writer = csv.writer(f, lineterminator='\n')
@@ -267,33 +221,3 @@ class DataField:
             writer.writerow(["tim", "echo_right", "echo_left",
                              "corr_right", "corr_left"])
             writer.writerows(data_for_csv)
-
-
-def main(csv_list, emit_csv_list):
-    """
-    main for detect point from echo
-    """
-    for idx, csv in enumerate(csv_list):
-        data_field = DataField(csv, emit_csv_list)
-        print("analyze target:{}".format(csv))
-        data_field.preprocessing()
-        data_field.get_info()
-        data_field.save()
-        print("-------finish:{}th/{}-----------".format(idx+1, len(csv_list)))
-
-
-if __name__ == "__main__":
-    argvs = sys.argv
-    if len(argvs) < 2:
-        print(
-            "Usage: python {} [folder of csv] [folder of emit_pulse csv]".format(argvs[0]))
-        exit()
-    csv_list = sorted(glob.glob("{}/*.csv".format(argvs[1])))
-    if csv_list != []:
-        if not os.path.exists("./corr_{}".format(os.path.basename(argvs[1]))):
-            os.makedirs("./corr_{}".format(os.path.basename(argvs[1])))
-        if not os.path.exists("./echo_point_{}".format(os.path.basename(argvs[1]))):
-            os.makedirs("./echo_point_{}".format(os.path.basename(argvs[1])))
-    print("csv_list:{}".format(csv_list))
-    emit_csv_list = sorted(glob.glob("{}/*.csv".format(argvs[2])))
-    main(csv_list, emit_csv_list)

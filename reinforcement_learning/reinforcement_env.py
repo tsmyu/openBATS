@@ -132,7 +132,7 @@ class Walls(object):
 
         denominator = xpb * y21 - x21 * ypb
         if denominator == 0:
-            r = 2.0
+            r = -1.0
             s = 2
 
         else:
@@ -142,7 +142,7 @@ class Walls(object):
             s = (x * ypb - self.xList[j] * ypb + self.yList[j]
                  * xpb - y * xpb) / (-1 * denominator)
 
-            r = np.round(r, 1)
+            r = np.round(r, 2)
 
         return r, s
 
@@ -151,7 +151,7 @@ class Walls(object):
         for i in range(1, obj_num+1):
             j = 2*(i-1)
             r, s = self.crossLine(x, y, p0, j)
-            r = np.round(r, 1)
+            r = np.round(r, 2)
             if 0 <= r <= 1 and 0 <= s <= 1:
                 R.append(r)
 
@@ -159,29 +159,29 @@ class Walls(object):
             return True, min(R)
         else:
 
-            return False, 2.0
+            return False, -1.0
 
     def crossLines_wall(self, x, y, p0):
         R = []
         for i in range(0, len(self.xList) - 1):
             r, s = self.crossLine(x, y, p0, i)
-            r = np.round(r, 1)
+            r = np.round(r, 2)
             if 0 <= r <= 1 and 0 <= s <= 1:
                 if i == len(self.xList) - 2:
-                    r = -5.0
+                    r = -1.0
                 R.append(r)
 
         if len(R) >= 1:
             return True, min(R)
         else:
 
-            return False, 2.0
+            return False, -1.0
 
     def crossLines_obstacle(self, x, y, p0):
         R = []
         for i in range(obstacle_agent_num):
             r, s = self.crossLine(x, y, p0, i)
-            r = np.round(r, 1)
+            r = np.round(r, 2)
             if 0 <= r <= 1 and 0 <= s <= 1:
                 R.append(r)
 
@@ -189,7 +189,7 @@ class Walls(object):
             return True, min(R)
         else:
 
-            return False, 2.0
+            return False, -1.0
 
     def reset(self):
         self.xList = []
@@ -403,14 +403,21 @@ class Reinforcement_Env(gym.Env):
         self.x_threshold = 2.4
         Rad = 20.0
         self.obs_agent = obs_agent
-
+        rr = random.randrange(10)
         self.Course = Walls(200, 0, 200, 132)
-        self.Course.addPoint(200, 0)
-        self.Course.addPoint(200, 132)
-        self.Course.addPoint(400, 300)
-        self.Course.addPoint(400, 168)
-        self.Course.addPoint(600, 0)
-        self.Course.addPoint(600, 132)
+        self.Course.addPoint(20*rr, 1*rr)
+        self.Course.addPoint(10*rr, 13*rr)
+        self.Course.addPoint(40*rr, 30*rr)
+        self.Course.addPoint(30*rr, 16*rr)
+        self.Course.addPoint(60*rr, 2*rr)
+        self.Course.addPoint(50*rr, 13*rr)
+
+        # self.Course.addPoint(200, 0)
+        # self.Course.addPoint(200, 132)
+        # self.Course.addPoint(400, 300)
+        # self.Course.addPoint(400, 168)
+        # self.Course.addPoint(600, 0)
+        # self.Course.addPoint(600, 132)
 
         # self.Course = Walls(Rad*math.cos(np.pi * -16 / Poly) + 100, Rad*math.sin(np.pi * -16 / Poly) + 100,
         #                     Rad*math.cos(np.pi * -16 / Poly) + 100, Rad*math.sin(np.pi * -16 / Poly) + 100)
@@ -505,7 +512,7 @@ class Reinforcement_Env(gym.Env):
         self.distance = []
         # Reward
         proximity_reward = 0.0
-        proximity_reward -= (2-action[0]-action[1])
+        proximity_reward -= (2-action[0]-action[1])*100
         if action[2]:
             for i in range(0, NUM_EYES):
 
@@ -518,7 +525,7 @@ class Reinforcement_Env(gym.Env):
                     self.state = 0
                 self.states.append(self.state)
                 self.distance.append(self.A.r)
-            proximity_reward -= 0.1
+            # proximity_reward -= 0.1
         else:
             for i in range(0, NUM_EYES):
                 self.states.append(0)
@@ -531,15 +538,14 @@ class Reinforcement_Env(gym.Env):
         #        if self.BBox.adLines_wall([self.A.pos_x, self.A.pos_y], 3.0):
         #            proximity_reward -= 10.0
         if done and not flag_target_wall:
-            proximity_reward -= 1000.0
-            # proximity_reward += int(self.A.pos_x)*10
+            proximity_reward -= 100.0
+            # proximity_reward += int(self.A.pos_x)**2
         else:
-            pass
-            # self.step_num -= 0.01
+            self.step_num += 0.1
 
         if self.Course.adLines([self.A.pos_x, self.A.pos_y], 20.0):
-            proximity_reward -= 1000.0
-            # proximity_reward += int(self.A.pos_x)*10
+            proximity_reward -= 100.0
+            # proximity_reward += int(self.A.pos_x)**2
             done = True
 
         #        if self.obstacle.adLines_obstacle([self.A.pos_x, self.A.pos_y], 5.0):
@@ -548,8 +554,9 @@ class Reinforcement_Env(gym.Env):
         if self.obs_agent:
             self.obstacle.reset()
 
-        reward = proximity_reward + self.step_num
+        # proximity_reward += int(self.A.pos_x)/10
 
+        reward = proximity_reward + self.step_num
 
         return (
             np.array(self.distance),
@@ -567,10 +574,20 @@ class Reinforcement_Env(gym.Env):
         self.step_num = 0
         self.A.pos_x = 80.0 * n
         self.A.pos_y = 20.0 * m + 10
-        # self.A.pos_x = 850
+        # self.A.pos_x = 50
         # self.A.pos_y = 150
-        self.A.dir_Angle = 10.0 * l *(-1)**n
+        # self.A.dir_Angle = 0
+        self.A.dir_Angle = 10.0 * l * (-1)**n
         self.steps_beyond_done = None
+        self.Course = Walls(200, 0, 200, 132)
+        self.Course.addPoint(90*n, 30*m)
+        self.Course.addPoint(90*l, 30*n)
+        self.Course.addPoint(80*m, 30*l)
+        self.Course.addPoint(80*n, 30*m)
+        self.Course.addPoint(70*l, 30*n)
+        self.Course.addPoint(70 * m, 30 * l)
+        self.Course.xList = self.Course.xList[2:]
+        self.Course.yList = self.Course.yList[2:]
         return np.array(self.state)
 
     def render(self, mode="human", close=False):

@@ -6,8 +6,10 @@ from scipy import signal
 from scipy.signal import argrelmax
 import itertools
 import math
-import re
 import csv
+import sympy as sp
+from sympy import sqrt, symbols
+import re
 
 # simulation parameter
 dx = 2.5e-4
@@ -30,6 +32,7 @@ class DataField:
         self.threash = 0.3
         self.base_name = input_data
         file_name = os.path.basename(input_data)
+        print(file_name)
         # self.pixel_area = (
         #     int(file_name.split("_")[-3]), int(file_name.split("_")[-2]))
         self.emit_angle = int(
@@ -38,7 +41,8 @@ class DataField:
             os.path.basename(input_data).split("_")[-2]))
         for emit_csv in emit_csv_list:
             emit_name = os.path.basename(emit_csv)
-            _emit_angle = int(re.split("[g]", emit_name.split("_")[-1].split(".")[0])[-1])
+            _emit_angle = int(
+                re.split("[g]", emit_name.split("_")[-1].split(".")[0])[-1])
             if self.emit_angle == _emit_angle:
                 emit_data_list = np.genfromtxt(emit_csv, usecols=(
                     0, 1, 2, 3), skip_header=1, skip_footer=1, delimiter=",")
@@ -56,14 +60,17 @@ class DataField:
 
         # 取得・計算する内部変数
         self.data_len = 0
+        self.right_corr_raw = None
+        self.left_corr_raw = None
         self.right_corr = None
         self.left_corr = None
         self.right_echo_time = None
         self.left_echo_time = None
         self.right_echo_power = None
         self.left_echo_power = None
-        self.distance_list = None
-        self.angle_list = None
+        self.distance_list = []
+        self.angle_list = []
+        self.power_list = []
 
     def preprocessing(self):
         # correlation
@@ -73,10 +80,13 @@ class DataField:
         # notmalize
         corr_wave_envelop_norm = self.__normalization(
             corr_wave_envelop, "echo")
-        
+
         # set length of data
         self.data_len = min(len(self.echo_without_emit_wave[0]), len(
             corr_wave[1]), len(self.time_line))
+        
+        self.right_corr_raw = corr_wave_envelop[1][:self.data_len]
+        self.left_corr_raw = corr_wave_envelop[2][:self.data_len]
 
         self.right_corr = corr_wave_envelop_norm[1][:self.data_len]
         self.left_corr = corr_wave_envelop_norm[2][:self.data_len]
@@ -130,8 +140,9 @@ class DataField:
             right_echo_point, left_echo_point)
         self.right_echo_power, self.left_echo_power = self.__get_echo_power(
             right_echo_point, left_echo_point)
-        self.distance_list, self.angle_list = self.__get_distance_angle()
-        self.echo_points = self.__get_echo_points()
+        position_list, power_list = self.__get_position()
+        self.power_list = power_list
+        self.echo_points = self.__get_echo_points(position_list)
         # tmp
         # import matplotlib.pyplot as plt
         # fig = plt.figure()
@@ -173,7 +184,8 @@ class DataField:
         #     pre_l_point = l_point
         peaks_right = argrelmax(right_echo_point_raw, order=100)
         peak_power_right = right_echo_point_raw[peaks_right]
-        peak_right = peaks_right[0][np.where(peak_power_right > self.threash)[0]]
+        peak_right = peaks_right[0][np.where(
+            peak_power_right > self.threash)[0]]
         peaks_left = argrelmax(left_echo_point_raw, order=100)
         peak_power_left = left_echo_point_raw[peaks_left]
         peak_left = peaks_left[0][np.where(peak_power_left > self.threash)[0]]
@@ -194,51 +206,62 @@ class DataField:
 
     def __get_echo_power(self, right_points, left_points):
 
-        return self.right_corr[right_points], self.left_corr[left_points]
+        return self.right_corr_raw[right_points], self.left_corr_raw[left_points]
 
-    def __get_distance_angle(self):
+    def __get_position(self):
         if min(len(self.right_echo_time), len(self.left_echo_time)) == 0:
-            distance_list = [-100]
-            angle_list = [-100]
+            position_list = [(-100, -100)]
+            power_list = []
         else:
-            distance_list, angle_list = self.__calc_distance_angle()
+            position_list, power_list = self.__calc_position()
 
-        return distance_list, angle_list
+        return position_list, power_list
 
-    def __calc_distance_angle(self):
-        distance_list = []
-        angle_list = []
-        for right_tim in self.right_echo_time:
-            tmp_distance_list = []
-            tmp_angle_list = []
-            for left_tim in self.left_echo_time:
+    def __calc_position(self):
+        position_list = []
+        power_list = []
+        x = symbols("x", positive=True)
+        y = symbols("y", positive=True)
+        a1 = symbols("a1", positive=True)
+        a2 = symbols("a2", positive=True)
+        sp.var('x, y, a1, a2')
+        eq1 = (x-(distance_ears / 4)) ** 2 / a1 ** 2 + y ** 2 / (a1 ** 2 - (distance_ears / 4)** 2) - 1
+        eq2 = (x+(distance_ears / 4)) ** 2 / a2 ** 2 + y ** 2 / (a2 ** 2 - (distance_ears / 4)** 2) - 1
+        ans = sp.solve([eq1, eq2], [x, y])
+        for right_tim, right_power in zip(self.right_echo_time, self.right_echo_power):
+            tmp_position_list = []
+            tmp_power_list = []
+            for left_tim, left_power in zip(self.left_echo_time, self.left_echo_power):
                 if abs(right_tim - left_tim) < limit_time:
-                    distance = (right_tim + left_tim) * velocity_air / 4
-                    if -1 < (right_tim-left_tim)*velocity_air/distance_ears < 1:
-                        angle = math.asin(abs((right_tim-left_tim)) *
-                                          velocity_air / distance_ears)
-                        if right_tim - left_tim > 0:
-                            angle = -angle
-                        tmp_angle_list.append(math.degrees(angle))
-                        tmp_distance_list.append(distance)
-            distance_list.append(tmp_distance_list)
-            angle_list.append(tmp_angle_list)
+                    a_1 = right_tim * velocity_air / 2
+                    a_2 = left_tim * velocity_air / 2
+                    x = round(ans[1][0].subs([(a1, a_1), (a2, a_2)]) / dx)
+                    y = round(ans[1][1].subs([(a1, a_1), (a2, a_2)]) / dx)
+                    tmp_position_list.append([x, y])
+                    tmp_power_list.append(int((right_power+left_power)))
+            position_list.append(tmp_position_list)
+            power_list.append(tmp_power_list)
+        power_l = list(itertools.chain(*power_list))
+        power_list = sorted(power_l, key=power_l.index)
+        return position_list, power_list
 
-        distance_l = list(itertools.chain(*distance_list))
-        angle_l = list(itertools.chain(*angle_list))
-        distance_list = sorted(set(distance_l), key=distance_l.index)
-        angle_list = sorted(set(angle_l), key=angle_l.index)
-        return distance_list, angle_list
-
-    def __get_echo_points(self):
+    def __get_echo_points(self, position_list):
         pixel_points = []
-        for (dis, ang) in zip(self.distance_list, self.angle_list):
-            f_angle = math.radians(self.emit_angle - 90 + ang)
-            pixel_points.append((self.emit_point[0]+round(dis*math.cos(f_angle)/dx),
-                                 self.emit_point[1]+round(dis*math.sin(f_angle)/dx)))
+        theta = math.radians(-self.emit_angle)
+        rotation_matrix = np.array(
+            [np.cos(theta), -np.sin(theta), np.sin(theta), np.cos(theta)]).reshape(2, 2)
+        for position in position_list:
+            if position == []:
+                pass
+            else:
+                pos_arr = np.array(position).reshape(2, 1)
+                point_arr = np.dot(rotation_matrix, pos_arr)
+                pixel_points.append((round(point_arr[0][0] + self.emit_point[0]), round(self.emit_point[1] - point_arr[1][0])))
+
         return pixel_points
 
     def save(self):
+        print(self.power_list)
         with open("./echo_point_{}/echo_point_{}.csv".format(os.path.basename(os.path.dirname(self.base_name)),
                                                              os.path.splitext(self.base_name)[0].split("/")[-1]), "a") as f:
             writer = csv.writer(f, lineterminator='\n')
@@ -255,6 +278,8 @@ class DataField:
             writer.writerow([self.emit_point])
             writer.writerow(["echo_points"])
             writer.writerow(self.echo_points)
+            writer.writerow(["echo_points_power"])
+            writer.writerow(self.power_list)
 
         tim = self.time_line[:self.data_len][:, np.newaxis]
         echo_right = self.echo_without_emit_wave[0][:self.data_len][:, np.newaxis]
