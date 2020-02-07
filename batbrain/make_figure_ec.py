@@ -67,7 +67,7 @@ def __make_figure(txt_name, w, x, y, pulse_dir, echo_point_list, power_max):
                                s=300*echo_point[2][i]/power_max,
                                c=np.array((c_r, c_g, c_b)),
                                marker="s",
-                               alpha = echo_point[2][i]/power_max)
+                               alpha=echo_point[2][i] / power_max)
     ax.plot((600, 600), (600, 336), 'k-', lw=4, linestyle="dashed")
     ax.plot((1000, 1000), (0, 264), 'k-', lw=4, linestyle="dashed")
     ax.plot((1400, 1400), (600, 336), 'k-', lw=4, linestyle="dashed")

@@ -90,6 +90,17 @@ class DataField:
 
         self.right_corr = corr_wave_envelop_norm[1][:self.data_len]
         self.left_corr = corr_wave_envelop_norm[2][:self.data_len]
+        import matplotlib as mpl
+        mpl.use('tkagg')
+        import matplotlib.pyplot as plt
+        fig = plt.figure()
+        ax_right = fig.add_subplot(211)
+        ax_left = fig.add_subplot(212)
+        ax_right.plot(corr_wave[1][:4000])
+        ax_left.plot(corr_wave[2][:4000])
+        ax_right.plot(corr_wave_envelop[1][:4000])
+        ax_left.plot(corr_wave_envelop[2][:4000])
+        plt.savefig(f"{os.path.basename(self.base_name)}.png")
 
     def __get_correlation(self):
         """
@@ -193,10 +204,13 @@ class DataField:
         # mpl.use('tkagg')
         # import matplotlib.pyplot as plt
         # fig = plt.figure()
-        # ax = fig.add_subplot(111)
-        # ax.plot(right_echo_point_raw)
-        # ax.scatter(peak_right, right_echo_point_raw[peak_right])
-        # plt.show()
+        # ax_right = fig.add_subplot(211)
+        # ax_left = fig.add_subplot(212)
+        # ax_right.plot(right_echo_point_raw)
+        # ax_right.scatter(peak_right, right_echo_point_raw[peak_right], c="r")
+        # ax_left.plot(left_echo_point_raw)
+        # ax_left.scatter(peak_left, left_echo_point_raw[peak_left], c ="r")
+        # plt.savefig(f"{os.path.basename(self.base_name)}.png")
 
         return peak_right, peak_left
 
@@ -235,6 +249,13 @@ class DataField:
                 if abs(right_tim - left_tim) < limit_time:
                     a_1 = right_tim * velocity_air / 2
                     a_2 = left_tim * velocity_air / 2
+                    for i in range(len(ans)):
+                        x0 = ans[i][0].subs([(a1, a_1), (a2, a_2)])
+                        y0 = ans[i][1].subs([(a1, a_1), (a2, a_2)])
+                        if x0.is_real and y0.is_real:
+                            if y0 >= 0:
+                                x = x0
+                                y = y0
                     x = round(ans[1][0].subs([(a1, a_1), (a2, a_2)]) / dx)
                     y = round(ans[1][1].subs([(a1, a_1), (a2, a_2)]) / dx)
                     tmp_position_list.append([x, y])

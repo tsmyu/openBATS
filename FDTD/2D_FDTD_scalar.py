@@ -29,6 +29,7 @@ with open(setting_file_path, "r") as setting_file_obj:
     sound_speed = config_param["soundspeed"]
     sound_speed_air = sound_speed["air"]
     sound_speed_acrylic = sound_speed["acrylic"]
+    density = config_param["density"]
     sig_freq = config_param["signal"]["frequency"]
     sig_amp = config_param["signal"]["amplitude"]
     sig_duration = config_param["signal"]["duration"]
@@ -59,7 +60,7 @@ def MakeFigure(P):
 def CreatePulse(i):
     sig_wave = sig_amp * math.sin(2 * math.pi * sig_freq * i * dt)
     # sig = sig_wave * signal.gaussian(sig_duration, std=sigma)[i]
-    
+
     return sig_wave
 
 
@@ -99,40 +100,43 @@ def Calc(field_data, P1, P2):
             ims.append([im])
         P1, P2 = P2, P1
     # plt.plot(recived_wave1)
-    recived_wave_arr_1 = abs(np.array(recived_wave1))
-    recived_wave_arr_2 = abs(np.array(recived_wave2))
+    # plt.plot(recived_wave2)
+    # plt.show()
+    # recived_wave_arr_1 = abs(np.array(recived_wave1))
+    # recived_wave_arr_2 = abs(np.array(recived_wave2))
     # plt.plot(recived_wave_arr_1)
-    plt.plot(recived_wave_arr_2)
-    plt.savefig("recived_wave_raw.png")
-    plt.close()
-    recived_wave1_max = max(recived_wave_arr_1)
-    recived_wave2_max = max(recived_wave_arr_2)
-    recived_wave1_log = 20 * np.log(recived_wave_arr_1 / recived_wave1_max)
-    recived_wave2_log = 20 * np.log(recived_wave_arr_2 / recived_wave2_max)
+    # plt.plot(recived_wave_arr_2)
+    # plt.savefig("recived_wave_raw.png")
+    # plt.close()
+    # recived_wave1_max = max(recived_wave_arr_1)
+    # recived_wave2_max = max(recived_wave_arr_2)
+    # recived_wave1_log = 20 * np.log(recived_wave_arr_1 / recived_wave1_max)
+    # recived_wave2_log = 20 * np.log(recived_wave_arr_2 / recived_wave2_max)
     # recived_wave1_log = [20 * np.log(20e-6/20e-6) if recived_wave <= 0 else 20 * np.log(recived_wave / 20e-6) for recived_wave in recived_wave1]
     # recived_wave2_log=[20 * np.log(20e-6/20e-6) if recived_wave <= 0 else 20 * np.log(recived_wave / 20e-6) for recived_wave in recived_wave2]
     # plt.plot(recived_wave1_log)
-    plt.plot(recived_wave2_log)
-    plt.ylim(-200, 0)
-    plt.xlabel("time [2e-6 s]")
-    plt.ylabel("P [dB]")
-    plt.savefig("recived_wave_num.png")
+    # plt.plot(recived_wave2_log)
+    # plt.ylim(-200, 0)
+    # plt.xlabel("time [2e-6 s]")
+    # plt.ylabel("P [dB]")
+    # plt.savefig("recived_wave_num.png")
 
     print(f"calc time:{np.round(tim,2)}[s]")
     return ims
 
 
 def get_wave(p):
-    recived_wave1.append(p[200, 300])
-    recived_wave2.append(p[400, 300])
+    recived_wave1.append(p[300, 300])
+    recived_wave2.append(p[600, 300])
 
 
 def main(field_image):
     print("field setting....")
-    field_data = field.Field(field_image, abc_name, sound_speed_air, dt, dx)
+    field_data = field.Field(field_image, abc_name, sound_speed_air, density, dt, dx)
     print("done")
     width = field_data.width
     height = field_data.height
+    density = field.density_arr
 
     if abc_name == "Mur1":
         import mur1
@@ -155,6 +159,7 @@ def main(field_image):
     if debug_flag:
         ani = animation.ArtistAnimation(
             fig, image_list, interval=100, blit=True)
+        #ani.save('anim.mp4', writer="ffmpeg")
         plt.show()
 
 
