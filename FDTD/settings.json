@@ -4,16 +4,12 @@
                 "yaxis": 5000
         },
         "resolution": {
-                "distance": 10.0e-4,
-                "time": 20.0e-7
+                "distance": 5.0e-4,
+                "time": 10.0e-7
         },
         "signal": {
-                "type": "gaussian",
                 "frequency": 1.0e4,
-                "amplitude": 5,
-                "duration": 100,
-                "sigma": 7,
-                "point": "(300,300)"
+                "wave_number": 8
         },
         "ABC": {
                 "Mur1": true
@@ -26,8 +22,8 @@
                 "air": 1.293,
                 "acrylic": 1180
         },
-        "ear_point_from_signal": 20,
-        "cycle_number": 5000,
-        "save_step": 0,
+        "ear_point_from_signal": 2.0e-2,
+        "cycle_number": 1500,
+        "save_step": 10,
         "GPU": false
 }

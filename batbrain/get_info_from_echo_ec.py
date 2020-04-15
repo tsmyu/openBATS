@@ -12,11 +12,11 @@ from sympy import sqrt, symbols
 import re
 
 # simulation parameter
-dx = 2.5e-4
+dx = 5.0e-4
 dt = 5.0e-7
 calc_time = 4.0
 # distance between nose and ears [m]
-distance_ears = 0.002
+distance_ears = 0.02
 velocity_air = 331.5
 limit_time = distance_ears / velocity_air
 
@@ -29,7 +29,7 @@ ignore_points = round(ignore_time/dt/10)
 class DataField:
     def __init__(self, input_data, emit_csv_list):
         # threash
-        self.threash = 0.3
+        self.threash = 0.03
         self.base_name = input_data
         file_name = os.path.basename(input_data)
         print(file_name)
@@ -52,10 +52,15 @@ class DataField:
 
         self.time_line = echo_data_list[:, 0]
         self.emit_wave = echo_data_list[:, 1]
-        right_wave = echo_data_list[:, 3] - \
-            emit_data_list[:, 3][:len(echo_data_list[:, 3])]
-        left_wave = echo_data_list[:, 2] - \
-            emit_data_list[:, 2][:len(echo_data_list[:, 2])]
+        right_wave = echo_data_list[:, 3]
+        left_wave = echo_data_list[:, 2][:len(right_wave)]
+        emit_zero = np.zeros(len(right_wave))
+        emit_right = np.concatenate([emit_data_list[:, 3], emit_zero])[
+            :len(right_wave)]
+        emit_left = np.concatenate([emit_data_list[:, 3], emit_zero])[
+            :len(right_wave)]
+        right_wave = right_wave - emit_right
+        left_wave = echo_data_list[:, 2] - emit_left
         self.echo_without_emit_wave = [right_wave, left_wave]
 
         # 取得・計算する内部変数
@@ -79,28 +84,28 @@ class DataField:
         corr_wave_envelop = self.__get_envelope(corr_wave)
         # notmalize
         corr_wave_envelop_norm = self.__normalization(
-            corr_wave_envelop, "echo")
+            corr_wave_envelop, "emit")
 
         # set length of data
         self.data_len = min(len(self.echo_without_emit_wave[0]), len(
             corr_wave[1]), len(self.time_line))
-        
+
         self.right_corr_raw = corr_wave_envelop[1][:self.data_len]
         self.left_corr_raw = corr_wave_envelop[2][:self.data_len]
 
         self.right_corr = corr_wave_envelop_norm[1][:self.data_len]
         self.left_corr = corr_wave_envelop_norm[2][:self.data_len]
-        import matplotlib as mpl
-        mpl.use('tkagg')
-        import matplotlib.pyplot as plt
-        fig = plt.figure()
-        ax_right = fig.add_subplot(211)
-        ax_left = fig.add_subplot(212)
-        ax_right.plot(corr_wave[1][:4000])
-        ax_left.plot(corr_wave[2][:4000])
-        ax_right.plot(corr_wave_envelop[1][:4000])
-        ax_left.plot(corr_wave_envelop[2][:4000])
-        plt.savefig(f"{os.path.basename(self.base_name)}.png")
+        # import matplotlib as mpl
+        # mpl.use('tkagg')
+        # import matplotlib.pyplot as plt
+        # fig = plt.figure()
+        # ax_right = fig.add_subplot(211)
+        # ax_left = fig.add_subplot(212)
+        # ax_right.plot(corr_wave[1])
+        # ax_left.plot(corr_wave[2])
+        # ax_right.plot(corr_wave_envelop[1])
+        # ax_left.plot(corr_wave_envelop[2])
+        # plt.savefig(f"{os.path.basename(self.base_name)}.png")
 
     def __get_correlation(self):
         """
@@ -130,10 +135,10 @@ class DataField:
         if base == "emit":
             for idx, wave in enumerate(wave_list):
                 if idx == 0:
-                    wave_max = max(np.array(wave))
+                    self.wave_max = max(np.array(wave))/100
                 wave = np.array(wave)
                 wave = wave - wave.mean()
-                wave_n = wave / wave_max
+                wave_n = wave / self.wave_max
                 norm_list.append(wave_n)
         elif base == "echo":
             for wave in wave_list:
@@ -151,19 +156,27 @@ class DataField:
             right_echo_point, left_echo_point)
         self.right_echo_power, self.left_echo_power = self.__get_echo_power(
             right_echo_point, left_echo_point)
-        position_list, power_list = self.__get_position()
+        position_list, r_l_tim_list, power_list, r_l_power_list = self.__get_position()
         self.power_list = power_list
+        self.r_l_tim_list = r_l_tim_list
+        self.r_l_power_list = r_l_power_list
         self.echo_points = self.__get_echo_points(position_list)
         # tmp
-        # import matplotlib.pyplot as plt
-        # fig = plt.figure()
-        # ax1 = fig.add_subplot(211)
-        # ax2 = fig.add_subplot(212)
-        # ax1.plot(self.right_corr)
-        # ax1.scatter(right_echo_point, self.right_echo_power, c="r")
-        # ax2.plot(self.left_corr)
-        # ax2.scatter(left_echo_point, self.left_echo_power,c="r")
-        # plt.savefig(f"{self.base_name}.png")
+        import matplotlib.pyplot as plt
+        fig = plt.figure()
+        ax1 = fig.add_subplot(211)
+        ax2 = fig.add_subplot(212)
+        ax1.plot(self.right_corr)
+        ax1.scatter(right_echo_point, self.right_echo_power/self.wave_max, c="r")
+        ax2.plot(self.left_corr)
+        ax2.scatter(left_echo_point, self.left_echo_power/self.wave_max, c="r")
+        path = os.getcwd()
+        s_folder = os.path.basename(self.base_name).split("_")[2]
+        ss_folder = os.path.basename(self.base_name).split("_")[3]
+        if not os.path.exists(f"{path}/{s_folder}/{ss_folder}"):
+            os.makedirs(f"{path}/{s_folder}/{ss_folder}")
+        file_name = os.path.basename(self.base_name).split(".")[0]
+        plt.savefig(f"{path}/{s_folder}/{ss_folder}/{file_name }.png")
 
     def __get_echo_point(self):
         # right_echo_point_raw = np.where(self.right_corr >= self.threash)[0]
@@ -224,27 +237,35 @@ class DataField:
 
     def __get_position(self):
         if min(len(self.right_echo_time), len(self.left_echo_time)) == 0:
-            position_list = [(-100, -100)]
+            position_list = [[(-100, -100)]]
+            r_l_tim_list = [[(-100, -100)]]
             power_list = []
+            r_l_power_list = []
         else:
-            position_list, power_list = self.__calc_position()
+            position_list, r_l_tim_list, power_list, r_l_power_list = self.__calc_position()
 
-        return position_list, power_list
+        return position_list, r_l_tim_list, power_list, r_l_power_list
 
     def __calc_position(self):
         position_list = []
+        r_l_tim_list = []
         power_list = []
+        r_l_power_list = []
         x = symbols("x", positive=True)
         y = symbols("y", positive=True)
         a1 = symbols("a1", positive=True)
         a2 = symbols("a2", positive=True)
         sp.var('x, y, a1, a2')
-        eq1 = (x-(distance_ears / 4)) ** 2 / a1 ** 2 + y ** 2 / (a1 ** 2 - (distance_ears / 4)** 2) - 1
-        eq2 = (x+(distance_ears / 4)) ** 2 / a2 ** 2 + y ** 2 / (a2 ** 2 - (distance_ears / 4)** 2) - 1
+        eq1 = (x-(distance_ears / 4)) ** 2 / a1 ** 2 + \
+            y ** 2 / (a1 ** 2 - (distance_ears / 4) ** 2) - 1
+        eq2 = (x+(distance_ears / 4)) ** 2 / a2 ** 2 + \
+            y ** 2 / (a2 ** 2 - (distance_ears / 4) ** 2) - 1
         ans = sp.solve([eq1, eq2], [x, y])
         for right_tim, right_power in zip(self.right_echo_time, self.right_echo_power):
             tmp_position_list = []
+            tmp_r_l_tim_list = []
             tmp_power_list = []
+            tmp_r_l_power_list = []
             for left_tim, left_power in zip(self.left_echo_time, self.left_echo_power):
                 if abs(right_tim - left_tim) < limit_time:
                     a_1 = right_tim * velocity_air / 2
@@ -259,25 +280,37 @@ class DataField:
                     x = round(ans[1][0].subs([(a1, a_1), (a2, a_2)]) / dx)
                     y = round(ans[1][1].subs([(a1, a_1), (a2, a_2)]) / dx)
                     tmp_position_list.append([x, y])
-                    tmp_power_list.append(int((right_power+left_power)))
+                    tmp_r_l_tim_list.append([right_tim, left_tim])
+                    tmp_power_list.append(((right_power + left_power)))
+                    tmp_r_l_power_list.append([right_power, left_power])
             position_list.append(tmp_position_list)
+            r_l_tim_list.append(tmp_r_l_tim_list)
             power_list.append(tmp_power_list)
+            r_l_power_list.append(tmp_r_l_power_list)
+        r_l_tim_l = list(itertools.chain(*r_l_tim_list))
+        r_l_tim_list = sorted(r_l_tim_l, key=r_l_tim_l.index)
         power_l = list(itertools.chain(*power_list))
         power_list = sorted(power_l, key=power_l.index)
-        return position_list, power_list
+        r_l_power_l = list(itertools.chain(*r_l_power_list))
+        r_l_power_list = sorted(r_l_power_l, key=r_l_power_l.index)
+        return position_list, r_l_tim_list, power_list, r_l_power_list
 
     def __get_echo_points(self, position_list):
         pixel_points = []
         theta = math.radians(-self.emit_angle)
         rotation_matrix = np.array(
             [np.cos(theta), -np.sin(theta), np.sin(theta), np.cos(theta)]).reshape(2, 2)
-        for position in position_list:
-            if position == []:
-                pass
-            else:
-                pos_arr = np.array(position).reshape(2, 1)
-                point_arr = np.dot(rotation_matrix, pos_arr)
-                pixel_points.append((round(point_arr[0][0] + self.emit_point[0]), round(self.emit_point[1] - point_arr[1][0])))
+        print(position_list)
+        for position_onepulse in position_list:
+            for position in position_onepulse:
+                print(position)
+                if position == []:
+                    pass
+                else:
+                    pos_arr = np.array(position).reshape(2, 1)
+                    point_arr = np.dot(rotation_matrix, pos_arr)
+                    pixel_points.append((round(
+                        point_arr[0][0] + self.emit_point[0]), round(self.emit_point[1] - point_arr[1][0])))
 
         return pixel_points
 
@@ -301,6 +334,10 @@ class DataField:
             writer.writerow(self.echo_points)
             writer.writerow(["echo_points_power"])
             writer.writerow(self.power_list)
+            writer.writerow(["echo_points_time_r_l"])
+            writer.writerow(self.r_l_tim_list)
+            writer.writerow(["echo_points_power_r_l"])
+            writer.writerow(self.r_l_power_list)
 
         tim = self.time_line[:self.data_len][:, np.newaxis]
         echo_right = self.echo_without_emit_wave[0][:self.data_len][:, np.newaxis]

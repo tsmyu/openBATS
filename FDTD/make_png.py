@@ -1,6 +1,31 @@
 from PIL import Image, ImageDraw
 import numpy as np
 
+# 1 pixel = 0.03 mm
+
+img = Image.new('L', (12000, 5000))
+draw = ImageDraw.Draw(img)
+draw.line((5000, 0, 5000, 2200), fill=255, width=64)
+draw.line((8333, 5000, 8333, 2800), fill=255, width=64)
+draw.line((11667, 0, 11667, 2200), fill=255, width=64)
+
+img.save('12000_5000.png')
+
+img = Image.new('L', (7000, 5000))
+draw = ImageDraw.Draw(img)
+draw.line((3333, 5000, 3333, 2800), fill=255, width=64)
+draw.line((6667, 0, 6667, 2200), fill=255, width=64)
+
+img.save('7000_5000.png')
+
+
+img = Image.new('L', (3500, 5000))
+draw = ImageDraw.Draw(img)
+draw.line((3333, 0, 3333, 2200), fill=255, width=64)
+
+img.save('3500_5000.png')
+
+
 # 1 pixel = 0.25 mm
 
 img = Image.new('L', (20000, 6000))
@@ -53,7 +78,7 @@ img.save('2000_600_450.png')
 
 img = Image.new('L', (2000, 600))
 draw = ImageDraw.Draw(img)
-draw.line((450, 400, 450, 600), fill=255, width=4)
+draw.line((1000, 0, 1000, 200), fill=255, width=4)
 #draw.line((1000, 600, 1000, 336), fill=255, width=4)
 #draw.line((1400, 0, 1400, 264), fill=255, width=4)
 
@@ -61,7 +86,7 @@ img.save('2000_600_diffraction.png')
 
 img = Image.new('L', (600, 600))
 draw = ImageDraw.Draw(img)
-#draw.line((450, 400, 450, 600), fill=255, width=4)
+# draw.line((300, 200, 300, 400), fill=255, width=4)
 #draw.line((1000, 600, 1000, 336), fill=255, width=4)
 #draw.line((1400, 0, 1400, 264), fill=255, width=4)
 
