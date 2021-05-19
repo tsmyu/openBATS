@@ -34,7 +34,7 @@ def main():
                              ' If it does not exist, it will be created.') #出力ファイルのパス
     parser.add_argument('--steps', type=int, default=10 ** 6) #100万回の探索
     parser.add_argument('--eval-interval', type=int, default=10000) #1万回ずつエージェントを評価する
-    parser.add_argument('--eval-n-runs', type=int, default=10) #各評価で10回をサンプリング？？？（サンプリングとは）
+    parser.add_argument('--eval-n-runs', type=int, default=10) #各評価で10回をサンプリング？
     parser.add_argument('--reward-scale-factor', type=float, default=1e-2) #報酬の大きさを決める要素...
     parser.add_argument('--standardize-advantages', action='store_true') #標準報酬...？
     parser.add_argument('--render', action='store_true', default=False) #出力=>図示
@@ -72,7 +72,7 @@ def main():
     process_seeds = np.arange(args.num_envs) + args.seed * args.num_envs #探索プロセスに関わる引数たち
     assert process_seeds.max() < 2 ** 32 #条件をテスト
 
-    args.outdir = experiments.prepare_output_dir(args, args.outdir) #ファイルへ書き込み？？？？？？？
+    args.outdir = experiments.prepare_output_dir(args, args.outdir) #ファイルへ書き込み
 
     def make_env(process_idx, test): #環境を設定する関数？
         env = gym.make(args.env) #gymで作る
