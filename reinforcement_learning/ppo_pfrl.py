@@ -131,8 +131,8 @@ def main():
     ) #モデル（ネットワーク）を構築（中身？？？？？？？）
 
     vf = torch.nn.Sequential(
-        nn.Linear(obs_size, 64), #行列の線形変換 nn.Linear(input_size,output_size)
-        nn.Tanh(), #ハイパボリックタンジェント
+        nn.Linear(obs_size, 64),
+        nn.Tanh(),
         nn.Linear(64, 64),
         nn.Tanh(),
         nn.Linear(64, 1),
