@@ -150,8 +150,7 @@ class LidarBat(object):
         get obsevation (echoes) by using FDTD
         """
         # check if echoes' data are in database
-        position = f'{self.bat_vec[0]}_{self.bat_vec[1]}'
-        position = [1000, 1500]
+        position = self.bat_vec
         if self.Ears.check_data_in_database(position):
             pass
         else:
