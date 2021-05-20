@@ -157,13 +157,13 @@ class LidarBat(object):
             print(
                 f'{self.bat_vec[0]}_{self.bat_vec[1]}.bin is not exist in data base.')
             print("FDTD.exe for sound pressure start")
-            subprocess.run(["/Bat2d1.1AI2/WE-FDTD.exe",
+            subprocess.run(["environments/Bat2d1.1AI2/WE-FDTD.exe",
                            f"{self.bat_vec[0]}", f"{self.bat_vec[1]}", "0"])
             print("FDTD.exe for particle velocity x start")
-            subprocess.run(["/Bat2d1.1AI2/WE-FDTD.exe",
+            subprocess.run(["environments/Bat2d1.1AI2/WE-FDTD.exe",
                            f"{self.bat_vec[0]}", f"{self.bat_vec[1]}", "1"])
             print("FDTD.exe for particle velocity y start")
-            subprocess.run(["/Bat2d1.1AI2/WE-FDTD.exe",
+            subprocess.run(["environments/Bat2d1.1AI2/WE-FDTD.exe",
                            f"{self.bat_vec[0]}", f"{self.bat_vec[1]}", "2"])
         # get echoes impulse response
         echoes = self.Ears.get_echoes(
