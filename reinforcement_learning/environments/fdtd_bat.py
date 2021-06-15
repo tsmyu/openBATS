@@ -158,13 +158,13 @@ class LidarBat(object):
                 f'{self.bat_vec[0]}_{self.bat_vec[1]}.bin is not exist in data base.')
             print("FDTD.exe for sound pressure start")
             subprocess.run(
-                f"./environments/Bat2d1.1AI2/WE-FDTD.exe {self.bat_vec[0]} {self.bat_vec[1]} 0", shell=True)
+                f"./environments/Bat2d1.1AI2/WE-FDTD_T.exe {self.bat_vec[0]} {self.bat_vec[1]} 0", shell=True)
             print("FDTD.exe for particle velocity x start")
             subprocess.run(
-                f"./environments/Bat2d1.1AI2/WE-FDTD.exe {self.bat_vec[0]} {self.bat_vec[1]} 1", shell=True)
+                f"./environments/Bat2d1.1AI2/WE-FDTD_T.exe {self.bat_vec[0]} {self.bat_vec[1]} 1", shell=True)
             print("FDTD.exe for particle velocity y start")
             subprocess.run(
-                f"./environments/Bat2d1.1AI2/WE-FDTD.exe {self.bat_vec[0]} {self.bat_vec[1]} 2", shell=True)
+                f"./environments/Bat2d1.1AI2/WE-FDTD_T.exe {self.bat_vec[0]} {self.bat_vec[1]} 2", shell=True)
         # get echoes impulse response
         echoes = self.Ears.get_echoes(
             position, pulse_angle, self.angle, self.angle_r_ear, self.angle_l_ear)

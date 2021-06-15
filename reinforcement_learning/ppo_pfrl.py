@@ -61,7 +61,7 @@ def main():
     parser.add_argument('--batchsize', type=int, default=64) #--batch-sizeとの違い...
     parser.add_argument('--epochs', type=int, default=10) #エポック数：１つの訓練データを何回繰り返して学習させるか
     parser.add_argument('--entropy-coef', type=float, default=0.0) #エントロピー係数：損失関数に加える→探索が行われなくなるのを防ぐ
-    parser.add_argument('--gpu', type=int, default=0)
+    parser.add_argument('--gpu', type=int, default=1)
     args = parser.parse_args() #引数を解析
 
     logging.basicConfig(level=args.logger_level) #ログの表示方法の１つ
