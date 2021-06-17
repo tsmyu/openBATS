@@ -174,7 +174,7 @@ class LidarBat(object):
                 f"./environments/Bat2d1.1AI2/WE-FDTD_T.exe {bat_vec_fdtd[0]} {bat_vec_fdtd[1]} 2", shell=True)
         # get echoes impulse response
         echoes = self.Ears.get_echoes(
-            position, pulse_angle, self.angle, self.angle_r_ear, self.angle_l_ear)
+            bat_vec_fdtd, pulse_angle, self.angle, self.angle_r_ear, self.angle_l_ear)
         # get echoes by conv pulse
         left_echo, right_echo = self.conv_pulse(echoes)
 
