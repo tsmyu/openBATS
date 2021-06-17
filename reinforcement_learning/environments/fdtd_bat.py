@@ -82,7 +82,6 @@ def rotation_direction(v0, v1):
 class LidarBat(object):
     def __init__(self, init_angle, init_x, init_y, init_speed, dt):
         self.Ears = Ears()
-        self.dt_fdtd = self.Ears.dt_fdtd
         self.angle = init_angle
         self.angle_r_ear = -60
         self.angle_l_ear = 60
@@ -114,7 +113,7 @@ class LidarBat(object):
     def create_pulse(self):
         f1 = 68e3         # start frequency
         f2 = 50e3         # end frequency
-        fs = int(1/self.dt_fdtd)        # sampling freq
+        fs = int(1/self.Ears.dt_fdtd)        # sampling freq
         d = 2e-3  # duration d*fsで測定したデータの個数
         time = np.linspace(0, 1, fs, endpoint=False)  # array を生成　0~1までfs*10個の点
         time_sig = time[:int(d*fs)]
@@ -144,6 +143,14 @@ class LidarBat(object):
             len(self.pulse):]
 
         return corr_left, corr_right
+    
+    def convert_to_fdtdmap(self):
+        dl = self.Ears.dl
+        bat_vec_fdtd = []
+        for bat_vec in self.bat_vec:
+            bat_vec_fdtd.append(int(bat_vec/dl))
+
+        return bat_vec_fdtd
 
     def emit_pulse(self, pulse_angle, obstacle_segments):
         """
@@ -154,18 +161,18 @@ class LidarBat(object):
         if self.Ears.check_data_in_database(position):
             pass
         else:
-            # TODO: convert bat_vec to field grid
+            bat_vec_fdtd = self.convert_to_fdtdmap()
             print(
-                f'{self.bat_vec[0]}_{self.bat_vec[1]}.bin is not exist in data base.')
+                f'{bat_vec_fdtd[0]}_{bat_vec_fdtd[1]}.bin is not exist in data base.')
             print("FDTD.exe for sound pressure start")
             subprocess.run(
-                f"./environments/Bat2d1.1AI2/WE-FDTD_T.exe {self.bat_vec[0]} {self.bat_vec[1]} 0", shell=True)
+                f"./environments/Bat2d1.1AI2/WE-FDTD_T.exe {bat_vec_fdtd[0]} {bat_vec_fdtd[1]} 0", shell=True)
             print("FDTD.exe for particle velocity x start")
             subprocess.run(
-                f"./environments/Bat2d1.1AI2/WE-FDTD_T.exe {self.bat_vec[0]} {self.bat_vec[1]} 1", shell=True)
+                f"./environments/Bat2d1.1AI2/WE-FDTD_T.exe {bat_vec_fdtd[0]} {bat_vec_fdtd[1]} 1", shell=True)
             print("FDTD.exe for particle velocity y start")
             subprocess.run(
-                f"./environments/Bat2d1.1AI2/WE-FDTD_T.exe {self.bat_vec[0]} {self.bat_vec[1]} 2", shell=True)
+                f"./environments/Bat2d1.1AI2/WE-FDTD_T.exe {bat_vec_fdtd[0]} {bat_vec_fdtd[1]} 2", shell=True)
         # get echoes impulse response
         echoes = self.Ears.get_echoes(
             position, pulse_angle, self.angle, self.angle_r_ear, self.angle_l_ear)

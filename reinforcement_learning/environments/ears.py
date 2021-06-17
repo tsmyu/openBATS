@@ -12,7 +12,7 @@ class Ears:
         self.database_path = os.path.dirname(os.path.abspath(__file__)) + '/Bat2d1.1AI2/'
         cfl = 0.98
         c0 = 340.0
-        dl = 0.0005
+        self.dl = 0.0005
         dt = cfl * dl / c0
         self.dt_fdtd = dt
 
