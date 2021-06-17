@@ -154,6 +154,7 @@ class LidarBat(object):
         if self.Ears.check_data_in_database(position):
             pass
         else:
+            # TODO: convert bat_vec to field grid
             print(
                 f'{self.bat_vec[0]}_{self.bat_vec[1]}.bin is not exist in data base.')
             print("FDTD.exe for sound pressure start")
