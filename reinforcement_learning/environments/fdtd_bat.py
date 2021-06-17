@@ -157,11 +157,10 @@ class LidarBat(object):
         get obsevation (echoes) by using FDTD
         """
         # check if echoes' data are in database
-        position = self.bat_vec
-        if self.Ears.check_data_in_database(position):
+        bat_vec_fdtd = self.convert_to_fdtdmap()
+        if self.Ears.check_data_in_database(bat_vec_fdtd):
             pass
         else:
-            bat_vec_fdtd = self.convert_to_fdtdmap()
             print(
                 f'{bat_vec_fdtd[0]}_{bat_vec_fdtd[1]}.bin is not exist in data base.')
             print("FDTD.exe for sound pressure start")
