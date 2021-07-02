@@ -159,6 +159,7 @@ class LidarBat(object):
         # check if echoes' data are in database
         bat_vec_fdtd = self.convert_to_fdtdmap()
         if self.Ears.check_data_in_database(bat_vec_fdtd):
+            print(f"data already existed x:{bat_vec_fdtd[0]} y:{bat_vec_fdtd[1]}")
             pass
         else:
             print(
@@ -180,7 +181,7 @@ class LidarBat(object):
 
         # get peak times by running cochlear_block of SCAT model
         emit_spike_list, echo_right_spike_list, echo_left_spike_list = scat.run(
-            self.pulse, left_echo, right_echo, self.dt_fdtd)
+            self.pulse, left_echo, right_echo, self.Ears.dt_fdtd)
         observation = [echo_right_spike_list, echo_left_spike_list]
         self._update_state(observation)
         return observation

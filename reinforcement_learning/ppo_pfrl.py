@@ -44,7 +44,7 @@ def main():
     parser.add_argument('--load', type=str, default='') #ロード
     parser.add_argument("--load-pretrained",
                         action="store_true", default=False) #以前の学習をロード
-    parser.add_argument('--logger-level', type=int, default=logging.DEBUG) #デバッグ確認
+    parser.add_argument('--logger-level', type=int, default=logging.INFO) #デバッグ確認
     parser.add_argument('--monitor', action='store_true') #モニター...
     parser.add_argument(
         "--log-interval",
