@@ -1,4 +1,4 @@
-// 2ŸŒ³WE-FDTD–@ CUDA version
+// 2ï¿½ï¿½ï¿½ï¿½WE-FDTDï¿½@ CUDA version
 // 2017.01.07
 // ver.0.01
 // Takao Tsuchiya, Doshisha Univ.
@@ -14,51 +14,51 @@
 #define HBD_TO_HBU 1
 #define HBU_TO_HBD 10
 
-// ƒ‚ƒfƒ‹ƒf[ƒ^
-int iCell;					// ƒ‚ƒfƒ‹ƒ^ƒCƒv
-char CellName[200] = {};			// ƒ{ƒNƒZƒ‹ƒtƒ@ƒCƒ‹–¼
-int Scheme, Boundary;		// è–@, ‹«ŠE
+// ï¿½ï¿½ï¿½fï¿½ï¿½ï¿½fï¿½[ï¿½^
+int iCell;					// ï¿½ï¿½ï¿½fï¿½ï¿½ï¿½^ï¿½Cï¿½v
+char CellName[200] = {};			// ï¿½{ï¿½Nï¿½Zï¿½ï¿½ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½
+int Scheme, Boundary;		// ï¿½ï¿½@, ï¿½ï¿½ï¿½E
 float c0;
-int3 Ndiv;					// x, y, z•ûŒü•ªŠ„”
-int Nyorg;					// Œ³‚Ìz•ûŒü•ªŠ„”
-int Nreg, Nt, Ns;			// —Ìˆæ•ªŠ„”, ŒvZƒXƒeƒbƒv”, ‰¹Œ¹ŠÔ
-int Nobs;					// ŠÏ‘ª“_”
-struct Pnt{					// ŠÏ‘ª“_î•ñ
+int3 Ndiv;					// x, y, zï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+int Nyorg;					// ï¿½ï¿½ï¿½ï¿½zï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+int Nreg, Nt, Ns;			// ï¿½Ìˆæ•ªï¿½ï¿½ï¿½ï¿½, ï¿½vï¿½Zï¿½Xï¿½eï¿½bï¿½vï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+int Nobs;					// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½
+struct Pnt{					// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½
 	int x, y;
 	float p;
 };
-Pnt Src, Rcv;				// ‰¹Œ¹Eó‰¹“_À•W
-Pnt* obs; 					// ŠÏ‘ª“_À•W
-float* drv;					// ‰¹Œ¹”gŒ`
-int Nw, Srcw;				// ‰¹Œ¹ŠÔ•, ‰¹Œ¹•
-float freq;					// “ü—Íü”g”
-int Nd;						// ƒo[ƒXƒg”g”
-float cfl, dl, dt, b;		// CFL, ƒTƒ“ƒvƒŠƒ“ƒOü”g”
-float Ref[4], aref;			// ‹«ŠE”½Ë—¦, ”CˆÓ‹«ŠE”½Ë—¦
-int iplane, ipn, iptime, iwave;		// o—Í•½–ÊC•½–ÊˆÊ’uCŠÔŠÔŠuC”gŒ`o—Í
-int Nwave;					// ”gŒ`ƒf[ƒ^ˆêŠ‡“]‘—ŠÔƒXƒeƒbƒv”
-float* pp;					// ‰¹ˆ³•ª•z}
-int istx, isty, ipts, ipte;	// ‰¹ˆ³•ª•z}ŠÔˆø‚«
-int Ndx, Ndy;				// ‰¹ˆ³•ª•z}‚Ì‘å‚«‚³
+Pnt Src, Rcv;				// ï¿½ï¿½ï¿½ï¿½ï¿½Eï¿½ó‰¹“_ï¿½ï¿½ï¿½W
+Pnt* obs; 					// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½W
+float* drv;					// ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½`
+int Nw, Srcw;				// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô•ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+float freq;					// ï¿½ï¿½ï¿½Íï¿½ï¿½gï¿½ï¿½
+int Nd;						// ï¿½oï¿½[ï¿½Xï¿½gï¿½gï¿½ï¿½
+float cfl, dl, dt, b;		// CFL, ï¿½Tï¿½ï¿½ï¿½vï¿½ï¿½ï¿½ï¿½ï¿½Oï¿½ï¿½ï¿½gï¿½ï¿½
+float Ref[4], aref;			// ï¿½ï¿½ï¿½Eï¿½ï¿½ï¿½Ë—ï¿½, ï¿½Cï¿½Ó‹ï¿½ï¿½Eï¿½ï¿½ï¿½Ë—ï¿½
+int iplane, ipn, iptime, iwave;		// ï¿½oï¿½Í•ï¿½ï¿½ÊCï¿½ï¿½ï¿½ÊˆÊ’uï¿½Cï¿½ï¿½ï¿½ÔŠÔŠuï¿½Cï¿½gï¿½`ï¿½oï¿½ï¿½
+int Nwave;					// ï¿½gï¿½`ï¿½fï¿½[ï¿½^ï¿½êŠ‡ï¿½]ï¿½ï¿½ï¿½ï¿½ï¿½ÔƒXï¿½eï¿½bï¿½vï¿½ï¿½
+float* pp;					// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½zï¿½}
+int istx, isty, ipts, ipte;	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½zï¿½}ï¿½Ôˆï¿½ï¿½ï¿½
+int Ndx, Ndy;				// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½zï¿½}ï¿½Ì‘å‚«ï¿½ï¿½
 
 // for GPU
-int Ngpu;					// g—pGPU”
-int GpuId = -1;				// 1GPU‚Ì‚Æ‚«‚ÌGPU ID
-int3 Block;					// BlockƒTƒCƒY
+int Ngpu;					// ï¿½gï¿½pGPUï¿½ï¿½
+int GpuId = -1;				// 1GPUï¿½Ì‚Æ‚ï¿½ï¿½ï¿½GPU ID
+int3 Block;					// Blockï¿½Tï¿½Cï¿½Y
 int Bblock = 256;
 int Boff;					// Block offset
 float mem;
 
 // for MPI
-int Nnode, inode;			// ƒm[ƒh”Cƒ‰ƒ“ƒN
-MPI_Status mpi_stat;		// MPIƒXƒe[ƒ^ƒX
+int Nnode, inode;			// ï¿½mï¿½[ï¿½hï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½N
+MPI_Status mpi_stat;		// MPIï¿½Xï¿½eï¿½[ï¿½^ï¿½X
 
 // for moving
-int iSource, iReceiver;		// ‰¹Œ¹/ó‰¹“_ˆÚ“®•û–@
-char SPosName[200] = {}, RPosName[200] = {}; //”CˆÓ‹O“¹ˆÊ’uƒtƒ@ƒCƒ‹–¼
-float vs, vs0, as, t, angs;	// ‰¹Œ¹‘¬“x, ‰‘¬“xC‰Á‘¬“x, Šp“x
-float vr, vr0, ar, angr;	// ó‰¹“_‘¬“x, ‰‘¬“xC‰Á‘¬“x, Šp“x
-float2 *SPos, *RPos;		// ‰¹Œ¹/ó‰¹“_ˆÊ’u
+int iSource, iReceiver;		// ï¿½ï¿½ï¿½ï¿½/ï¿½ó‰¹“_ï¿½Ú“ï¿½ï¿½ï¿½ï¿½@
+char SPosName[200] = {}, RPosName[200] = {}; //ï¿½Cï¿½Ó‹Oï¿½ï¿½ï¿½Ê’uï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½
+float vs, vs0, as, t, angs;	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½x, ï¿½ï¿½ï¿½ï¿½ï¿½xï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½x, ï¿½pï¿½x
+float vr, vr0, ar, angr;	// ï¿½ó‰¹“_ï¿½ï¿½ï¿½x, ï¿½ï¿½ï¿½ï¿½ï¿½xï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½x, ï¿½pï¿½x
+float2 *SPos, *RPos;		// ï¿½ï¿½ï¿½ï¿½/ï¿½ó‰¹“_ï¿½Ê’u
 int Nsrc, Nrcv;
 
 #include "WE-FDTD.h"
@@ -67,7 +67,7 @@ int Nsrc, Nrcv;
 int main(int argc, char* argv[]) 
 {
 
-	// MPI‰Šú‰»
+	// MPIï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	int    resultlen;
 	char   proc_name[MPI_MAX_PROCESSOR_NAME];
 
@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
 	MPI_Comm_rank(MPI_COMM_WORLD, &inode);
 	MPI_Get_processor_name( proc_name, &resultlen );
 
-	// ƒ‚ƒfƒ‹ƒf[ƒ^“Ç‚İ‚İ
+	// ï¿½ï¿½ï¿½fï¿½ï¿½ï¿½fï¿½[ï¿½^ï¿½Ç‚İï¿½ï¿½ï¿½
 	float th1, th2, al1, al2, b1, b2, d1, d2;
 	ReadModel(argc, argv);
 	
@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
 			printf(" Receiver: linear at v0 = %6.2f(m/s), a = %6.2f(m/s^2), theta = %3.0f(deg.)\n", vr0, ar, angr);
 	}
 
-	// ƒfƒoƒCƒX‰Šú‰»
+	// ï¿½fï¿½oï¿½Cï¿½Xï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	int Num_gpu = 0;
 	cudaGetDeviceCount(&Num_gpu);
 	cudaDeviceProp dev;
@@ -153,7 +153,7 @@ int main(int argc, char* argv[])
 	MPI_Barrier(MPI_COMM_WORLD);
 
 
-	// 1ƒuƒƒbƒNBlock_x*Block_y‚ÌƒXƒŒƒbƒh”‚Å•À—ñŒvZ
+	// 1ï¿½uï¿½ï¿½ï¿½bï¿½NBlock_x*Block_yï¿½ÌƒXï¿½ï¿½ï¿½bï¿½hï¿½ï¿½ï¿½Å•ï¿½ï¿½ï¿½vï¿½Z
 	MPI_Barrier(MPI_COMM_WORLD);
 	int Nydiv = Ndiv.y / Nreg;
 	int Nygpu = Nydiv + Block.y;
@@ -166,17 +166,17 @@ int main(int argc, char* argv[])
 	}
 
 
-	// ƒzƒXƒgã‚ÉfloatŒ^‚Ìƒƒ‚ƒŠ‚ğŠm•Û‚·‚é
+	// ï¿½zï¿½Xï¿½gï¿½ï¿½ï¿½floatï¿½^ï¿½Ìƒï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½mï¿½Û‚ï¿½ï¿½ï¿½
 	int Nbm;
 	Nbm = Ndiv.x;
-	float* dpt = (float*) malloc(sizeof(float)*Boff*Nbm*Ngpu);		// OMP—p‹«ŠEƒf[ƒ^(ã‘w)
-	float* dpb = (float*) malloc(sizeof(float)*Boff*Nbm*Ngpu);		// OMP—p‹«ŠEƒf[ƒ^(‰º‘w)
-	float* dppt = (float*) malloc(sizeof(float)*Boff*Nbm*Ngpu);		// OMP—p‹«ŠEƒf[ƒ^(ã‘w)
-	float* dppb = (float*) malloc(sizeof(float)*Boff*Nbm*Ngpu);		// OMP—p‹«ŠEƒf[ƒ^(‰º‘w)
-	float* mpt = (float*) malloc(sizeof(float)*Boff*Nbm);			// MPI—p‹«ŠEƒf[ƒ^(ã‘w)
-	float* mppt = (float*) malloc(sizeof(float)*Boff*Nbm);			// MPI—p‹«ŠEƒf[ƒ^(ã‘w)
-	float* mpb = (float*) malloc(sizeof(float)*Boff*Nbm);			// MPI—p‹«ŠEƒf[ƒ^(‰º‘w)
-	float* mppb = (float*) malloc(sizeof(float)*Boff*Nbm);			// MPI—p‹«ŠEƒf[ƒ^(‰º‘w)
+	float* dpt = (float*) malloc(sizeof(float)*Boff*Nbm*Ngpu);		// OMPï¿½pï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^(ï¿½ï¿½w)
+	float* dpb = (float*) malloc(sizeof(float)*Boff*Nbm*Ngpu);		// OMPï¿½pï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^(ï¿½ï¿½ï¿½w)
+	float* dppt = (float*) malloc(sizeof(float)*Boff*Nbm*Ngpu);		// OMPï¿½pï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^(ï¿½ï¿½w)
+	float* dppb = (float*) malloc(sizeof(float)*Boff*Nbm*Ngpu);		// OMPï¿½pï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^(ï¿½ï¿½ï¿½w)
+	float* mpt = (float*) malloc(sizeof(float)*Boff*Nbm);			// MPIï¿½pï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^(ï¿½ï¿½w)
+	float* mppt = (float*) malloc(sizeof(float)*Boff*Nbm);			// MPIï¿½pï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^(ï¿½ï¿½w)
+	float* mpb = (float*) malloc(sizeof(float)*Boff*Nbm);			// MPIï¿½pï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^(ï¿½ï¿½ï¿½w)
+	float* mppb = (float*) malloc(sizeof(float)*Boff*Nbm);			// MPIï¿½pï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^(ï¿½ï¿½ï¿½w)
 	for(int i = 0; i < Boff*Nbm*Ngpu; ++i) {
 		dpt[i] = dpb[i] = dppt[i] = dppb[i] = 0;
 	}
@@ -185,11 +185,11 @@ int main(int argc, char* argv[])
 	}
 
 
-	// ŠÏ‘ª”gŒ`—p
+	// ï¿½Ï‘ï¿½ï¿½gï¿½`ï¿½p
 	Nwave = 100;
-	float* wave  = (float*) malloc(sizeof(float)*Nwave*Nobs*3);	// ŠÏ‘ª“_‰¹ˆ³”gŒ`
-	char WaveName[200] = {};			// ”gŒ`ƒf[ƒ^ƒtƒ@ƒCƒ‹–¼
-	char WaveNamebin[200] = {};			// ”gŒ`ƒf[ƒ^ƒtƒ@ƒCƒ‹–¼
+	float* wave  = (float*) malloc(sizeof(float)*Nwave*Nobs*3);	// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½`
+	char WaveName[200] = {};			// ï¿½gï¿½`ï¿½fï¿½[ï¿½^ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½
+	char WaveNamebin[200] = {};			// ï¿½gï¿½`ï¿½fï¿½[ï¿½^ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½
 	for(int i = 0; i < Nwave*Nobs*3; i++)
 		wave[i] = 0;
 		
@@ -213,10 +213,10 @@ int main(int argc, char* argv[])
 	fwrite(&Nt, sizeof(int), 1, fpb);
 
 
-	// ‰¹ˆ³•ª•z}—p”z—ñ
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½zï¿½}ï¿½pï¿½zï¿½ï¿½
 	pp = (float*) malloc(sizeof(float)*Ndiv.x*Ndiv.y);
 
-	// OMPŠJn
+	// OMPï¿½Jï¿½n
 	printf(" Calculation start!\n");
 	MPI_Barrier(MPI_COMM_WORLD);
 	omp_set_num_threads(Ngpu);			// create as many CPU threads as there are CUDA devices
@@ -240,7 +240,7 @@ int main(int argc, char* argv[])
 		int Nbnd = 0;
 		unsigned long long id, Nem;
 		int iReg, nbx;
-		float* pobs  = (float*) malloc(sizeof(float));			 	// ŠÏ‘ª“_‰¹ˆ³
+		float* pobs  = (float*) malloc(sizeof(float));			 	// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½
 
 		Nem = (unsigned long long)Ndiv.x * Nygpu;
 		if(Ngpu == 1)
@@ -248,7 +248,7 @@ int main(int argc, char* argv[])
 		else
 			iReg = inode * Ngpu + gpu_id;
 
-		float* hwave = (float*)malloc(sizeof(float)*Nwave*Nobs*3);	// ŠÏ‘ª“_‰¹ˆ³”gŒ`
+		float* hwave = (float*)malloc(sizeof(float)*Nwave*Nobs*3);	// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½`
 		for(int i = 0; i < Nwave*Nobs*3; i++)
 			hwave[i] = 0;
 
@@ -276,31 +276,31 @@ int main(int argc, char* argv[])
 		}
 
 
-		// ƒfƒoƒCƒXã‚Éƒƒ‚ƒŠ‚ğŠm•Û‚·‚é
+		// ï¿½fï¿½oï¿½Cï¿½Xï¿½ï¿½Éƒï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½mï¿½Û‚ï¿½ï¿½ï¿½
 		float *dp, *dpp, *tmp, *dRef, *dp2, *dux, *duy;
 		unsigned char *dCell;
 		unsigned long long *dBid;
 		unsigned short *dBnode;
 		float *dwave, *ddrv;
-		Pnt *dobs;				// ŠÏ‘ª“_À•W
-//		int3 *dobs;				// ŠÏ‘ª“_À•W
+		Pnt *dobs;				// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½W
+//		int3 *dobs;				// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½W
 		
-		cudaMalloc((void**) &dp,    sizeof(float)*Nem);			// ‰¹ˆ³
-		cudaMalloc((void**) &dpp,   sizeof(float)*Nem);			// 1ƒXƒeƒbƒv‘O‰¹ˆ³
-		cudaMalloc((void**) &dp2,   sizeof(float)*6*(Ndiv.x+Ndiv.y));			// 1ƒXƒeƒbƒv‘O‰¹ˆ³
-		cudaMalloc((void**) &dobs,  sizeof(Pnt)*Nobs*5);			// ŠÏ‘ª”gŒ`—p
-		cudaMalloc((void**) &dwave, sizeof(float)*Nwave*Nobs*3);	// ŠÏ‘ª”gŒ`—p
-		cudaMalloc((void**) &dux, sizeof(float)*Nobs);	// ŠÏ‘ª”gŒ`—±q‘¬“xx—p
-		cudaMalloc((void**) &duy, sizeof(float)*Nobs);	// ŠÏ‘ª”gŒ`—±q‘¬“xy—p
-		cudaMalloc((void**) &ddrv, sizeof(float)*Nt);	// ŠÏ‘ª”gŒ`—p
-		cudaMalloc((void**) &dRef, sizeof(float)*4);			// ”½ËŒW”
+		cudaMalloc((void**) &dp,    sizeof(float)*Nem);			// ï¿½ï¿½ï¿½ï¿½
+		cudaMalloc((void**) &dpp,   sizeof(float)*Nem);			// 1ï¿½Xï¿½eï¿½bï¿½vï¿½Oï¿½ï¿½ï¿½ï¿½
+		cudaMalloc((void**) &dp2,   sizeof(float)*6*(Ndiv.x+Ndiv.y));			// 1ï¿½Xï¿½eï¿½bï¿½vï¿½Oï¿½ï¿½ï¿½ï¿½
+		cudaMalloc((void**) &dobs,  sizeof(Pnt)*Nobs*5);			// ï¿½Ï‘ï¿½ï¿½gï¿½`ï¿½p
+		cudaMalloc((void**) &dwave, sizeof(float)*Nwave*Nobs*3);	// ï¿½Ï‘ï¿½ï¿½gï¿½`ï¿½p
+		cudaMalloc((void**) &dux, sizeof(float)*Nobs);	// ï¿½Ï‘ï¿½ï¿½gï¿½`ï¿½ï¿½ï¿½qï¿½ï¿½ï¿½xxï¿½p
+		cudaMalloc((void**) &duy, sizeof(float)*Nobs);	// ï¿½Ï‘ï¿½ï¿½gï¿½`ï¿½ï¿½ï¿½qï¿½ï¿½ï¿½xyï¿½p
+		cudaMalloc((void**) &ddrv, sizeof(float)*Nt);	// ï¿½Ï‘ï¿½ï¿½gï¿½`ï¿½p
+		cudaMalloc((void**) &dRef, sizeof(float)*4);			// ï¿½ï¿½ï¿½ËŒWï¿½ï¿½
 		if(iCell > 0){
-			cudaMalloc((void**) &dCell, sizeof(unsigned char)*Nem);			// Œ`óƒf[ƒ^
-			cudaMalloc((void**) &dBid, sizeof(unsigned long long)*Nbnd);	// ‹«ŠEğŒidƒf[ƒ^
-			cudaMalloc((void**) &dBnode, sizeof(unsigned short)*Nbnd);		// ‹«ŠE”½ËŒW”ƒf[ƒ^
+			cudaMalloc((void**) &dCell, sizeof(unsigned char)*Nem);			// ï¿½`ï¿½ï¿½fï¿½[ï¿½^
+			cudaMalloc((void**) &dBid, sizeof(unsigned long long)*Nbnd);	// ï¿½ï¿½ï¿½Eï¿½ï¿½ï¿½ï¿½idï¿½fï¿½[ï¿½^
+			cudaMalloc((void**) &dBnode, sizeof(unsigned short)*Nbnd);		// ï¿½ï¿½ï¿½Eï¿½ï¿½ï¿½ËŒWï¿½ï¿½ï¿½fï¿½[ï¿½^
 		}
 
-		// ƒfƒoƒCƒXƒƒ‚ƒŠ‚Ì‰Šú‰»
+		// ï¿½fï¿½oï¿½Cï¿½Xï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½
 		#pragma omp barrier
 		#pragma omp single
 		MPI_Barrier(MPI_COMM_WORLD);
@@ -358,7 +358,7 @@ int main(int argc, char* argv[])
 		float4 Driv;
 		Driv.x = Driv.y = Driv.w = 0.0;
 		float phi;
-		phi   = M_PI / 180. * Src.p;	// …•½Šp
+		phi   = M_PI / 180. * Src.p;	// ï¿½ï¿½ï¿½ï¿½ï¿½p
 		
 		int Nyoff, Nys, Nye;
 		Nyoff = Nydiv * iReg - Boff;
@@ -376,13 +376,13 @@ int main(int argc, char* argv[])
 		#pragma omp single
 		MPI_Barrier(MPI_COMM_WORLD);
 		if(inode == 0 && (Nreg == 1 || gpu_id == 0)){
-			// ƒ^ƒCƒ}[‚ğì¬‚µ‚ÄŒv‘ªŠJn
+			// ï¿½^ï¿½Cï¿½}ï¿½[ï¿½ï¿½ï¿½ì¬ï¿½ï¿½ï¿½ÄŒvï¿½ï¿½ï¿½Jï¿½n
 			cudaEventCreate(&start);
 			cudaEventCreate(&stop);
 			cudaEventRecord(start,0);
 		}
 
-		// ŠÔƒ‹[ƒv
+		// ï¿½ï¿½ï¿½Ôƒï¿½ï¿½[ï¿½v
 		for(int it = 0; it < Nt; it++){
 
 			itt = it % Nwave;
@@ -394,7 +394,7 @@ int main(int argc, char* argv[])
 					printf("cuda debug:: line:%d rank:%d gpu:%d msg:%s\n", __LINE__, inode, gpu_id, cudaGetErrorString(err));
 			}
 
-			// ‰¹Œ¹ŒvZ
+			// ï¿½ï¿½ï¿½ï¿½ï¿½vï¿½Z
 			t = it * dt;
 
 			dr = 0;
@@ -435,7 +435,7 @@ int main(int argc, char* argv[])
 
 			ABC_Higdon_store<<<grid, threads>>>(dpp, dp2, Ndiv.x, Nyorg, Nyoff, Nys, Nye);
 
-			// —ÌˆæŒvZ
+			// ï¿½Ìˆï¿½vï¿½Z
 			cudaThreadSynchronize();
 			#pragma omp barrier
 			#pragma omp single
@@ -461,7 +461,7 @@ int main(int argc, char* argv[])
 			#pragma omp barrier
 			#pragma omp single
 			MPI_Barrier(MPI_COMM_WORLD);
-			// ‹«ŠEŒvZ
+			// ï¿½ï¿½ï¿½Eï¿½vï¿½Z
 			if(iCell > 0 && Nbnd > 0){
 
 				CE_boundary_Plane2d<<<gridb, threadsb>>>(dp, dpp, aref, dCell, dBid, dBnode, Ndiv.x, cfl, Nbnd);
@@ -480,7 +480,7 @@ int main(int argc, char* argv[])
 			if(Nreg > 1)
 				ExcangeBoundary(dpt, dppt, dpb, dppb, dp, dpp, mpt, mppt, mpb, mppb, Nem, Nbm, Nydiv, inode, gpu_id, Nygpu);
 
-			// ŠÏ‘ª“_‰¹ˆ³æ“¾
+			// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½ï¿½æ“¾
 			if(iwave > 0){
 				if(iReceiver == 0) ObssEcho<<<gridw, threadsw>>>(dp, Ndiv, Nydiv, Block, iReg, dobs, dwave, dux, duy, cfl, Nwave, itt);
 //				if(iReceiver == 0) WaveObss<<<gridw, threadsw>>>(dp, Ndiv, Nydiv, Block, iReg, dobs, dwave, du, cfl, Nwave, itt);
@@ -506,7 +506,7 @@ int main(int argc, char* argv[])
 			#pragma omp single
 			MPI_Barrier(MPI_COMM_WORLD);
 
-			// ‰¹ˆ³•ª•z}•Û‘¶
+			// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½zï¿½}ï¿½Û‘ï¿½
 			if(iplane > 0 && it % iptime == 0 && it > 0){
 				ipn = 1;
 				Ndx = ceil((double)Ndiv.x / istx);
@@ -519,7 +519,7 @@ int main(int argc, char* argv[])
 
 		}
 		
-		//ƒ^ƒCƒ}[‚ğ’â~‚µ‚©‚©‚Á‚½ŠÔ‚ğ•\¦
+		//ï¿½^ï¿½Cï¿½}ï¿½[ï¿½ï¿½ï¿½~ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô‚ï¿½\ï¿½ï¿½
 		if(inode == 0 && (Nreg == 1 || gpu_id == 0)){
 			float elapsed_time = 0.0;
 			cudaEventRecord(stop,0);

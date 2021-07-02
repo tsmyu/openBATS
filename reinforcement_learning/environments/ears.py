@@ -9,18 +9,21 @@ import struct
 
 class Ears:
     def __init__(self):
-        self.database_path = os.path.dirname(os.path.abspath(__file__)) + '/Bat2d1.1AI2/'
+        ## self.database_path = os.path.dirname(os.path.abspath(__file__))
+        self.database_path = "."
         cfl = 0.98
         c0 = 340.0
-        dl = 0.0005
-        dt = cfl * dl / c0
+        self.dl = 0.0005
+        dt = cfl * self.dl / c0
         self.dt_fdtd = dt
 
     def check_data_in_database(self, position):
-        # print(self.database_path + f'wave0_x{position[0]}_y{position[1]}.bin')
-        if os.path.isfile(self.database_path + f'wave0_x{position[0]}_y{position[1]}.bin'):
+        print(self.database_path + f'/wave0_x{position[0]}_y{position[1]}.bin')
+        if os.path.isfile(self.database_path + f'/wave0_x{position[0]}_y{position[1]}.bin'):
+            print("bin files exist.")
             return True
         else:
+            print("bin files do not exist.")
             return False
 
     def get_echoes(self, position, pulse_angle, head_angle, rear_angle, lear_angle):
@@ -55,7 +58,7 @@ class Ears:
 
     def __get_file_from_database(self, position):
 
-        return glob.glob(f'{self.database_path}/wave*_x{position[0]}_y{position[1]}.bin')
+        return glob.glob(f'{self.database_path}/*_x{position[0]}_y{position[1]}.bin')
 
     def __read_echo_data(self, data_files):
         for d_file in data_files:
