@@ -17,6 +17,9 @@ import environments #シミュレーション環境を導入
 
 
 def main():
+    '''
+    ArgumentParserの設定
+    '''
     import logging #loggingモジュール(ログを出力)の導入
     torch.cuda.empty_cache() #メモリの使用量の更新
 
@@ -75,8 +78,11 @@ def main():
 
     args.outdir = experiments.prepare_output_dir(args, args.outdir) #ファイルへ書き込み
 
-    def make_env(process_idx, test): #環境を設定する関数？
-        env = gym.make(args.env) #gymで作る
+    def make_env(process_idx, test):
+        '''
+        ArgumentParser(--env)で指定したlidar_batの呼び出し
+        '''
+        env = gym.make(args.env) 
         # Use different random seeds for train and test envs
         process_seed = int(process_seeds[process_idx]) #探索プロセス（関数の呼び出し時に変更可能？）
         env_seed = 2 ** 32 - 1 - process_seed if test else process_seed
@@ -92,6 +98,9 @@ def main():
         return env
 
     def make_batch_env(test): #mini-batch学習の環境
+        '''
+        mini-batch学習の環境設定
+        '''
         return pfrl.envs.MultiprocessVectorEnv(
             [
                 functools.partial(make_env, idx, test)
