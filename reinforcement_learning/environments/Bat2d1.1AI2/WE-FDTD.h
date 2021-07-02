@@ -4,7 +4,7 @@ void ReadModel(int argc, char* argv[])
 	float ang;
 	int dum;
 
-//	SrcName = (char*) malloc(sizeof(char)*20); 			// ‰¹Œ¹”gŒ`ƒtƒ@ƒCƒ‹–¼
+//	SrcName = (char*) malloc(sizeof(char)*20); 			// ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½`ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½
 	FILE *fi  = fopen("input.dat","r");
 	if(fi == NULL){
 		printf("error:: No input file!\n");
@@ -13,17 +13,17 @@ void ReadModel(int argc, char* argv[])
 	}
 
 	if(fgets(buf, sizeof(buf), fi) != NULL);
-	sscanf(buf, "%d", &dum);							// 1s–Ú‚ÍƒRƒƒ“ƒg
+	sscanf(buf, "%d", &dum);							// 1ï¿½sï¿½Ú‚ÍƒRï¿½ï¿½ï¿½ï¿½ï¿½g
 	
 	Scheme = 0;
 	Boundary = 0;
 	if(fgets(buf, sizeof(buf), fi) != NULL);
-	sscanf(buf, "%d %d %d", &iCell, &Scheme, &Boundary);	// ”CˆÓ‹«ŠE(0:‹éŒ`C1:”CˆÓ)Cè–@(0:SLF, 1:IWB), ‹«ŠEğŒ(0:Mur1Ÿ,1:Higdon2Ÿ)
+	sscanf(buf, "%d %d %d", &iCell, &Scheme, &Boundary);	// ï¿½Cï¿½Ó‹ï¿½ï¿½E(0:ï¿½ï¿½`ï¿½C1:ï¿½Cï¿½ï¿½)ï¿½Cï¿½ï¿½@(0:SLF, 1:IWB), ï¿½ï¿½ï¿½Eï¿½ï¿½ï¿½ï¿½(0:Mur1ï¿½ï¿½,1:Higdon2ï¿½ï¿½)
 
 	if(fgets(buf, sizeof(buf), fi) != NULL)
-	sscanf(buf, "%d %d %s", &Ndiv.x, &Ndiv.y, CellName);	// •ªŠ„”, ƒZƒ‹ƒf[ƒ^ƒtƒ@ƒCƒ‹–¼
+	sscanf(buf, "%d %d %s", &Ndiv.x, &Ndiv.y, CellName);	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½Zï¿½ï¿½ï¿½fï¿½[ï¿½^ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½
 
-	if(iCell > 0){										// ”CˆÓƒ{ƒNƒZƒ‹ƒ‚ƒfƒ‹
+	if(iCell > 0){										// ï¿½Cï¿½Óƒ{ï¿½Nï¿½Zï¿½ï¿½ï¿½ï¿½ï¿½fï¿½ï¿½
 		FILE *fim  = fopen(CellName, "rb");
 		if(fim == NULL){
 			if(inode == 0) printf("error:: No CELL file!\n");
@@ -31,10 +31,10 @@ void ReadModel(int argc, char* argv[])
 			exit(1);
 		}
 		if(fgets(buf, sizeof(buf), fim) != NULL)
-		sscanf(buf, "%d %d", &Ndiv.x, &Ndiv.y);			// •ªŠ„”‚¾‚¯æ‚É“Ç‚İ‚Ş
+		sscanf(buf, "%d %d", &Ndiv.x, &Ndiv.y);			// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É“Ç‚İï¿½ï¿½ï¿½
 		fclose(fim);
 	}
-	else{												// ‹éŒ`ƒ‚ƒfƒ‹
+	else{												// ï¿½ï¿½`ï¿½ï¿½ï¿½fï¿½ï¿½
 	}
 	Block.x = 4;
 	Block.y = 4;
@@ -47,7 +47,7 @@ void ReadModel(int argc, char* argv[])
 	sscanf(buf, "%f %f %f %f %f", &Ref[0], &Ref[1], &Ref[2], &Ref[3], &aref);
 	
 	if(fgets(buf, sizeof(buf), fi) != NULL);
-	sscanf(buf, "%f %f %f", &cfl, &dl, &c0);				// ƒ¢Cƒ¢t, c0
+	sscanf(buf, "%f %f %f", &cfl, &dl, &c0);				// ï¿½ï¿½ï¿½Cï¿½ï¿½t, c0
 	if(Scheme == 0){
 		printf("2D SLF method\n");
 		if(cfl == 0) cfl = 1. / sqrt(2);
@@ -61,16 +61,16 @@ void ReadModel(int argc, char* argv[])
 	dt = cfl / c0 * dl;
 	
 	if(fgets(buf, sizeof(buf), fi) != NULL);
-	sscanf(buf, "%d", &Nt);								// ŒvZƒXƒeƒbƒv”
+	sscanf(buf, "%d", &Nt);								// ï¿½vï¿½Zï¿½Xï¿½eï¿½bï¿½vï¿½ï¿½
 	
 	if(fgets(buf, sizeof(buf), fi) != NULL);
-	sscanf(buf, "%d %s", &iSource, SPosName);			// ˆÚ“®Œ`‘Ô, ‰¹Œ¹À•Wƒtƒ@ƒCƒ‹–¼
+	sscanf(buf, "%d %s", &iSource, SPosName);			// ï¿½Ú“ï¿½ï¿½`ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Wï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½
 
 	vs0 = 0;
 	as = 0;
 	angs = 0;
 	if(fgets(buf, sizeof(buf), fi) != NULL);
-	sscanf(buf, "%d %d %f %f %f %f", &Src.x, &Src.y, &Src.p, &vs0, &as, &angs);	// ‰¹Œ¹ˆÊ’u•ûŒü, ‰¹Œ¹‘¬“xC‰Á‘¬“xC•ûŒü
+	sscanf(buf, "%d %d %f %f %f %f", &Src.x, &Src.y, &Src.p, &vs0, &as, &angs);	// ï¿½ï¿½ï¿½ï¿½ï¿½Ê’uï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½xï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½xï¿½Cï¿½ï¿½ï¿½ï¿½
 	if(argc > 1){
 		Src.x = atoi(argv[1]);
 		Src.y = atoi(argv[2]);
@@ -81,7 +81,7 @@ void ReadModel(int argc, char* argv[])
 	int it = 0;
 	Nsrc = Nt;
 	if(iSource == 1){
-		SPos = (float2*) malloc(sizeof(float2)*Nt); 		// ŠÏ‘ª“_À•W
+		SPos = (float2*) malloc(sizeof(float2)*Nt); 		// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½W
 
 		FILE *fpo = fopen(SPosName, "r");
 		if(fpo == NULL){
@@ -105,14 +105,14 @@ void ReadModel(int argc, char* argv[])
 	}
 	
 	if(fgets(buf, sizeof(buf), fi) != NULL);
-	sscanf(buf, "%f %d %s", &freq, &Nd, SrcName);					// ‰¹Œ¹ü”g”CüŠú”(0: ˜A‘±, -1: ƒCƒ“ƒpƒ‹ƒX)
+	sscanf(buf, "%f %d %s", &freq, &Nd, SrcName);					// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(0: ï¿½Aï¿½ï¿½, -1: ï¿½Cï¿½ï¿½ï¿½pï¿½ï¿½ï¿½X)
 	
 	Nw = 0;
-	drv = (float*) malloc(sizeof(float)*Nt); 			// ‰¹Œ¹”gŒ`
+	drv = (float*) malloc(sizeof(float)*Nt); 			// ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½`
 	for(int it = 0; it < Nt; it++){
 		drv[it] = 0.;
 	}
-	if(freq == -1){										// ‰¹Œ¹ƒtƒ@ƒCƒ‹‚©‚ç”gŒ`“ü—Í
+	if(freq == -1){										// ï¿½ï¿½ï¿½ï¿½ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½`ï¿½ï¿½ï¿½ï¿½
 		printf("%s\n", SrcName);
 		FILE *fi2  = fopen(SrcName, "r");
 		for(int it = 0; it < Nt; it++){
@@ -124,18 +124,18 @@ void ReadModel(int argc, char* argv[])
 		}
 		fclose(fi2);
 	}
-	else if(freq == 0){								// ƒCƒ“ƒpƒ‹ƒX
+	else if(freq == 0){								// ï¿½Cï¿½ï¿½ï¿½pï¿½ï¿½ï¿½X
 		drv[0] = 1.;
 		Nw = 1;
 	}
 	else{
-		if(Nd == 0){										// ˜A‘±”g
+		if(Nd == 0){										// ï¿½Aï¿½ï¿½ï¿½g
 			for(int it = 0; it < Nt; it++){
 				drv[it] = sin(2 * 3.1415926 * freq * it * dt);
 			}
 			Nw = Nt;
 		}
-		else if(Nd == 1){		// ”÷•ªƒKƒEƒX
+		else if(Nd == 1){		// ï¿½ï¿½ï¿½ï¿½ï¿½Kï¿½Eï¿½X
 			double wl = 2.0 / freq / dt;
 			Nw = wl;
 			if(Nw > Nt) Nw = Nt;
@@ -144,7 +144,7 @@ void ReadModel(int argc, char* argv[])
 	//			printf("%f\n", drv[it]);
 			}
 		}
-		else{					// ƒg[ƒ“ƒo[ƒXƒg
+		else{					// ï¿½gï¿½[ï¿½ï¿½ï¿½oï¿½[ï¿½Xï¿½g
 			Nw = 1.0 / freq / dt * Nd;
 			if(Nw > Nt) Nw = Nt;
 			for(int it = 0; it < Nw; it++){
@@ -154,13 +154,13 @@ void ReadModel(int argc, char* argv[])
 	}
 
 	if(fgets(buf, sizeof(buf), fi) != NULL);
-	sscanf(buf, "%d %s", &iReceiver, RPosName);			// ˆÚ“®Œ`‘Ô, ó‰¹“_À•Wƒtƒ@ƒCƒ‹–¼
+	sscanf(buf, "%d %s", &iReceiver, RPosName);			// ï¿½Ú“ï¿½ï¿½`ï¿½ï¿½, ï¿½ó‰¹“_ï¿½ï¿½ï¿½Wï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½
 
 	float sep = 0.01;
 	float obsx, obsy;
 	Nobs = 37;
 	if(iReceiver == 0){
-		obs  = (Pnt*) malloc(sizeof(Pnt)*Nobs); 			// ŠÏ‘ª“_À•W
+		obs  = (Pnt*) malloc(sizeof(Pnt)*Nobs); 			// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½W
 		for(int io = 0; io < Nobs; io++){
 			ang = io * 10 * 3.1415926 / 180.;
 			obsx = (Src.x) * dl + sep * cos(ang);
@@ -174,7 +174,7 @@ void ReadModel(int argc, char* argv[])
 	it = 0;
 	Nrcv = Nt;
 	if(iReceiver == 1){
-		RPos = (float2*) malloc(sizeof(float2)*Nt); 		// ŠÏ‘ª“_À•W
+		RPos = (float2*) malloc(sizeof(float2)*Nt); 		// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½W
 
 		FILE *fpo = fopen(RPosName, "r");
 		if(fpo == NULL){
@@ -192,17 +192,17 @@ void ReadModel(int argc, char* argv[])
 	}
 	if(iReceiver == 2){
 		if(fgets(buf, sizeof(buf), fi) != NULL);
-		sscanf(buf, "%d %d %f %f %f %f", &Rcv.x, &Rcv.y, &Rcv.p, &vr0, &ar, &angr);	// ‰¹Œ¹ˆÊ’u•ûŒü, ‰¹Œ¹‘¬“xC‰Á‘¬“xC•ûŒü
+		sscanf(buf, "%d %d %f %f %f %f", &Rcv.x, &Rcv.y, &Rcv.p, &vr0, &ar, &angr);	// ï¿½ï¿½ï¿½ï¿½ï¿½Ê’uï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½xï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½xï¿½Cï¿½ï¿½ï¿½ï¿½
 	}
 
 	if(fgets(buf, sizeof(buf), fi) != NULL)
-		sscanf(buf, "%d %d", &iplane, &iwave);		// ƒRƒ“ƒ^[–ÊC”gŒ`o—Í
+		sscanf(buf, "%d %d", &iplane, &iwave);		// ï¿½Rï¿½ï¿½ï¿½^ï¿½[ï¿½ÊCï¿½gï¿½`ï¿½oï¿½ï¿½
 	if(fgets(buf, sizeof(buf), fi) != NULL)
-		sscanf(buf, "%d %d %d %d %d", &iptime, &istx, &isty, &ipts, &ipte);								// ƒRƒ“ƒ^[ŠÔˆø‚«
+		sscanf(buf, "%d %d %d %d %d", &iptime, &istx, &isty, &ipts, &ipte);								// ï¿½Rï¿½ï¿½ï¿½^ï¿½[ï¿½Ôˆï¿½ï¿½ï¿½
 	if(ipte == 0) ipte = Nt;
 	
 	if(fgets(buf, sizeof(buf), fi) != NULL);
-	sscanf(buf, "%d %d", &Ngpu, &GpuId);							// GPU”/ƒm[ƒh, 1GPU‚Ì‚Æ‚«‚ÌGPU ID
+	sscanf(buf, "%d %d", &Ngpu, &GpuId);							// GPUï¿½ï¿½/ï¿½mï¿½[ï¿½h, 1GPUï¿½Ì‚Æ‚ï¿½ï¿½ï¿½GPU ID
 	
 	if(Ngpu < 1){
 		if(inode == 0) printf("error:: Invalid number of GPUs.: %d\n", Ngpu);
@@ -211,7 +211,7 @@ void ReadModel(int argc, char* argv[])
 	}
 	Nreg = Nnode * Ngpu;
 		
-	// •ªŠ„ƒ`ƒFƒbƒN
+	// ï¿½ï¿½ï¿½ï¿½ï¿½`ï¿½Fï¿½bï¿½N
 	int Fx, Fy;
 	Nyorg = Ndiv.y;
 	if(Ndiv.y % (Nreg * Block.y) != 0)
@@ -237,13 +237,13 @@ int ReadCell(unsigned char* Cell, int iReg, int Nydiv, int Nygpu)
 	int Nbnd = 0, dum;
 	char bufm[200];
 		
-	FILE *fim  = fopen(CellName, "rb");		// ƒ{ƒNƒZƒ‹ƒf[ƒ^
+	FILE *fim  = fopen(CellName, "rb");		// ï¿½{ï¿½Nï¿½Zï¿½ï¿½ï¿½fï¿½[ï¿½^
 	if(fim == NULL){
 		printf("error:: No CELL file!\n");
 		exit(1);
 	}
 
-	// ƒZƒ‹ƒf[ƒ^“Ç‚İ‚İ
+	// ï¿½Zï¿½ï¿½ï¿½fï¿½[ï¿½^ï¿½Ç‚İï¿½ï¿½ï¿½
 	if(iReg == 0) printf(" Reading cell data: %s\n", CellName);
 	int* nn = (int*)malloc(sizeof(int)*Ndiv.x);
 	unsigned char* in = (unsigned char*)malloc(sizeof(unsigned char)*Ndiv.x);
@@ -296,7 +296,7 @@ int ReadCell(unsigned char* Cell, int iReg, int Nydiv, int Nygpu)
 						id = (unsigned long long)Ndiv.x * j + ix;
 						Cell[id] = in[i];
 						ix++;
-						if(Cell[id] > 1) Nbnd++;		// ‹«ŠEğŒƒf[ƒ^”
+						if(Cell[id] > 1) Nbnd++;		// ï¿½ï¿½ï¿½Eï¿½ï¿½ï¿½ï¿½ï¿½fï¿½[ï¿½^ï¿½ï¿½
 					}
 				}
 			}
@@ -842,7 +842,7 @@ void ExcangeBoundary(float* dpt, float* dppt, float* dpb, float* dppb, float* dp
 	float* mpt, float* mppt, float* mpb, float* mppb, int Nem, int Nbm, int Nydiv, int inode, 
 	int gpu_id, int Nygpu)
 {
-	// ‹«ŠEƒf[ƒ^“]‘—(ƒfƒoƒCƒX¨ƒzƒXƒg)
+	// ï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^ï¿½]ï¿½ï¿½(ï¿½fï¿½oï¿½Cï¿½Xï¿½ï¿½ï¿½zï¿½Xï¿½g)
 	if(Nnode > 1 || Ngpu > 1){
 		cudaMemcpy(dpt+ 2*Nbm*gpu_id, dp+ Nbm*(Nygpu-Block.y), sizeof(float)*2*Nbm, cudaMemcpyDeviceToHost);
 		cudaMemcpy(dppt+2*Nbm*gpu_id, dpp+Nbm*(Nygpu-Block.y), sizeof(float)*2*Nbm, cudaMemcpyDeviceToHost);
@@ -855,7 +855,7 @@ void ExcangeBoundary(float* dpt, float* dppt, float* dpb, float* dppb, float* dp
 	#pragma omp single
 	MPI_Barrier(MPI_COMM_WORLD);
 
-	// ã‘w‹«ŠEƒf[ƒ^“]‘—(ƒm[ƒhŠÔ)
+	// ï¿½ï¿½wï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^ï¿½]ï¿½ï¿½(ï¿½mï¿½[ï¿½hï¿½ï¿½)
 	if(Nnode > 1){
 		#pragma omp single
 		{
@@ -880,7 +880,7 @@ void ExcangeBoundary(float* dpt, float* dppt, float* dpb, float* dppb, float* dp
 	#pragma omp single
 	MPI_Barrier(MPI_COMM_WORLD);
 
-	// ‰º‘w‹«ŠEƒf[ƒ^“]‘—(ƒm[ƒhŠÔ)
+	// ï¿½ï¿½ï¿½wï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^ï¿½]ï¿½ï¿½(ï¿½mï¿½[ï¿½hï¿½ï¿½)
 	if(Nnode > 1){
 		#pragma omp single
 		{
@@ -905,7 +905,7 @@ void ExcangeBoundary(float* dpt, float* dppt, float* dpb, float* dppb, float* dp
 	#pragma omp single
 	MPI_Barrier(MPI_COMM_WORLD);
 
-	// ‹«ŠEƒf[ƒ^“]‘—(ƒzƒXƒg¨ƒfƒoƒCƒX)
+	// ï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^ï¿½]ï¿½ï¿½(ï¿½zï¿½Xï¿½gï¿½ï¿½ï¿½fï¿½oï¿½Cï¿½X)
 	if(gpu_id > 0){
 		cudaMemcpy(dp,  dpt+ 2*Nbm*(gpu_id-1), sizeof(float)*2*Nbm, cudaMemcpyHostToDevice);
 		cudaMemcpy(dpp, dppt+2*Nbm*(gpu_id-1), sizeof(float)*2*Nbm, cudaMemcpyHostToDevice);
@@ -934,17 +934,17 @@ void ExcangeBoundary(float* dpt, float* dppt, float* dpb, float* dppb, float* dp
 }
 
 
-// ‰¹ˆ³•ª•z•Û‘¶
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½zï¿½Û‘ï¿½
 void save_cross_section(float* dp, float* pp, int3 Ndiv, int inode, int gpu_id, int it, int Nydiv, int Boff, 
 	int iReg, int ipn, int istx, int isty)
 {
-	float* pobs  = (float*) malloc(sizeof(float));		 	// ŠÏ‘ª“_‰¹ˆ³
+	float* pobs  = (float*) malloc(sizeof(float));		 	// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½
 	int id, iy, Nd;
 	long long idd;
 	int ii;
 	char filename[200];
 
-	// xy•½–Ê•Û‘¶
+	// xyï¿½ï¿½ï¿½Ê•Û‘ï¿½
 	Nd = Ndx * Ndy;
 	idd = 0;
 
@@ -969,7 +969,7 @@ void save_cross_section(float* dp, float* pp, int3 Ndiv, int inode, int gpu_id, 
 	#pragma omp barrier
 	#pragma omp single
 	MPI_Barrier(MPI_COMM_WORLD);
-	// ƒm[ƒh0‚Ö“]‘—
+	// ï¿½mï¿½[ï¿½h0ï¿½Ö“]ï¿½ï¿½
 	if(gpu_id == 0 && Nnode > 1){
 		for(int ip = 1; ip < Nnode; ip++){
 			if(inode == ip)
@@ -985,7 +985,7 @@ void save_cross_section(float* dp, float* pp, int3 Ndiv, int inode, int gpu_id, 
 	MPI_Barrier(MPI_COMM_WORLD);
 	if(Nnode == 1 || (inode == 0 && gpu_id == 0)){
 		if(ipn == 0){
-			sprintf(filename, "output%d.dat", it);	// o—Íƒtƒ@ƒCƒ‹
+			sprintf(filename, "output%d.dat", it);	// ï¿½oï¿½Íƒtï¿½@ï¿½Cï¿½ï¿½
 			FILE *fpo  = fopen(filename,"w");
 			for(int j = 0; j < Ndy; j++){
 				for(int i = 0; i < Ndx; i++){
@@ -997,7 +997,7 @@ void save_cross_section(float* dp, float* pp, int3 Ndiv, int inode, int gpu_id, 
 			fclose(fpo);
 		}
 		else{
-			sprintf(filename, "output%d.bin", it);	// o—Íƒtƒ@ƒCƒ‹
+			sprintf(filename, "output%d.bin", it);	// ï¿½oï¿½Íƒtï¿½@ï¿½Cï¿½ï¿½
 			FILE *fpo  = fopen(filename,"wb");
 			fwrite(&Ndx, sizeof(int), 1, fpo);
 			fwrite(&Ndy, sizeof(int), 1, fpo);
@@ -1010,7 +1010,7 @@ void save_cross_section(float* dp, float* pp, int3 Ndiv, int inode, int gpu_id, 
 
 void MovingReceiver(float* dp, float* wave, int3 Ndiv, int Nydiv, int3 Block, int iReg, int Boff, Pnt Rcv, float2* RPos, int it){
 
-	float* pobs = (float*) malloc(sizeof(float)*4);		 	// ŠÏ‘ª“_‰¹ˆ³
+	float* pobs = (float*) malloc(sizeof(float)*4);		 	// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½
 	int ix, iy, itt;
 	unsigned long long id;
 	float Node[4] = {};
@@ -1074,7 +1074,7 @@ void MovingReceiver(float* dp, float* wave, int3 Ndiv, int Nydiv, int3 Block, in
 	}
 }
 
-/* ‘¬“xƒ|ƒeƒ“ƒVƒƒƒ‹?
+/* ï¿½ï¿½ï¿½xï¿½|ï¿½eï¿½ï¿½ï¿½Vï¿½ï¿½ï¿½ï¿½?
 __global__ void WaveObss(float* dp, float* dpp, int3 Ndiv, int Nydiv, int3 Block, int iReg, 
 		Pnt* dobs, float* dwave, float* du, float cfl, int Nwave, int it, float dt){
 
@@ -1157,7 +1157,7 @@ void SaveWaveBin(float* dwave, float* hwave, float* wave, int it, int gpu_id, in
 //	double ux, uy, phi2, uu;
 	int Nw;
 
-	// ŠÏ‘ª“_‰¹ˆ³æ“¾
+	// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½ï¿½æ“¾
 	Nw = (it % Nwave) + 1;
 	cudaMemcpy(hwave, dwave, sizeof(float)*Nwave*Nobs*3, cudaMemcpyDeviceToHost);
 		
@@ -1206,7 +1206,7 @@ void SaveWave(float* dwave, float* hwave, float* wave, int it, int gpu_id, int N
 	int Nw;
 	
 	Nw = (it % Nwave) + 1;
-	// ŠÏ‘ª“_‰¹ˆ³æ“¾
+	// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½ï¿½æ“¾
 	if(iReceiver == 0){
 		cudaMemcpy(hwave, dwave, sizeof(float)*Nwave*Nobs*3, cudaMemcpyDeviceToHost);
 

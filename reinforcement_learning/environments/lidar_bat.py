@@ -3,14 +3,26 @@ import numpy as np
 
 
 class Point(object):
+    '''
+    objectのxy座標を定義
+    '''
     def __init__(self, x, y):
+        '''
+        __init__メソッドはclassを使うには必要なもの
+        '''
         self.x = x
         self.y = y
 
     def unpack(self):
+        '''
+        xy座標を返す
+        '''
         return np.array([self.x, self.y])
 
 class Segment(object):
+    '''
+    座標の名前
+    '''
     def __init__(self, p0: Point, p1: Point):
         self.p0 = p0
         self.p1 = p1
@@ -20,9 +32,15 @@ class Segment(object):
 
 
 def cos_sin(theta) -> np.ndarray:
+    '''
+    角度から座標を定義
+    '''
     return np.array([math.cos(theta), math.sin(theta)])
 
 def cal_cross_point(s0: Segment, s1: Segment) -> Point:
+    '''
+    2つのセグメントの重なっている点を計算...
+    '''
     x0, y0, x1, y1 = s0.p0.x, s0.p0.y, s0.p1.x, s0.p1.y
     x2, y2, x3, y3 = s1.p0.x, s1.p0.y, s1.p1.x, s1.p1.y
     den = (x3 - x2) * (y1 - y0) - (x1 - x0) * (y3 - y2)
@@ -37,17 +55,26 @@ def cal_cross_point(s0: Segment, s1: Segment) -> Point:
     return Point(x, y)
 
 def rotate_vector(v, angle):
+    '''
+    vを回転
+    '''
     return np.array(
         [[np.cos(angle), -np.sin(angle)], 
          [np.sin(angle), np.cos(angle)]]) @ v
 
 def is_point_in_segment(p: Point, s: Segment) -> bool:
+    '''
+    p.xが適切な値か
+    '''
     e = 1e-8  # e is small number, for excuse 
     x_ok = (min(s.p0.x, s.p1.x) - e <= p.x) and (p.x <= max(s.p0.x, s.p1.x) + e)
     y_ok = (min(s.p0.y, s.p1.y) - e <= p.y) and (p.y <= max(s.p0.y, s.p1.y) + e)
     return x_ok and y_ok
 
 def convert2vec(v):
+    '''
+    v 
+    '''
     if type(v) == Point:
         v = v.unpack()
     if type(v) == Segment:

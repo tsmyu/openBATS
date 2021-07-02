@@ -5,7 +5,7 @@ from gym.utils import seeding
 import numpy as np
 
 # from .lidar_bat import *
-from .fdtd_bat import *
+from .lidar_bat import *
 
 
 FPS = 60
@@ -67,6 +67,9 @@ class BatFlyingEnv(gym.Env):
         self.discrete_length = discrete_length
         # self.dt = 0.01  # [s]
         self.dt = 0.005  # [s]
+        #time from emitting pulse [s]
+        self.spend_time_from_pulse = 0.1
+        self.min_IPI = 5
 
         self.lower_bound_freq_emit_pulse = 0.3
 
@@ -91,7 +94,7 @@ class BatFlyingEnv(gym.Env):
         self.walls = [] if walls is None else walls
 
         # self.goal_area = () if goal_area is None else goal_area
-        self.max_flying_angle = math.pi / 6  # [rad]
+        self.max_flying_angle = math.pi / 18  # [rad]
         self.max_pulse_angle = math.pi / 4  # [rad]
 
         # env settings
@@ -147,14 +150,21 @@ class BatFlyingEnv(gym.Env):
                 step_reward += self.bump_reward
                 done = True
 
-        self.bat.emit = False
+        
         # freq emit pulse [0.3, 0.8]
-        if np.random.rand() < pulse_proba/2 + self.lower_bound_freq_emit_pulse:
-            self.bat.emit_pulse(pulse_angle * self.max_pulse_angle, self.walls)
-            self.bat.emit = True
-            self.last_pulse_angle = pulse_angle
-            step_reward += self.pulse_reward
-            step_reward += self.pulse_angle_reward * np.abs(pulse_angle)
+        self.spend_time_from_pulse += self.dt
+        if self.spend_time_from_pulse >= self.min_IPI:
+            if np.random.rand() < pulse_proba/2 + self.lower_bound_freq_emit_pulse:
+                self.bat.emit_pulse(pulse_angle * self.max_pulse_angle, self.walls)
+                self.bat.emit = True
+                self.last_pulse_angle = pulse_angle
+                step_reward += self.pulse_reward
+                step_reward += self.pulse_angle_reward * np.abs(pulse_angle)
+                self.spend_time_from_pulse = 0.0
+            else:
+                self.bat.emit = False
+        else:
+            self.bat.emit = False
 
         if np.linalg.norm(self.bat.v_vec) < 1:
             step_reward += self.low_speed_reward
@@ -170,6 +180,7 @@ class BatFlyingEnv(gym.Env):
         self._reset_bat()
         self._reset_walls()
         self.t = 0.0
+        self.spend_time_from_pulse = 0.1
         self.close()
         self._update_observation()
         return self.state

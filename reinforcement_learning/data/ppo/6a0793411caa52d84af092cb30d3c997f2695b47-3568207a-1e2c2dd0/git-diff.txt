@@ -1,0 +1,2621 @@
+diff --git a/reinforcement_learning/environments/Bat2d1.1AI2/CalcEcho.m b/reinforcement_learning/environments/Bat2d1.1AI2/CalcEcho.m
+old mode 100644
+new mode 100755
+diff --git a/reinforcement_learning/environments/Bat2d1.1AI2/DisplayCellData.m b/reinforcement_learning/environments/Bat2d1.1AI2/DisplayCellData.m
+old mode 100644
+new mode 100755
+diff --git "a/reinforcement_learning/environments/Bat2d1.1AI2/FDTD\343\203\242\343\203\206\343\202\231\343\203\253_teshima_20201201.pptx" "b/reinforcement_learning/environments/Bat2d1.1AI2/FDTD\343\203\242\343\203\206\343\202\231\343\203\253_teshima_20201201.pptx"
+old mode 100644
+new mode 100755
+diff --git a/reinforcement_learning/environments/Bat2d1.1AI2/MakeFDTDinput.m b/reinforcement_learning/environments/Bat2d1.1AI2/MakeFDTDinput.m
+old mode 100644
+new mode 100755
+diff --git a/reinforcement_learning/environments/Bat2d1.1AI2/ReadCellData.c b/reinforcement_learning/environments/Bat2d1.1AI2/ReadCellData.c
+old mode 100644
+new mode 100755
+diff --git a/reinforcement_learning/environments/Bat2d1.1AI2/ReadCellData.mexw64 b/reinforcement_learning/environments/Bat2d1.1AI2/ReadCellData.mexw64
+old mode 100644
+new mode 100755
+diff --git a/reinforcement_learning/environments/Bat2d1.1AI2/ReadMe.txt b/reinforcement_learning/environments/Bat2d1.1AI2/ReadMe.txt
+old mode 100644
+new mode 100755
+diff --git a/reinforcement_learning/environments/Bat2d1.1AI2/SaveCellData.c b/reinforcement_learning/environments/Bat2d1.1AI2/SaveCellData.c
+old mode 100644
+new mode 100755
+diff --git a/reinforcement_learning/environments/Bat2d1.1AI2/SaveCellData.mexw64 b/reinforcement_learning/environments/Bat2d1.1AI2/SaveCellData.mexw64
+old mode 100644
+new mode 100755
+diff --git a/reinforcement_learning/environments/Bat2d1.1AI2/Theoretical_directivity.xlsx b/reinforcement_learning/environments/Bat2d1.1AI2/Theoretical_directivity.xlsx
+old mode 100644
+new mode 100755
+diff --git a/reinforcement_learning/environments/Bat2d1.1AI2/WE-FDTD.cu b/reinforcement_learning/environments/Bat2d1.1AI2/WE-FDTD.cu
+old mode 100644
+new mode 100755
+index a55918a..92d347b
+--- a/reinforcement_learning/environments/Bat2d1.1AI2/WE-FDTD.cu
++++ b/reinforcement_learning/environments/Bat2d1.1AI2/WE-FDTD.cu
+@@ -1,4 +1,4 @@
+-// 2ŸŒ³WE-FDTD–@ CUDA version
++// 2ï¿½ï¿½ï¿½ï¿½WE-FDTDï¿½@ CUDA version
+ // 2017.01.07
+ // ver.0.01
+ // Takao Tsuchiya, Doshisha Univ.
+@@ -14,51 +14,51 @@
+ #define HBD_TO_HBU 1
+ #define HBU_TO_HBD 10
+ 
+-// ƒ‚ƒfƒ‹ƒf[ƒ^
+-int iCell;					// ƒ‚ƒfƒ‹ƒ^ƒCƒv
+-char CellName[200] = {};			// ƒ{ƒNƒZƒ‹ƒtƒ@ƒCƒ‹–¼
+-int Scheme, Boundary;		// è–@, ‹«ŠE
++// ï¿½ï¿½ï¿½fï¿½ï¿½ï¿½fï¿½[ï¿½^
++int iCell;					// ï¿½ï¿½ï¿½fï¿½ï¿½ï¿½^ï¿½Cï¿½v
++char CellName[200] = {};			// ï¿½{ï¿½Nï¿½Zï¿½ï¿½ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½
++int Scheme, Boundary;		// ï¿½ï¿½@, ï¿½ï¿½ï¿½E
+ float c0;
+-int3 Ndiv;					// x, y, z•ûŒü•ªŠ„”
+-int Nyorg;					// Œ³‚Ìz•ûŒü•ªŠ„”
+-int Nreg, Nt, Ns;			// —Ìˆæ•ªŠ„”, ŒvZƒXƒeƒbƒv”, ‰¹Œ¹ŠÔ
+-int Nobs;					// ŠÏ‘ª“_”
+-struct Pnt{					// ŠÏ‘ª“_î•ñ
++int3 Ndiv;					// x, y, zï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
++int Nyorg;					// ï¿½ï¿½ï¿½ï¿½zï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
++int Nreg, Nt, Ns;			// ï¿½Ìˆæ•ªï¿½ï¿½ï¿½ï¿½, ï¿½vï¿½Zï¿½Xï¿½eï¿½bï¿½vï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
++int Nobs;					// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½
++struct Pnt{					// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½
+ 	int x, y;
+ 	float p;
+ };
+-Pnt Src, Rcv;				// ‰¹Œ¹Eó‰¹“_À•W
+-Pnt* obs; 					// ŠÏ‘ª“_À•W
+-float* drv;					// ‰¹Œ¹”gŒ`
+-int Nw, Srcw;				// ‰¹Œ¹ŠÔ•, ‰¹Œ¹•
+-float freq;					// “ü—Íü”g”
+-int Nd;						// ƒo[ƒXƒg”g”
+-float cfl, dl, dt, b;		// CFL, ƒTƒ“ƒvƒŠƒ“ƒOü”g”
+-float Ref[4], aref;			// ‹«ŠE”½Ë—¦, ”CˆÓ‹«ŠE”½Ë—¦
+-int iplane, ipn, iptime, iwave;		// o—Í•½–ÊC•½–ÊˆÊ’uCŠÔŠÔŠuC”gŒ`o—Í
+-int Nwave;					// ”gŒ`ƒf[ƒ^ˆêŠ‡“]‘—ŠÔƒXƒeƒbƒv”
+-float* pp;					// ‰¹ˆ³•ª•z}
+-int istx, isty, ipts, ipte;	// ‰¹ˆ³•ª•z}ŠÔˆø‚«
+-int Ndx, Ndy;				// ‰¹ˆ³•ª•z}‚Ì‘å‚«‚³
++Pnt Src, Rcv;				// ï¿½ï¿½ï¿½ï¿½ï¿½Eï¿½ó‰¹“_ï¿½ï¿½ï¿½W
++Pnt* obs; 					// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½W
++float* drv;					// ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½`
++int Nw, Srcw;				// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô•ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
++float freq;					// ï¿½ï¿½ï¿½Íï¿½ï¿½gï¿½ï¿½
++int Nd;						// ï¿½oï¿½[ï¿½Xï¿½gï¿½gï¿½ï¿½
++float cfl, dl, dt, b;		// CFL, ï¿½Tï¿½ï¿½ï¿½vï¿½ï¿½ï¿½ï¿½ï¿½Oï¿½ï¿½ï¿½gï¿½ï¿½
++float Ref[4], aref;			// ï¿½ï¿½ï¿½Eï¿½ï¿½ï¿½Ë—ï¿½, ï¿½Cï¿½Ó‹ï¿½ï¿½Eï¿½ï¿½ï¿½Ë—ï¿½
++int iplane, ipn, iptime, iwave;		// ï¿½oï¿½Í•ï¿½ï¿½ÊCï¿½ï¿½ï¿½ÊˆÊ’uï¿½Cï¿½ï¿½ï¿½ÔŠÔŠuï¿½Cï¿½gï¿½`ï¿½oï¿½ï¿½
++int Nwave;					// ï¿½gï¿½`ï¿½fï¿½[ï¿½^ï¿½êŠ‡ï¿½]ï¿½ï¿½ï¿½ï¿½ï¿½ÔƒXï¿½eï¿½bï¿½vï¿½ï¿½
++float* pp;					// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½zï¿½}
++int istx, isty, ipts, ipte;	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½zï¿½}ï¿½Ôˆï¿½ï¿½ï¿½
++int Ndx, Ndy;				// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½zï¿½}ï¿½Ì‘å‚«ï¿½ï¿½
+ 
+ // for GPU
+-int Ngpu;					// g—pGPU”
+-int GpuId = -1;				// 1GPU‚Ì‚Æ‚«‚ÌGPU ID
+-int3 Block;					// BlockƒTƒCƒY
++int Ngpu;					// ï¿½gï¿½pGPUï¿½ï¿½
++int GpuId = -1;				// 1GPUï¿½Ì‚Æ‚ï¿½ï¿½ï¿½GPU ID
++int3 Block;					// Blockï¿½Tï¿½Cï¿½Y
+ int Bblock = 256;
+ int Boff;					// Block offset
+ float mem;
+ 
+ // for MPI
+-int Nnode, inode;			// ƒm[ƒh”Cƒ‰ƒ“ƒN
+-MPI_Status mpi_stat;		// MPIƒXƒe[ƒ^ƒX
++int Nnode, inode;			// ï¿½mï¿½[ï¿½hï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½N
++MPI_Status mpi_stat;		// MPIï¿½Xï¿½eï¿½[ï¿½^ï¿½X
+ 
+ // for moving
+-int iSource, iReceiver;		// ‰¹Œ¹/ó‰¹“_ˆÚ“®•û–@
+-char SPosName[200] = {}, RPosName[200] = {}; //”CˆÓ‹O“¹ˆÊ’uƒtƒ@ƒCƒ‹–¼
+-float vs, vs0, as, t, angs;	// ‰¹Œ¹‘¬“x, ‰‘¬“xC‰Á‘¬“x, Šp“x
+-float vr, vr0, ar, angr;	// ó‰¹“_‘¬“x, ‰‘¬“xC‰Á‘¬“x, Šp“x
+-float2 *SPos, *RPos;		// ‰¹Œ¹/ó‰¹“_ˆÊ’u
++int iSource, iReceiver;		// ï¿½ï¿½ï¿½ï¿½/ï¿½ó‰¹“_ï¿½Ú“ï¿½ï¿½ï¿½ï¿½@
++char SPosName[200] = {}, RPosName[200] = {}; //ï¿½Cï¿½Ó‹Oï¿½ï¿½ï¿½Ê’uï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½
++float vs, vs0, as, t, angs;	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½x, ï¿½ï¿½ï¿½ï¿½ï¿½xï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½x, ï¿½pï¿½x
++float vr, vr0, ar, angr;	// ï¿½ó‰¹“_ï¿½ï¿½ï¿½x, ï¿½ï¿½ï¿½ï¿½ï¿½xï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½x, ï¿½pï¿½x
++float2 *SPos, *RPos;		// ï¿½ï¿½ï¿½ï¿½/ï¿½ó‰¹“_ï¿½Ê’u
+ int Nsrc, Nrcv;
+ 
+ #include "WE-FDTD.h"
+@@ -67,7 +67,7 @@ int Nsrc, Nrcv;
+ int main(int argc, char* argv[]) 
+ {
+ 
+-	// MPI‰Šú‰»
++	// MPIï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ 	int    resultlen;
+ 	char   proc_name[MPI_MAX_PROCESSOR_NAME];
+ 
+@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
+ 	MPI_Comm_rank(MPI_COMM_WORLD, &inode);
+ 	MPI_Get_processor_name( proc_name, &resultlen );
+ 
+-	// ƒ‚ƒfƒ‹ƒf[ƒ^“Ç‚İ‚İ
++	// ï¿½ï¿½ï¿½fï¿½ï¿½ï¿½fï¿½[ï¿½^ï¿½Ç‚İï¿½ï¿½ï¿½
+ 	float th1, th2, al1, al2, b1, b2, d1, d2;
+ 	ReadModel(argc, argv);
+ 	
+@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
+ 			printf(" Receiver: linear at v0 = %6.2f(m/s), a = %6.2f(m/s^2), theta = %3.0f(deg.)\n", vr0, ar, angr);
+ 	}
+ 
+-	// ƒfƒoƒCƒX‰Šú‰»
++	// ï¿½fï¿½oï¿½Cï¿½Xï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ 	int Num_gpu = 0;
+ 	cudaGetDeviceCount(&Num_gpu);
+ 	cudaDeviceProp dev;
+@@ -153,7 +153,7 @@ int main(int argc, char* argv[])
+ 	MPI_Barrier(MPI_COMM_WORLD);
+ 
+ 
+-	// 1ƒuƒƒbƒNBlock_x*Block_y‚ÌƒXƒŒƒbƒh”‚Å•À—ñŒvZ
++	// 1ï¿½uï¿½ï¿½ï¿½bï¿½NBlock_x*Block_yï¿½ÌƒXï¿½ï¿½ï¿½bï¿½hï¿½ï¿½ï¿½Å•ï¿½ï¿½ï¿½vï¿½Z
+ 	MPI_Barrier(MPI_COMM_WORLD);
+ 	int Nydiv = Ndiv.y / Nreg;
+ 	int Nygpu = Nydiv + Block.y;
+@@ -166,17 +166,17 @@ int main(int argc, char* argv[])
+ 	}
+ 
+ 
+-	// ƒzƒXƒgã‚ÉfloatŒ^‚Ìƒƒ‚ƒŠ‚ğŠm•Û‚·‚é
++	// ï¿½zï¿½Xï¿½gï¿½ï¿½ï¿½floatï¿½^ï¿½Ìƒï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½mï¿½Û‚ï¿½ï¿½ï¿½
+ 	int Nbm;
+ 	Nbm = Ndiv.x;
+-	float* dpt = (float*) malloc(sizeof(float)*Boff*Nbm*Ngpu);		// OMP—p‹«ŠEƒf[ƒ^(ã‘w)
+-	float* dpb = (float*) malloc(sizeof(float)*Boff*Nbm*Ngpu);		// OMP—p‹«ŠEƒf[ƒ^(‰º‘w)
+-	float* dppt = (float*) malloc(sizeof(float)*Boff*Nbm*Ngpu);		// OMP—p‹«ŠEƒf[ƒ^(ã‘w)
+-	float* dppb = (float*) malloc(sizeof(float)*Boff*Nbm*Ngpu);		// OMP—p‹«ŠEƒf[ƒ^(‰º‘w)
+-	float* mpt = (float*) malloc(sizeof(float)*Boff*Nbm);			// MPI—p‹«ŠEƒf[ƒ^(ã‘w)
+-	float* mppt = (float*) malloc(sizeof(float)*Boff*Nbm);			// MPI—p‹«ŠEƒf[ƒ^(ã‘w)
+-	float* mpb = (float*) malloc(sizeof(float)*Boff*Nbm);			// MPI—p‹«ŠEƒf[ƒ^(‰º‘w)
+-	float* mppb = (float*) malloc(sizeof(float)*Boff*Nbm);			// MPI—p‹«ŠEƒf[ƒ^(‰º‘w)
++	float* dpt = (float*) malloc(sizeof(float)*Boff*Nbm*Ngpu);		// OMPï¿½pï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^(ï¿½ï¿½w)
++	float* dpb = (float*) malloc(sizeof(float)*Boff*Nbm*Ngpu);		// OMPï¿½pï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^(ï¿½ï¿½ï¿½w)
++	float* dppt = (float*) malloc(sizeof(float)*Boff*Nbm*Ngpu);		// OMPï¿½pï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^(ï¿½ï¿½w)
++	float* dppb = (float*) malloc(sizeof(float)*Boff*Nbm*Ngpu);		// OMPï¿½pï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^(ï¿½ï¿½ï¿½w)
++	float* mpt = (float*) malloc(sizeof(float)*Boff*Nbm);			// MPIï¿½pï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^(ï¿½ï¿½w)
++	float* mppt = (float*) malloc(sizeof(float)*Boff*Nbm);			// MPIï¿½pï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^(ï¿½ï¿½w)
++	float* mpb = (float*) malloc(sizeof(float)*Boff*Nbm);			// MPIï¿½pï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^(ï¿½ï¿½ï¿½w)
++	float* mppb = (float*) malloc(sizeof(float)*Boff*Nbm);			// MPIï¿½pï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^(ï¿½ï¿½ï¿½w)
+ 	for(int i = 0; i < Boff*Nbm*Ngpu; ++i) {
+ 		dpt[i] = dpb[i] = dppt[i] = dppb[i] = 0;
+ 	}
+@@ -185,11 +185,11 @@ int main(int argc, char* argv[])
+ 	}
+ 
+ 
+-	// ŠÏ‘ª”gŒ`—p
++	// ï¿½Ï‘ï¿½ï¿½gï¿½`ï¿½p
+ 	Nwave = 100;
+-	float* wave  = (float*) malloc(sizeof(float)*Nwave*Nobs*3);	// ŠÏ‘ª“_‰¹ˆ³”gŒ`
+-	char WaveName[200] = {};			// ”gŒ`ƒf[ƒ^ƒtƒ@ƒCƒ‹–¼
+-	char WaveNamebin[200] = {};			// ”gŒ`ƒf[ƒ^ƒtƒ@ƒCƒ‹–¼
++	float* wave  = (float*) malloc(sizeof(float)*Nwave*Nobs*3);	// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½`
++	char WaveName[200] = {};			// ï¿½gï¿½`ï¿½fï¿½[ï¿½^ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½
++	char WaveNamebin[200] = {};			// ï¿½gï¿½`ï¿½fï¿½[ï¿½^ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½
+ 	for(int i = 0; i < Nwave*Nobs*3; i++)
+ 		wave[i] = 0;
+ 		
+@@ -213,10 +213,10 @@ int main(int argc, char* argv[])
+ 	fwrite(&Nt, sizeof(int), 1, fpb);
+ 
+ 
+-	// ‰¹ˆ³•ª•z}—p”z—ñ
++	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½zï¿½}ï¿½pï¿½zï¿½ï¿½
+ 	pp = (float*) malloc(sizeof(float)*Ndiv.x*Ndiv.y);
+ 
+-	// OMPŠJn
++	// OMPï¿½Jï¿½n
+ 	printf(" Calculation start!\n");
+ 	MPI_Barrier(MPI_COMM_WORLD);
+ 	omp_set_num_threads(Ngpu);			// create as many CPU threads as there are CUDA devices
+@@ -240,7 +240,7 @@ int main(int argc, char* argv[])
+ 		int Nbnd = 0;
+ 		unsigned long long id, Nem;
+ 		int iReg, nbx;
+-		float* pobs  = (float*) malloc(sizeof(float));			 	// ŠÏ‘ª“_‰¹ˆ³
++		float* pobs  = (float*) malloc(sizeof(float));			 	// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½
+ 
+ 		Nem = (unsigned long long)Ndiv.x * Nygpu;
+ 		if(Ngpu == 1)
+@@ -248,7 +248,7 @@ int main(int argc, char* argv[])
+ 		else
+ 			iReg = inode * Ngpu + gpu_id;
+ 
+-		float* hwave = (float*)malloc(sizeof(float)*Nwave*Nobs*3);	// ŠÏ‘ª“_‰¹ˆ³”gŒ`
++		float* hwave = (float*)malloc(sizeof(float)*Nwave*Nobs*3);	// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½`
+ 		for(int i = 0; i < Nwave*Nobs*3; i++)
+ 			hwave[i] = 0;
+ 
+@@ -276,31 +276,31 @@ int main(int argc, char* argv[])
+ 		}
+ 
+ 
+-		// ƒfƒoƒCƒXã‚Éƒƒ‚ƒŠ‚ğŠm•Û‚·‚é
++		// ï¿½fï¿½oï¿½Cï¿½Xï¿½ï¿½Éƒï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½mï¿½Û‚ï¿½ï¿½ï¿½
+ 		float *dp, *dpp, *tmp, *dRef, *dp2, *dux, *duy;
+ 		unsigned char *dCell;
+ 		unsigned long long *dBid;
+ 		unsigned short *dBnode;
+ 		float *dwave, *ddrv;
+-		Pnt *dobs;				// ŠÏ‘ª“_À•W
+-//		int3 *dobs;				// ŠÏ‘ª“_À•W
++		Pnt *dobs;				// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½W
++//		int3 *dobs;				// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½W
+ 		
+-		cudaMalloc((void**) &dp,    sizeof(float)*Nem);			// ‰¹ˆ³
+-		cudaMalloc((void**) &dpp,   sizeof(float)*Nem);			// 1ƒXƒeƒbƒv‘O‰¹ˆ³
+-		cudaMalloc((void**) &dp2,   sizeof(float)*6*(Ndiv.x+Ndiv.y));			// 1ƒXƒeƒbƒv‘O‰¹ˆ³
+-		cudaMalloc((void**) &dobs,  sizeof(Pnt)*Nobs*5);			// ŠÏ‘ª”gŒ`—p
+-		cudaMalloc((void**) &dwave, sizeof(float)*Nwave*Nobs*3);	// ŠÏ‘ª”gŒ`—p
+-		cudaMalloc((void**) &dux, sizeof(float)*Nobs);	// ŠÏ‘ª”gŒ`—±q‘¬“xx—p
+-		cudaMalloc((void**) &duy, sizeof(float)*Nobs);	// ŠÏ‘ª”gŒ`—±q‘¬“xy—p
+-		cudaMalloc((void**) &ddrv, sizeof(float)*Nt);	// ŠÏ‘ª”gŒ`—p
+-		cudaMalloc((void**) &dRef, sizeof(float)*4);			// ”½ËŒW”
++		cudaMalloc((void**) &dp,    sizeof(float)*Nem);			// ï¿½ï¿½ï¿½ï¿½
++		cudaMalloc((void**) &dpp,   sizeof(float)*Nem);			// 1ï¿½Xï¿½eï¿½bï¿½vï¿½Oï¿½ï¿½ï¿½ï¿½
++		cudaMalloc((void**) &dp2,   sizeof(float)*6*(Ndiv.x+Ndiv.y));			// 1ï¿½Xï¿½eï¿½bï¿½vï¿½Oï¿½ï¿½ï¿½ï¿½
++		cudaMalloc((void**) &dobs,  sizeof(Pnt)*Nobs*5);			// ï¿½Ï‘ï¿½ï¿½gï¿½`ï¿½p
++		cudaMalloc((void**) &dwave, sizeof(float)*Nwave*Nobs*3);	// ï¿½Ï‘ï¿½ï¿½gï¿½`ï¿½p
++		cudaMalloc((void**) &dux, sizeof(float)*Nobs);	// ï¿½Ï‘ï¿½ï¿½gï¿½`ï¿½ï¿½ï¿½qï¿½ï¿½ï¿½xxï¿½p
++		cudaMalloc((void**) &duy, sizeof(float)*Nobs);	// ï¿½Ï‘ï¿½ï¿½gï¿½`ï¿½ï¿½ï¿½qï¿½ï¿½ï¿½xyï¿½p
++		cudaMalloc((void**) &ddrv, sizeof(float)*Nt);	// ï¿½Ï‘ï¿½ï¿½gï¿½`ï¿½p
++		cudaMalloc((void**) &dRef, sizeof(float)*4);			// ï¿½ï¿½ï¿½ËŒWï¿½ï¿½
+ 		if(iCell > 0){
+-			cudaMalloc((void**) &dCell, sizeof(unsigned char)*Nem);			// Œ`óƒf[ƒ^
+-			cudaMalloc((void**) &dBid, sizeof(unsigned long long)*Nbnd);	// ‹«ŠEğŒidƒf[ƒ^
+-			cudaMalloc((void**) &dBnode, sizeof(unsigned short)*Nbnd);		// ‹«ŠE”½ËŒW”ƒf[ƒ^
++			cudaMalloc((void**) &dCell, sizeof(unsigned char)*Nem);			// ï¿½`ï¿½ï¿½fï¿½[ï¿½^
++			cudaMalloc((void**) &dBid, sizeof(unsigned long long)*Nbnd);	// ï¿½ï¿½ï¿½Eï¿½ï¿½ï¿½ï¿½idï¿½fï¿½[ï¿½^
++			cudaMalloc((void**) &dBnode, sizeof(unsigned short)*Nbnd);		// ï¿½ï¿½ï¿½Eï¿½ï¿½ï¿½ËŒWï¿½ï¿½ï¿½fï¿½[ï¿½^
+ 		}
+ 
+-		// ƒfƒoƒCƒXƒƒ‚ƒŠ‚Ì‰Šú‰»
++		// ï¿½fï¿½oï¿½Cï¿½Xï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½
+ 		#pragma omp barrier
+ 		#pragma omp single
+ 		MPI_Barrier(MPI_COMM_WORLD);
+@@ -358,7 +358,7 @@ int main(int argc, char* argv[])
+ 		float4 Driv;
+ 		Driv.x = Driv.y = Driv.w = 0.0;
+ 		float phi;
+-		phi   = M_PI / 180. * Src.p;	// …•½Šp
++		phi   = M_PI / 180. * Src.p;	// ï¿½ï¿½ï¿½ï¿½ï¿½p
+ 		
+ 		int Nyoff, Nys, Nye;
+ 		Nyoff = Nydiv * iReg - Boff;
+@@ -376,13 +376,13 @@ int main(int argc, char* argv[])
+ 		#pragma omp single
+ 		MPI_Barrier(MPI_COMM_WORLD);
+ 		if(inode == 0 && (Nreg == 1 || gpu_id == 0)){
+-			// ƒ^ƒCƒ}[‚ğì¬‚µ‚ÄŒv‘ªŠJn
++			// ï¿½^ï¿½Cï¿½}ï¿½[ï¿½ï¿½ï¿½ì¬ï¿½ï¿½ï¿½ÄŒvï¿½ï¿½ï¿½Jï¿½n
+ 			cudaEventCreate(&start);
+ 			cudaEventCreate(&stop);
+ 			cudaEventRecord(start,0);
+ 		}
+ 
+-		// ŠÔƒ‹[ƒv
++		// ï¿½ï¿½ï¿½Ôƒï¿½ï¿½[ï¿½v
+ 		for(int it = 0; it < Nt; it++){
+ 
+ 			itt = it % Nwave;
+@@ -394,7 +394,7 @@ int main(int argc, char* argv[])
+ 					printf("cuda debug:: line:%d rank:%d gpu:%d msg:%s\n", __LINE__, inode, gpu_id, cudaGetErrorString(err));
+ 			}
+ 
+-			// ‰¹Œ¹ŒvZ
++			// ï¿½ï¿½ï¿½ï¿½ï¿½vï¿½Z
+ 			t = it * dt;
+ 
+ 			dr = 0;
+@@ -435,7 +435,7 @@ int main(int argc, char* argv[])
+ 
+ 			ABC_Higdon_store<<<grid, threads>>>(dpp, dp2, Ndiv.x, Nyorg, Nyoff, Nys, Nye);
+ 
+-			// —ÌˆæŒvZ
++			// ï¿½Ìˆï¿½vï¿½Z
+ 			cudaThreadSynchronize();
+ 			#pragma omp barrier
+ 			#pragma omp single
+@@ -461,7 +461,7 @@ int main(int argc, char* argv[])
+ 			#pragma omp barrier
+ 			#pragma omp single
+ 			MPI_Barrier(MPI_COMM_WORLD);
+-			// ‹«ŠEŒvZ
++			// ï¿½ï¿½ï¿½Eï¿½vï¿½Z
+ 			if(iCell > 0 && Nbnd > 0){
+ 
+ 				CE_boundary_Plane2d<<<gridb, threadsb>>>(dp, dpp, aref, dCell, dBid, dBnode, Ndiv.x, cfl, Nbnd);
+@@ -480,7 +480,7 @@ int main(int argc, char* argv[])
+ 			if(Nreg > 1)
+ 				ExcangeBoundary(dpt, dppt, dpb, dppb, dp, dpp, mpt, mppt, mpb, mppb, Nem, Nbm, Nydiv, inode, gpu_id, Nygpu);
+ 
+-			// ŠÏ‘ª“_‰¹ˆ³æ“¾
++			// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½ï¿½æ“¾
+ 			if(iwave > 0){
+ 				if(iReceiver == 0) ObssEcho<<<gridw, threadsw>>>(dp, Ndiv, Nydiv, Block, iReg, dobs, dwave, dux, duy, cfl, Nwave, itt);
+ //				if(iReceiver == 0) WaveObss<<<gridw, threadsw>>>(dp, Ndiv, Nydiv, Block, iReg, dobs, dwave, du, cfl, Nwave, itt);
+@@ -506,7 +506,7 @@ int main(int argc, char* argv[])
+ 			#pragma omp single
+ 			MPI_Barrier(MPI_COMM_WORLD);
+ 
+-			// ‰¹ˆ³•ª•z}•Û‘¶
++			// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½zï¿½}ï¿½Û‘ï¿½
+ 			if(iplane > 0 && it % iptime == 0 && it > 0){
+ 				ipn = 1;
+ 				Ndx = ceil((double)Ndiv.x / istx);
+@@ -519,7 +519,7 @@ int main(int argc, char* argv[])
+ 
+ 		}
+ 		
+-		//ƒ^ƒCƒ}[‚ğ’â~‚µ‚©‚©‚Á‚½ŠÔ‚ğ•\¦
++		//ï¿½^ï¿½Cï¿½}ï¿½[ï¿½ï¿½ï¿½~ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô‚ï¿½\ï¿½ï¿½
+ 		if(inode == 0 && (Nreg == 1 || gpu_id == 0)){
+ 			float elapsed_time = 0.0;
+ 			cudaEventRecord(stop,0);
+diff --git a/reinforcement_learning/environments/Bat2d1.1AI2/WE-FDTD.exe b/reinforcement_learning/environments/Bat2d1.1AI2/WE-FDTD.exe
+old mode 100644
+new mode 100755
+index 80f49ce..e82c08b
+Binary files a/reinforcement_learning/environments/Bat2d1.1AI2/WE-FDTD.exe and b/reinforcement_learning/environments/Bat2d1.1AI2/WE-FDTD.exe differ
+diff --git a/reinforcement_learning/environments/Bat2d1.1AI2/WE-FDTD.h b/reinforcement_learning/environments/Bat2d1.1AI2/WE-FDTD.h
+old mode 100644
+new mode 100755
+index 8d1558c..eccb2f9
+--- a/reinforcement_learning/environments/Bat2d1.1AI2/WE-FDTD.h
++++ b/reinforcement_learning/environments/Bat2d1.1AI2/WE-FDTD.h
+@@ -4,7 +4,7 @@ void ReadModel(int argc, char* argv[])
+ 	float ang;
+ 	int dum;
+ 
+-//	SrcName = (char*) malloc(sizeof(char)*20); 			// ‰¹Œ¹”gŒ`ƒtƒ@ƒCƒ‹–¼
++//	SrcName = (char*) malloc(sizeof(char)*20); 			// ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½`ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½
+ 	FILE *fi  = fopen("input.dat","r");
+ 	if(fi == NULL){
+ 		printf("error:: No input file!\n");
+@@ -13,17 +13,17 @@ void ReadModel(int argc, char* argv[])
+ 	}
+ 
+ 	if(fgets(buf, sizeof(buf), fi) != NULL);
+-	sscanf(buf, "%d", &dum);							// 1s–Ú‚ÍƒRƒƒ“ƒg
++	sscanf(buf, "%d", &dum);							// 1ï¿½sï¿½Ú‚ÍƒRï¿½ï¿½ï¿½ï¿½ï¿½g
+ 	
+ 	Scheme = 0;
+ 	Boundary = 0;
+ 	if(fgets(buf, sizeof(buf), fi) != NULL);
+-	sscanf(buf, "%d %d %d", &iCell, &Scheme, &Boundary);	// ”CˆÓ‹«ŠE(0:‹éŒ`C1:”CˆÓ)Cè–@(0:SLF, 1:IWB), ‹«ŠEğŒ(0:Mur1Ÿ,1:Higdon2Ÿ)
++	sscanf(buf, "%d %d %d", &iCell, &Scheme, &Boundary);	// ï¿½Cï¿½Ó‹ï¿½ï¿½E(0:ï¿½ï¿½`ï¿½C1:ï¿½Cï¿½ï¿½)ï¿½Cï¿½ï¿½@(0:SLF, 1:IWB), ï¿½ï¿½ï¿½Eï¿½ï¿½ï¿½ï¿½(0:Mur1ï¿½ï¿½,1:Higdon2ï¿½ï¿½)
+ 
+ 	if(fgets(buf, sizeof(buf), fi) != NULL)
+-	sscanf(buf, "%d %d %s", &Ndiv.x, &Ndiv.y, CellName);	// •ªŠ„”, ƒZƒ‹ƒf[ƒ^ƒtƒ@ƒCƒ‹–¼
++	sscanf(buf, "%d %d %s", &Ndiv.x, &Ndiv.y, CellName);	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½Zï¿½ï¿½ï¿½fï¿½[ï¿½^ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½
+ 
+-	if(iCell > 0){										// ”CˆÓƒ{ƒNƒZƒ‹ƒ‚ƒfƒ‹
++	if(iCell > 0){										// ï¿½Cï¿½Óƒ{ï¿½Nï¿½Zï¿½ï¿½ï¿½ï¿½ï¿½fï¿½ï¿½
+ 		FILE *fim  = fopen(CellName, "rb");
+ 		if(fim == NULL){
+ 			if(inode == 0) printf("error:: No CELL file!\n");
+@@ -31,10 +31,10 @@ void ReadModel(int argc, char* argv[])
+ 			exit(1);
+ 		}
+ 		if(fgets(buf, sizeof(buf), fim) != NULL)
+-		sscanf(buf, "%d %d", &Ndiv.x, &Ndiv.y);			// •ªŠ„”‚¾‚¯æ‚É“Ç‚İ‚Ş
++		sscanf(buf, "%d %d", &Ndiv.x, &Ndiv.y);			// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É“Ç‚İï¿½ï¿½ï¿½
+ 		fclose(fim);
+ 	}
+-	else{												// ‹éŒ`ƒ‚ƒfƒ‹
++	else{												// ï¿½ï¿½`ï¿½ï¿½ï¿½fï¿½ï¿½
+ 	}
+ 	Block.x = 4;
+ 	Block.y = 4;
+@@ -47,7 +47,7 @@ void ReadModel(int argc, char* argv[])
+ 	sscanf(buf, "%f %f %f %f %f", &Ref[0], &Ref[1], &Ref[2], &Ref[3], &aref);
+ 	
+ 	if(fgets(buf, sizeof(buf), fi) != NULL);
+-	sscanf(buf, "%f %f %f", &cfl, &dl, &c0);				// ƒ¢Cƒ¢t, c0
++	sscanf(buf, "%f %f %f", &cfl, &dl, &c0);				// ï¿½ï¿½ï¿½Cï¿½ï¿½t, c0
+ 	if(Scheme == 0){
+ 		printf("2D SLF method\n");
+ 		if(cfl == 0) cfl = 1. / sqrt(2);
+@@ -61,16 +61,16 @@ void ReadModel(int argc, char* argv[])
+ 	dt = cfl / c0 * dl;
+ 	
+ 	if(fgets(buf, sizeof(buf), fi) != NULL);
+-	sscanf(buf, "%d", &Nt);								// ŒvZƒXƒeƒbƒv”
++	sscanf(buf, "%d", &Nt);								// ï¿½vï¿½Zï¿½Xï¿½eï¿½bï¿½vï¿½ï¿½
+ 	
+ 	if(fgets(buf, sizeof(buf), fi) != NULL);
+-	sscanf(buf, "%d %s", &iSource, SPosName);			// ˆÚ“®Œ`‘Ô, ‰¹Œ¹À•Wƒtƒ@ƒCƒ‹–¼
++	sscanf(buf, "%d %s", &iSource, SPosName);			// ï¿½Ú“ï¿½ï¿½`ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Wï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½
+ 
+ 	vs0 = 0;
+ 	as = 0;
+ 	angs = 0;
+ 	if(fgets(buf, sizeof(buf), fi) != NULL);
+-	sscanf(buf, "%d %d %f %f %f %f", &Src.x, &Src.y, &Src.p, &vs0, &as, &angs);	// ‰¹Œ¹ˆÊ’u•ûŒü, ‰¹Œ¹‘¬“xC‰Á‘¬“xC•ûŒü
++	sscanf(buf, "%d %d %f %f %f %f", &Src.x, &Src.y, &Src.p, &vs0, &as, &angs);	// ï¿½ï¿½ï¿½ï¿½ï¿½Ê’uï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½xï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½xï¿½Cï¿½ï¿½ï¿½ï¿½
+ 	if(argc > 1){
+ 		Src.x = atoi(argv[1]);
+ 		Src.y = atoi(argv[2]);
+@@ -81,7 +81,7 @@ void ReadModel(int argc, char* argv[])
+ 	int it = 0;
+ 	Nsrc = Nt;
+ 	if(iSource == 1){
+-		SPos = (float2*) malloc(sizeof(float2)*Nt); 		// ŠÏ‘ª“_À•W
++		SPos = (float2*) malloc(sizeof(float2)*Nt); 		// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½W
+ 
+ 		FILE *fpo = fopen(SPosName, "r");
+ 		if(fpo == NULL){
+@@ -105,14 +105,14 @@ void ReadModel(int argc, char* argv[])
+ 	}
+ 	
+ 	if(fgets(buf, sizeof(buf), fi) != NULL);
+-	sscanf(buf, "%f %d %s", &freq, &Nd, SrcName);					// ‰¹Œ¹ü”g”CüŠú”(0: ˜A‘±, -1: ƒCƒ“ƒpƒ‹ƒX)
++	sscanf(buf, "%f %d %s", &freq, &Nd, SrcName);					// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(0: ï¿½Aï¿½ï¿½, -1: ï¿½Cï¿½ï¿½ï¿½pï¿½ï¿½ï¿½X)
+ 	
+ 	Nw = 0;
+-	drv = (float*) malloc(sizeof(float)*Nt); 			// ‰¹Œ¹”gŒ`
++	drv = (float*) malloc(sizeof(float)*Nt); 			// ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½`
+ 	for(int it = 0; it < Nt; it++){
+ 		drv[it] = 0.;
+ 	}
+-	if(freq == -1){										// ‰¹Œ¹ƒtƒ@ƒCƒ‹‚©‚ç”gŒ`“ü—Í
++	if(freq == -1){										// ï¿½ï¿½ï¿½ï¿½ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½`ï¿½ï¿½ï¿½ï¿½
+ 		printf("%s\n", SrcName);
+ 		FILE *fi2  = fopen(SrcName, "r");
+ 		for(int it = 0; it < Nt; it++){
+@@ -124,18 +124,18 @@ void ReadModel(int argc, char* argv[])
+ 		}
+ 		fclose(fi2);
+ 	}
+-	else if(freq == 0){								// ƒCƒ“ƒpƒ‹ƒX
++	else if(freq == 0){								// ï¿½Cï¿½ï¿½ï¿½pï¿½ï¿½ï¿½X
+ 		drv[0] = 1.;
+ 		Nw = 1;
+ 	}
+ 	else{
+-		if(Nd == 0){										// ˜A‘±”g
++		if(Nd == 0){										// ï¿½Aï¿½ï¿½ï¿½g
+ 			for(int it = 0; it < Nt; it++){
+ 				drv[it] = sin(2 * 3.1415926 * freq * it * dt);
+ 			}
+ 			Nw = Nt;
+ 		}
+-		else if(Nd == 1){		// ”÷•ªƒKƒEƒX
++		else if(Nd == 1){		// ï¿½ï¿½ï¿½ï¿½ï¿½Kï¿½Eï¿½X
+ 			double wl = 2.0 / freq / dt;
+ 			Nw = wl;
+ 			if(Nw > Nt) Nw = Nt;
+@@ -144,7 +144,7 @@ void ReadModel(int argc, char* argv[])
+ 	//			printf("%f\n", drv[it]);
+ 			}
+ 		}
+-		else{					// ƒg[ƒ“ƒo[ƒXƒg
++		else{					// ï¿½gï¿½[ï¿½ï¿½ï¿½oï¿½[ï¿½Xï¿½g
+ 			Nw = 1.0 / freq / dt * Nd;
+ 			if(Nw > Nt) Nw = Nt;
+ 			for(int it = 0; it < Nw; it++){
+@@ -154,13 +154,13 @@ void ReadModel(int argc, char* argv[])
+ 	}
+ 
+ 	if(fgets(buf, sizeof(buf), fi) != NULL);
+-	sscanf(buf, "%d %s", &iReceiver, RPosName);			// ˆÚ“®Œ`‘Ô, ó‰¹“_À•Wƒtƒ@ƒCƒ‹–¼
++	sscanf(buf, "%d %s", &iReceiver, RPosName);			// ï¿½Ú“ï¿½ï¿½`ï¿½ï¿½, ï¿½ó‰¹“_ï¿½ï¿½ï¿½Wï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½
+ 
+ 	float sep = 0.01;
+ 	float obsx, obsy;
+ 	Nobs = 37;
+ 	if(iReceiver == 0){
+-		obs  = (Pnt*) malloc(sizeof(Pnt)*Nobs); 			// ŠÏ‘ª“_À•W
++		obs  = (Pnt*) malloc(sizeof(Pnt)*Nobs); 			// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½W
+ 		for(int io = 0; io < Nobs; io++){
+ 			ang = io * 10 * 3.1415926 / 180.;
+ 			obsx = (Src.x) * dl + sep * cos(ang);
+@@ -174,7 +174,7 @@ void ReadModel(int argc, char* argv[])
+ 	it = 0;
+ 	Nrcv = Nt;
+ 	if(iReceiver == 1){
+-		RPos = (float2*) malloc(sizeof(float2)*Nt); 		// ŠÏ‘ª“_À•W
++		RPos = (float2*) malloc(sizeof(float2)*Nt); 		// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½W
+ 
+ 		FILE *fpo = fopen(RPosName, "r");
+ 		if(fpo == NULL){
+@@ -192,17 +192,17 @@ void ReadModel(int argc, char* argv[])
+ 	}
+ 	if(iReceiver == 2){
+ 		if(fgets(buf, sizeof(buf), fi) != NULL);
+-		sscanf(buf, "%d %d %f %f %f %f", &Rcv.x, &Rcv.y, &Rcv.p, &vr0, &ar, &angr);	// ‰¹Œ¹ˆÊ’u•ûŒü, ‰¹Œ¹‘¬“xC‰Á‘¬“xC•ûŒü
++		sscanf(buf, "%d %d %f %f %f %f", &Rcv.x, &Rcv.y, &Rcv.p, &vr0, &ar, &angr);	// ï¿½ï¿½ï¿½ï¿½ï¿½Ê’uï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½xï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½xï¿½Cï¿½ï¿½ï¿½ï¿½
+ 	}
+ 
+ 	if(fgets(buf, sizeof(buf), fi) != NULL)
+-		sscanf(buf, "%d %d", &iplane, &iwave);		// ƒRƒ“ƒ^[–ÊC”gŒ`o—Í
++		sscanf(buf, "%d %d", &iplane, &iwave);		// ï¿½Rï¿½ï¿½ï¿½^ï¿½[ï¿½ÊCï¿½gï¿½`ï¿½oï¿½ï¿½
+ 	if(fgets(buf, sizeof(buf), fi) != NULL)
+-		sscanf(buf, "%d %d %d %d %d", &iptime, &istx, &isty, &ipts, &ipte);								// ƒRƒ“ƒ^[ŠÔˆø‚«
++		sscanf(buf, "%d %d %d %d %d", &iptime, &istx, &isty, &ipts, &ipte);								// ï¿½Rï¿½ï¿½ï¿½^ï¿½[ï¿½Ôˆï¿½ï¿½ï¿½
+ 	if(ipte == 0) ipte = Nt;
+ 	
+ 	if(fgets(buf, sizeof(buf), fi) != NULL);
+-	sscanf(buf, "%d %d", &Ngpu, &GpuId);							// GPU”/ƒm[ƒh, 1GPU‚Ì‚Æ‚«‚ÌGPU ID
++	sscanf(buf, "%d %d", &Ngpu, &GpuId);							// GPUï¿½ï¿½/ï¿½mï¿½[ï¿½h, 1GPUï¿½Ì‚Æ‚ï¿½ï¿½ï¿½GPU ID
+ 	
+ 	if(Ngpu < 1){
+ 		if(inode == 0) printf("error:: Invalid number of GPUs.: %d\n", Ngpu);
+@@ -211,7 +211,7 @@ void ReadModel(int argc, char* argv[])
+ 	}
+ 	Nreg = Nnode * Ngpu;
+ 		
+-	// •ªŠ„ƒ`ƒFƒbƒN
++	// ï¿½ï¿½ï¿½ï¿½ï¿½`ï¿½Fï¿½bï¿½N
+ 	int Fx, Fy;
+ 	Nyorg = Ndiv.y;
+ 	if(Ndiv.y % (Nreg * Block.y) != 0)
+@@ -237,13 +237,13 @@ int ReadCell(unsigned char* Cell, int iReg, int Nydiv, int Nygpu)
+ 	int Nbnd = 0, dum;
+ 	char bufm[200];
+ 		
+-	FILE *fim  = fopen(CellName, "rb");		// ƒ{ƒNƒZƒ‹ƒf[ƒ^
++	FILE *fim  = fopen(CellName, "rb");		// ï¿½{ï¿½Nï¿½Zï¿½ï¿½ï¿½fï¿½[ï¿½^
+ 	if(fim == NULL){
+ 		printf("error:: No CELL file!\n");
+ 		exit(1);
+ 	}
+ 
+-	// ƒZƒ‹ƒf[ƒ^“Ç‚İ‚İ
++	// ï¿½Zï¿½ï¿½ï¿½fï¿½[ï¿½^ï¿½Ç‚İï¿½ï¿½ï¿½
+ 	if(iReg == 0) printf(" Reading cell data: %s\n", CellName);
+ 	int* nn = (int*)malloc(sizeof(int)*Ndiv.x);
+ 	unsigned char* in = (unsigned char*)malloc(sizeof(unsigned char)*Ndiv.x);
+@@ -296,7 +296,7 @@ int ReadCell(unsigned char* Cell, int iReg, int Nydiv, int Nygpu)
+ 						id = (unsigned long long)Ndiv.x * j + ix;
+ 						Cell[id] = in[i];
+ 						ix++;
+-						if(Cell[id] > 1) Nbnd++;		// ‹«ŠEğŒƒf[ƒ^”
++						if(Cell[id] > 1) Nbnd++;		// ï¿½ï¿½ï¿½Eï¿½ï¿½ï¿½ï¿½ï¿½fï¿½[ï¿½^ï¿½ï¿½
+ 					}
+ 				}
+ 			}
+@@ -842,7 +842,7 @@ void ExcangeBoundary(float* dpt, float* dppt, float* dpb, float* dppb, float* dp
+ 	float* mpt, float* mppt, float* mpb, float* mppb, int Nem, int Nbm, int Nydiv, int inode, 
+ 	int gpu_id, int Nygpu)
+ {
+-	// ‹«ŠEƒf[ƒ^“]‘—(ƒfƒoƒCƒX¨ƒzƒXƒg)
++	// ï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^ï¿½]ï¿½ï¿½(ï¿½fï¿½oï¿½Cï¿½Xï¿½ï¿½ï¿½zï¿½Xï¿½g)
+ 	if(Nnode > 1 || Ngpu > 1){
+ 		cudaMemcpy(dpt+ 2*Nbm*gpu_id, dp+ Nbm*(Nygpu-Block.y), sizeof(float)*2*Nbm, cudaMemcpyDeviceToHost);
+ 		cudaMemcpy(dppt+2*Nbm*gpu_id, dpp+Nbm*(Nygpu-Block.y), sizeof(float)*2*Nbm, cudaMemcpyDeviceToHost);
+@@ -855,7 +855,7 @@ void ExcangeBoundary(float* dpt, float* dppt, float* dpb, float* dppb, float* dp
+ 	#pragma omp single
+ 	MPI_Barrier(MPI_COMM_WORLD);
+ 
+-	// ã‘w‹«ŠEƒf[ƒ^“]‘—(ƒm[ƒhŠÔ)
++	// ï¿½ï¿½wï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^ï¿½]ï¿½ï¿½(ï¿½mï¿½[ï¿½hï¿½ï¿½)
+ 	if(Nnode > 1){
+ 		#pragma omp single
+ 		{
+@@ -880,7 +880,7 @@ void ExcangeBoundary(float* dpt, float* dppt, float* dpb, float* dppb, float* dp
+ 	#pragma omp single
+ 	MPI_Barrier(MPI_COMM_WORLD);
+ 
+-	// ‰º‘w‹«ŠEƒf[ƒ^“]‘—(ƒm[ƒhŠÔ)
++	// ï¿½ï¿½ï¿½wï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^ï¿½]ï¿½ï¿½(ï¿½mï¿½[ï¿½hï¿½ï¿½)
+ 	if(Nnode > 1){
+ 		#pragma omp single
+ 		{
+@@ -905,7 +905,7 @@ void ExcangeBoundary(float* dpt, float* dppt, float* dpb, float* dppb, float* dp
+ 	#pragma omp single
+ 	MPI_Barrier(MPI_COMM_WORLD);
+ 
+-	// ‹«ŠEƒf[ƒ^“]‘—(ƒzƒXƒg¨ƒfƒoƒCƒX)
++	// ï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^ï¿½]ï¿½ï¿½(ï¿½zï¿½Xï¿½gï¿½ï¿½ï¿½fï¿½oï¿½Cï¿½X)
+ 	if(gpu_id > 0){
+ 		cudaMemcpy(dp,  dpt+ 2*Nbm*(gpu_id-1), sizeof(float)*2*Nbm, cudaMemcpyHostToDevice);
+ 		cudaMemcpy(dpp, dppt+2*Nbm*(gpu_id-1), sizeof(float)*2*Nbm, cudaMemcpyHostToDevice);
+@@ -934,17 +934,17 @@ void ExcangeBoundary(float* dpt, float* dppt, float* dpb, float* dppb, float* dp
+ }
+ 
+ 
+-// ‰¹ˆ³•ª•z•Û‘¶
++// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½zï¿½Û‘ï¿½
+ void save_cross_section(float* dp, float* pp, int3 Ndiv, int inode, int gpu_id, int it, int Nydiv, int Boff, 
+ 	int iReg, int ipn, int istx, int isty)
+ {
+-	float* pobs  = (float*) malloc(sizeof(float));		 	// ŠÏ‘ª“_‰¹ˆ³
++	float* pobs  = (float*) malloc(sizeof(float));		 	// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½
+ 	int id, iy, Nd;
+ 	long long idd;
+ 	int ii;
+ 	char filename[200];
+ 
+-	// xy•½–Ê•Û‘¶
++	// xyï¿½ï¿½ï¿½Ê•Û‘ï¿½
+ 	Nd = Ndx * Ndy;
+ 	idd = 0;
+ 
+@@ -969,7 +969,7 @@ void save_cross_section(float* dp, float* pp, int3 Ndiv, int inode, int gpu_id,
+ 	#pragma omp barrier
+ 	#pragma omp single
+ 	MPI_Barrier(MPI_COMM_WORLD);
+-	// ƒm[ƒh0‚Ö“]‘—
++	// ï¿½mï¿½[ï¿½h0ï¿½Ö“]ï¿½ï¿½
+ 	if(gpu_id == 0 && Nnode > 1){
+ 		for(int ip = 1; ip < Nnode; ip++){
+ 			if(inode == ip)
+@@ -985,7 +985,7 @@ void save_cross_section(float* dp, float* pp, int3 Ndiv, int inode, int gpu_id,
+ 	MPI_Barrier(MPI_COMM_WORLD);
+ 	if(Nnode == 1 || (inode == 0 && gpu_id == 0)){
+ 		if(ipn == 0){
+-			sprintf(filename, "output%d.dat", it);	// o—Íƒtƒ@ƒCƒ‹
++			sprintf(filename, "output%d.dat", it);	// ï¿½oï¿½Íƒtï¿½@ï¿½Cï¿½ï¿½
+ 			FILE *fpo  = fopen(filename,"w");
+ 			for(int j = 0; j < Ndy; j++){
+ 				for(int i = 0; i < Ndx; i++){
+@@ -997,7 +997,7 @@ void save_cross_section(float* dp, float* pp, int3 Ndiv, int inode, int gpu_id,
+ 			fclose(fpo);
+ 		}
+ 		else{
+-			sprintf(filename, "output%d.bin", it);	// o—Íƒtƒ@ƒCƒ‹
++			sprintf(filename, "output%d.bin", it);	// ï¿½oï¿½Íƒtï¿½@ï¿½Cï¿½ï¿½
+ 			FILE *fpo  = fopen(filename,"wb");
+ 			fwrite(&Ndx, sizeof(int), 1, fpo);
+ 			fwrite(&Ndy, sizeof(int), 1, fpo);
+@@ -1010,7 +1010,7 @@ void save_cross_section(float* dp, float* pp, int3 Ndiv, int inode, int gpu_id,
+ 
+ void MovingReceiver(float* dp, float* wave, int3 Ndiv, int Nydiv, int3 Block, int iReg, int Boff, Pnt Rcv, float2* RPos, int it){
+ 
+-	float* pobs = (float*) malloc(sizeof(float)*4);		 	// ŠÏ‘ª“_‰¹ˆ³
++	float* pobs = (float*) malloc(sizeof(float)*4);		 	// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½
+ 	int ix, iy, itt;
+ 	unsigned long long id;
+ 	float Node[4] = {};
+@@ -1074,7 +1074,7 @@ void MovingReceiver(float* dp, float* wave, int3 Ndiv, int Nydiv, int3 Block, in
+ 	}
+ }
+ 
+-/* ‘¬“xƒ|ƒeƒ“ƒVƒƒƒ‹?
++/* ï¿½ï¿½ï¿½xï¿½|ï¿½eï¿½ï¿½ï¿½Vï¿½ï¿½ï¿½ï¿½?
+ __global__ void WaveObss(float* dp, float* dpp, int3 Ndiv, int Nydiv, int3 Block, int iReg, 
+ 		Pnt* dobs, float* dwave, float* du, float cfl, int Nwave, int it, float dt){
+ 
+@@ -1157,7 +1157,7 @@ void SaveWaveBin(float* dwave, float* hwave, float* wave, int it, int gpu_id, in
+ //	double ux, uy, phi2, uu;
+ 	int Nw;
+ 
+-	// ŠÏ‘ª“_‰¹ˆ³æ“¾
++	// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½ï¿½æ“¾
+ 	Nw = (it % Nwave) + 1;
+ 	cudaMemcpy(hwave, dwave, sizeof(float)*Nwave*Nobs*3, cudaMemcpyDeviceToHost);
+ 		
+@@ -1206,7 +1206,7 @@ void SaveWave(float* dwave, float* hwave, float* wave, int it, int gpu_id, int N
+ 	int Nw;
+ 	
+ 	Nw = (it % Nwave) + 1;
+-	// ŠÏ‘ª“_‰¹ˆ³æ“¾
++	// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½ï¿½æ“¾
+ 	if(iReceiver == 0){
+ 		cudaMemcpy(hwave, dwave, sizeof(float)*Nwave*Nobs*3, cudaMemcpyDeviceToHost);
+ 
+diff --git a/reinforcement_learning/environments/Bat2d1.1AI2/WE-FDTD_T.cu b/reinforcement_learning/environments/Bat2d1.1AI2/WE-FDTD_T.cu
+new file mode 100755
+index 0000000..df28e09
+--- /dev/null
++++ b/reinforcement_learning/environments/Bat2d1.1AI2/WE-FDTD_T.cu
+@@ -0,0 +1,543 @@
++// 2ï¿½ï¿½ï¿½ï¿½WE-FDTDï¿½@ CUDA version
++// 2017.01.07
++// ver.0.01
++// Takao Tsuchiya, Doshisha Univ.
++
++#include <stdio.h>
++#include <stdlib.h>
++#include <math.h>
++#include <omp.h>
++#include <time.h>
++#include <mpi.h>
++
++//#define M_PI 3.14159265358979
++#define HBD_TO_HBU 1
++#define HBU_TO_HBD 10
++
++// ï¿½ï¿½ï¿½fï¿½ï¿½ï¿½fï¿½[ï¿½^
++int iCell;					// ï¿½ï¿½ï¿½fï¿½ï¿½ï¿½^ï¿½Cï¿½v
++char CellName[200] = {};			// ï¿½{ï¿½Nï¿½Zï¿½ï¿½ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½
++int Scheme, Boundary;		// ï¿½ï¿½@, ï¿½ï¿½ï¿½E
++float c0;
++int3 Ndiv;					// x, y, zï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
++int Nyorg;					// ï¿½ï¿½ï¿½ï¿½zï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
++int Nreg, Nt, Ns;			// ï¿½Ìˆæ•ªï¿½ï¿½ï¿½ï¿½, ï¿½vï¿½Zï¿½Xï¿½eï¿½bï¿½vï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
++int Nobs;					// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½
++struct Pnt{					// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½
++	int x, y;
++	float p;
++};
++Pnt Src, Rcv;				// ï¿½ï¿½ï¿½ï¿½ï¿½Eï¿½ó‰¹“_ï¿½ï¿½ï¿½W
++Pnt* obs; 					// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½W
++float* drv;					// ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½`
++int Nw, Srcw;				// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô•ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
++float freq;					// ï¿½ï¿½ï¿½Íï¿½ï¿½gï¿½ï¿½
++int Nd;						// ï¿½oï¿½[ï¿½Xï¿½gï¿½gï¿½ï¿½
++float cfl, dl, dt, b;		// CFL, ï¿½Tï¿½ï¿½ï¿½vï¿½ï¿½ï¿½ï¿½ï¿½Oï¿½ï¿½ï¿½gï¿½ï¿½
++float Ref[4], aref;			// ï¿½ï¿½ï¿½Eï¿½ï¿½ï¿½Ë—ï¿½, ï¿½Cï¿½Ó‹ï¿½ï¿½Eï¿½ï¿½ï¿½Ë—ï¿½
++int iplane, ipn, iptime, iwave;		// ï¿½oï¿½Í•ï¿½ï¿½ÊCï¿½ï¿½ï¿½ÊˆÊ’uï¿½Cï¿½ï¿½ï¿½ÔŠÔŠuï¿½Cï¿½gï¿½`ï¿½oï¿½ï¿½
++int Nwave;					// ï¿½gï¿½`ï¿½fï¿½[ï¿½^ï¿½êŠ‡ï¿½]ï¿½ï¿½ï¿½ï¿½ï¿½ÔƒXï¿½eï¿½bï¿½vï¿½ï¿½
++float* pp;					// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½zï¿½}
++int istx, isty, ipts, ipte;	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½zï¿½}ï¿½Ôˆï¿½ï¿½ï¿½
++int Ndx, Ndy;				// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½zï¿½}ï¿½Ì‘å‚«ï¿½ï¿½
++
++// for GPU
++int Ngpu;					// ï¿½gï¿½pGPUï¿½ï¿½
++int GpuId = -1;				// 1GPUï¿½Ì‚Æ‚ï¿½ï¿½ï¿½GPU ID
++int3 Block;					// Blockï¿½Tï¿½Cï¿½Y
++int Bblock = 256;
++int Boff;					// Block offset
++float mem;
++
++// for MPI
++int Nnode, inode;			// ï¿½mï¿½[ï¿½hï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½N
++MPI_Status mpi_stat;		// MPIï¿½Xï¿½eï¿½[ï¿½^ï¿½X
++
++// for moving
++int iSource, iReceiver;		// ï¿½ï¿½ï¿½ï¿½/ï¿½ó‰¹“_ï¿½Ú“ï¿½ï¿½ï¿½ï¿½@
++char SPosName[200] = {}, RPosName[200] = {}; //ï¿½Cï¿½Ó‹Oï¿½ï¿½ï¿½Ê’uï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½
++float vs, vs0, as, t, angs;	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½x, ï¿½ï¿½ï¿½ï¿½ï¿½xï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½x, ï¿½pï¿½x
++float vr, vr0, ar, angr;	// ï¿½ó‰¹“_ï¿½ï¿½ï¿½x, ï¿½ï¿½ï¿½ï¿½ï¿½xï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½x, ï¿½pï¿½x
++float2 *SPos, *RPos;		// ï¿½ï¿½ï¿½ï¿½/ï¿½ó‰¹“_ï¿½Ê’u
++int Nsrc, Nrcv;
++
++#include "WE-FDTD_T.h"
++
++
++int main(int argc, char* argv[]) 
++{
++
++	// MPIï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
++	int    resultlen;
++	char   proc_name[MPI_MAX_PROCESSOR_NAME];
++
++	MPI_Init(&argc, &argv);
++	MPI_Comm_size(MPI_COMM_WORLD, &Nnode);
++	MPI_Comm_rank(MPI_COMM_WORLD, &inode);
++	MPI_Get_processor_name( proc_name, &resultlen );
++
++	// ï¿½ï¿½ï¿½fï¿½ï¿½ï¿½fï¿½[ï¿½^ï¿½Ç‚İï¿½ï¿½ï¿½
++	float th1, th2, al1, al2, b1, b2, d1, d2;
++	ReadModel(argc, argv);
++	
++	if(Boundary == 0){
++		for(int ir = 0; ir < 4; ir++)
++			Ref[ir] = ((1.0 + Ref[ir]) * cfl - (1.0 - Ref[ir])) / ((1.0 + Ref[ir]) * cfl + (1.0 - Ref[ir]));
++	}
++	if(Boundary == 1){
++		th1 = 45.0 / 180.0 * M_PI;
++		th2 = 45.0 / 180.0 * M_PI;
++		al1 = 1.0 / cos(th1);
++		al2 = 1.0 / cos(th2);
++		b1 = (al1 * cfl - 1) / (al1 * cfl + 1);
++		b2 = (al2 * cfl - 1) / (al2 * cfl + 1);
++		d1 = 0.001;
++		d2 = 0.001;
++	}
++	
++	mem = (double)(Ndiv.x)*Ndiv.y*8 + (double)Nwave*Nobs*28 + Nobs*12*7;
++	if(inode == 0){
++		if(Scheme == 0) printf("SLF method\n");
++		if(Scheme == 1) printf("IWB method\n");
++		if(iCell > 0){
++			printf(" Arbitrary model Model, file name: %s\n", CellName);
++			mem += (double)(Ndiv.x)*Ndiv.y;
++		}
++		else
++			printf(" Rectangular model\n");
++			
++		printf(" dl = %f(m), dt = %e(s), CFL = %f, b = %f\n", dl, dt, cfl, b);
++		printf(" Nx = %d, Ny (%d) = %d, Nt = %d\n", Ndiv.x, Ndiv.y, Nyorg, Nt);
++		printf(" Size: %f x %f(m) = %f(m^2), total time %f(s)\n", Ndiv.x*dl, Ndiv.y*dl, 
++		Ndiv.x*dl*Ndiv.y*dl, Nt*dt);
++		if(iSource == 0)
++			printf(" Source  : fixed at (%d, %d) \n", Src.x, Src.y);
++		if(iSource == 1)
++			printf(" Source  : moving source, file name: %s \n", SPosName);
++		if(iSource == 2)
++			printf(" Source  : linear at v0 = %6.2f(m/s), a = %6.2f(m/s^2), theta = %3.0f(deg.)\n", vs0, as, angs);
++		if(iReceiver == 0)
++			printf(" Receiver: %d fixed observation points \n", Nobs);
++		if(iReceiver == 1)
++			printf(" Receiver: moving receiver, file name: %s \n", RPosName);
++		if(iReceiver == 2)
++			printf(" Receiver: linear at v0 = %6.2f(m/s), a = %6.2f(m/s^2), theta = %3.0f(deg.)\n", vr0, ar, angr);
++	}
++
++	// ï¿½fï¿½oï¿½Cï¿½Xï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
++	int Num_gpu = 0;
++	cudaGetDeviceCount(&Num_gpu);
++	cudaDeviceProp dev;
++	MPI_Barrier(MPI_COMM_WORLD);
++	if(inode == 0){
++		printf(" %d MPI nodes are used, %d GPUs are used in each node\n", Nnode, Ngpu);
++		printf(" No. of divided regions = %d, Total GPUs used = %d\n", Nreg, Ngpu*Nnode);
++	}
++	
++	MPI_Barrier(MPI_COMM_WORLD);
++	printf(" %s: Node = %d, %d GPUs found, %d GPUs are used\n", proc_name, inode, Num_gpu, Ngpu);
++	if( Num_gpu < Ngpu ) {
++		printf("error:: Proc %s, rank %d, %d GPUs found, %d GPUs are used\n", proc_name, inode, Num_gpu, Ngpu);
++		MPI_Abort( MPI_COMM_WORLD, 1 );
++		exit(1);
++	}
++	if(inode == 0){
++		cudaGetDeviceProperties(&dev, 0);
++		printf(" Global Memory Usage: %f (GB), Total Global Memory %f (GB)\n\n", mem/1024./1024./1024., 
++			Nnode*Ngpu*dev.totalGlobalMem/1024./1024./1024.);
++		if(mem > Nnode*Ngpu*dev.totalGlobalMem){
++			printf(" Momory over!!\n");
++			exit(1);
++		}
++	}
++	MPI_Barrier(MPI_COMM_WORLD);
++
++
++	// 1ï¿½uï¿½ï¿½ï¿½bï¿½NBlock_x*Block_yï¿½ÌƒXï¿½ï¿½ï¿½bï¿½hï¿½ï¿½ï¿½Å•ï¿½ï¿½ï¿½vï¿½Z
++	MPI_Barrier(MPI_COMM_WORLD);
++	int Nydiv = Ndiv.y / Nreg;
++	int Nygpu = Nydiv + Block.y;
++	int bdx = Ndiv.x / Block.x;
++	int bdy = Nygpu / Block.y;
++	if(inode == 0){
++		printf(" x division for each GPU: %d\n", Nygpu);
++		printf(" Block: %d, %d ", Block.x, Block.y);
++		printf(" Block Size: %d * %d, Thread Size: %d\n", bdx, bdy, Block.x*Block.y);
++	}
++
++
++	// ï¿½zï¿½Xï¿½gï¿½ï¿½ï¿½floatï¿½^ï¿½Ìƒï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½mï¿½Û‚ï¿½ï¿½ï¿½
++	int Nbm;
++	Nbm = Ndiv.x;
++	float* dpt = (float*) malloc(sizeof(float)*Boff*Nbm*Ngpu);		// OMPï¿½pï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^(ï¿½ï¿½w)
++	float* dpb = (float*) malloc(sizeof(float)*Boff*Nbm*Ngpu);		// OMPï¿½pï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^(ï¿½ï¿½ï¿½w)
++	float* dppt = (float*) malloc(sizeof(float)*Boff*Nbm*Ngpu);		// OMPï¿½pï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^(ï¿½ï¿½w)
++	float* dppb = (float*) malloc(sizeof(float)*Boff*Nbm*Ngpu);		// OMPï¿½pï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^(ï¿½ï¿½ï¿½w)
++	float* mpt = (float*) malloc(sizeof(float)*Boff*Nbm);			// MPIï¿½pï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^(ï¿½ï¿½w)
++	float* mppt = (float*) malloc(sizeof(float)*Boff*Nbm);			// MPIï¿½pï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^(ï¿½ï¿½w)
++	float* mpb = (float*) malloc(sizeof(float)*Boff*Nbm);			// MPIï¿½pï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^(ï¿½ï¿½ï¿½w)
++	float* mppb = (float*) malloc(sizeof(float)*Boff*Nbm);			// MPIï¿½pï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^(ï¿½ï¿½ï¿½w)
++	for(int i = 0; i < Boff*Nbm*Ngpu; ++i) {
++		dpt[i] = dpb[i] = dppt[i] = dppb[i] = 0;
++	}
++	for(int i = 0; i < Boff*Nbm; i++){
++		mpt[i] = mppt[i] = mpb[i] = mppb[i] = 0;
++	}
++
++
++	// ï¿½Ï‘ï¿½ï¿½gï¿½`ï¿½p
++	Nwave = 100;
++	float* wave  = (float*) malloc(sizeof(float)*Nwave*Nobs*3);	// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½`
++	char WaveName[200] = {};			// ï¿½gï¿½`ï¿½fï¿½[ï¿½^ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½
++	char WaveNamebin[200] = {};			// ï¿½gï¿½`ï¿½fï¿½[ï¿½^ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½
++	for(int i = 0; i < Nwave*Nobs*3; i++)
++		wave[i] = 0;
++		
++	char tmp[10];
++	if(Src.p == 0)
++		strcat(WaveName, "wave0_x");
++	if(Src.p == 1)
++		strcat(WaveName, "waveX_x");
++	if(Src.p == 2)
++		strcat(WaveName, "waveY_x");
++	sprintf(tmp, "%d", Src.x);
++	strcat(WaveName, tmp);
++	strcat(WaveName, "_y");
++	sprintf(tmp, "%d", Src.y);
++	strcat(WaveName, tmp);
++	strcat(WaveNamebin, WaveName);
++	strcat(WaveNamebin, ".bin");
++	strcat(WaveName, ".csv");
++//	FILE *fp2 = fopen(WaveName,"w");
++	FILE *fpb = fopen(WaveNamebin,"wb");
++	fwrite(&Nt, sizeof(int), 1, fpb);
++
++
++	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½zï¿½}ï¿½pï¿½zï¿½ï¿½
++	pp = (float*) malloc(sizeof(float)*Ndiv.x*Ndiv.y);
++
++	// OMPï¿½Jï¿½n
++	printf(" Calculation start!\n");
++	MPI_Barrier(MPI_COMM_WORLD);
++	omp_set_num_threads(Ngpu);			// create as many CPU threads as there are CUDA devices
++	cudaEvent_t start,stop;
++	#pragma omp parallel
++	{
++		unsigned int cpu_id = omp_get_thread_num();
++		unsigned int Nthreads = omp_get_num_threads();
++
++		int gpu_id;
++		if(Nreg == 1 && GpuId < Num_gpu)
++			cudaSetDevice(GpuId);	// "% num_gpus" allows more CPU threads than GPU devices
++		else
++			cudaSetDevice(cpu_id % Ngpu);	// "% num_gpus" allows more CPU threads than GPU devices
++		cudaGetDevice(&gpu_id);
++		printf(" Node: %d, thread: %d uses CUDA device %d\n", inode, cpu_id, gpu_id);
++
++		unsigned char* Cell;
++		unsigned long long *Bid;
++		unsigned short *Bnode;
++		int Nbnd = 0;
++		unsigned long long id, Nem;
++		int iReg, nbx;
++		float* pobs  = (float*) malloc(sizeof(float));			 	// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½
++
++		Nem = (unsigned long long)Ndiv.x * Nygpu;
++		if(Ngpu == 1)
++			iReg = inode * Ngpu;
++		else
++			iReg = inode * Ngpu + gpu_id;
++
++		float* hwave = (float*)malloc(sizeof(float)*Nwave*Nobs*3);	// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½`
++		for(int i = 0; i < Nwave*Nobs*3; i++)
++			hwave[i] = 0;
++
++		if(iCell > 0){
++			Cell  = (unsigned char*)malloc(sizeof(unsigned char)*Nem);
++			for(int j = 0; j < Nygpu; j++){
++				for(int i = 0; i < Ndiv.x; i++){
++					id = (unsigned long long)(Ndiv.x * j + i);
++					Cell[id] = 0;
++				}
++			}
++	
++			Nbnd = ReadCell(Cell, iReg, Nydiv, Nygpu);
++
++			nbx = Nbnd / Bblock + 1;
++			Nbnd = Bblock * nbx;
++
++			Bid = (unsigned long long*)malloc(sizeof(unsigned long long)*Nbnd);
++			Bnode = (unsigned short*)malloc(sizeof(unsigned short)*Nbnd);
++			for(int i = 0; i < Nbnd; i++){
++				Bid[i] = 0;
++				Bnode[i] = 0;
++			}
++			SetBoundary2d(Cell, Bid, Bnode, Nygpu, Nem);
++		}
++
++
++		// ï¿½fï¿½oï¿½Cï¿½Xï¿½ï¿½Éƒï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½mï¿½Û‚ï¿½ï¿½ï¿½
++		float *dp, *dpp, *tmp, *dRef, *dp2, *dux, *duy;
++		unsigned char *dCell;
++		unsigned long long *dBid;
++		unsigned short *dBnode;
++		float *dwave, *ddrv;
++		Pnt *dobs;				// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½W
++//		int3 *dobs;				// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½W
++		
++		cudaMalloc((void**) &dp,    sizeof(float)*Nem);			// ï¿½ï¿½ï¿½ï¿½
++		cudaMalloc((void**) &dpp,   sizeof(float)*Nem);			// 1ï¿½Xï¿½eï¿½bï¿½vï¿½Oï¿½ï¿½ï¿½ï¿½
++		cudaMalloc((void**) &dp2,   sizeof(float)*6*(Ndiv.x+Ndiv.y));			// 1ï¿½Xï¿½eï¿½bï¿½vï¿½Oï¿½ï¿½ï¿½ï¿½
++		cudaMalloc((void**) &dobs,  sizeof(Pnt)*Nobs*5);			// ï¿½Ï‘ï¿½ï¿½gï¿½`ï¿½p
++		cudaMalloc((void**) &dwave, sizeof(float)*Nwave*Nobs*3);	// ï¿½Ï‘ï¿½ï¿½gï¿½`ï¿½p
++		cudaMalloc((void**) &dux, sizeof(float)*Nobs);	// ï¿½Ï‘ï¿½ï¿½gï¿½`ï¿½ï¿½ï¿½qï¿½ï¿½ï¿½xxï¿½p
++		cudaMalloc((void**) &duy, sizeof(float)*Nobs);	// ï¿½Ï‘ï¿½ï¿½gï¿½`ï¿½ï¿½ï¿½qï¿½ï¿½ï¿½xyï¿½p
++		cudaMalloc((void**) &ddrv, sizeof(float)*Nt);	// ï¿½Ï‘ï¿½ï¿½gï¿½`ï¿½p
++		cudaMalloc((void**) &dRef, sizeof(float)*4);			// ï¿½ï¿½ï¿½ËŒWï¿½ï¿½
++		if(iCell > 0){
++			cudaMalloc((void**) &dCell, sizeof(unsigned char)*Nem);			// ï¿½`ï¿½ï¿½fï¿½[ï¿½^
++			cudaMalloc((void**) &dBid, sizeof(unsigned long long)*Nbnd);	// ï¿½ï¿½ï¿½Eï¿½ï¿½ï¿½ï¿½idï¿½fï¿½[ï¿½^
++			cudaMalloc((void**) &dBnode, sizeof(unsigned short)*Nbnd);		// ï¿½ï¿½ï¿½Eï¿½ï¿½ï¿½ËŒWï¿½ï¿½ï¿½fï¿½[ï¿½^
++		}
++
++		// ï¿½fï¿½oï¿½Cï¿½Xï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½
++		#pragma omp barrier
++		#pragma omp single
++		MPI_Barrier(MPI_COMM_WORLD);
++		cudaMemset(dp,   0, sizeof(float)*Nem);
++		cudaMemset(dpp,  0, sizeof(float)*Nem);
++		cudaMemset(dp2,  0, sizeof(float)*6*(Ndiv.x+Ndiv.y));
++		cudaMemcpy(dobs, obs, sizeof(Pnt)*Nobs, cudaMemcpyHostToDevice);
++		cudaMemset(dwave,0, sizeof(float)*Nwave*Nobs*3);
++		cudaMemset(dux,0, sizeof(float)*Nobs);
++		cudaMemset(duy,0, sizeof(float)*Nobs);
++		cudaMemcpy(ddrv, drv, sizeof(float)*Nt, cudaMemcpyHostToDevice);
++		cudaMemcpy(dRef, Ref, sizeof(float)*4, cudaMemcpyHostToDevice);
++		if(iCell > 0){
++			cudaMemcpy(dCell, Cell, sizeof(unsigned char)*Nem, cudaMemcpyHostToDevice);
++			cudaMemcpy(dBid, Bid, sizeof(unsigned long long)*Nbnd, cudaMemcpyHostToDevice);
++			cudaMemcpy(dBnode, Bnode, sizeof(unsigned short)*Nbnd, cudaMemcpyHostToDevice);
++		}
++
++		dim3 grid(bdx, bdy, 1);
++		dim3 threads(Block.x, Block.y, 1);
++		dim3 gridb(nbx, 1, 1);
++		dim3 threadsb(Bblock, 1, 1);
++		dim3 gridw(1, 1, 1);
++		dim3 threadsw(Nobs, 1, 1);
++		
++		#pragma omp barrier
++		#pragma omp single
++		MPI_Barrier(MPI_COMM_WORLD);
++
++		// communication test
++		if(Nnode > 1){
++			for(int i = 0; i < 20; ++i){
++				#pragma omp single
++				{
++					if(inode == 0){
++						MPI_Send((void*)(dpt+Nbm*(Ngpu-1)), Nbm, MPI_FLOAT, inode+1, HBU_TO_HBD, MPI_COMM_WORLD);
++					}else if(inode == Nnode -1){
++						MPI_Recv((void*)mpt, Nbm, MPI_FLOAT, inode-1, HBU_TO_HBD, MPI_COMM_WORLD, &mpi_stat);
++					}else{
++						MPI_Sendrecv((void*)(dpt+Nbm*(Ngpu-1)), Nbm, MPI_FLOAT, inode+1, HBU_TO_HBD, 
++									(void*)mpt, Nbm, MPI_FLOAT, inode-1, HBU_TO_HBD, MPI_COMM_WORLD, &mpi_stat);
++					}
++				}
++			}
++		}
++		cudaError_t err = cudaGetLastError();
++		printf("cuda debug:: line:%d rank:%d gpu:%d msg:%s\n", __LINE__, inode, gpu_id, cudaGetErrorString(err));
++
++		// for moving source
++		float2 XY, Psrc, dm;
++		int3 Msrc;
++		int itt;
++		float rads = angs / 180. * M_PI;
++		float dr;
++		float4 Driv;
++		Driv.x = Driv.y = Driv.w = 0.0;
++		float phi;
++		phi   = M_PI / 180. * Src.p;	// ï¿½ï¿½ï¿½ï¿½ï¿½p
++		
++		int Nyoff, Nys, Nye;
++		Nyoff = Nydiv * iReg - Boff;
++		Nys = Nyoff;
++		Nye = Nyoff + Nygpu - 1;
++		if(iReg == 0) Nys = 0;
++		if(iReg == Nreg-1) Nye = Nyorg - 1;
++//		if(iReg == Nreg-1) Nye = Ndiv.y - 1;
++		
++		if(iReg == 0) printf("Nydiv: %d  Nygpu: %d\n", Nydiv, Nygpu);
++		printf("Nyoff: %d\n", Nyoff);
++		printf("Nys: %d  Nye: %d\n", Nys, Nye);
++
++		#pragma omp barrier
++		#pragma omp single
++		MPI_Barrier(MPI_COMM_WORLD);
++		if(inode == 0 && (Nreg == 1 || gpu_id == 0)){
++			// ï¿½^ï¿½Cï¿½}ï¿½[ï¿½ï¿½ï¿½ì¬ï¿½ï¿½ï¿½ÄŒvï¿½ï¿½ï¿½Jï¿½n
++			cudaEventCreate(&start);
++			cudaEventCreate(&stop);
++			cudaEventRecord(start,0);
++		}
++
++		// ï¿½ï¿½ï¿½Ôƒï¿½ï¿½[ï¿½v
++		for(int it = 0; it < Nt; it++){
++
++			itt = it % Nwave;
++			if((itt == 0 || it == Nt - 1) && inode == 0){
++				if(Ngpu == 1 || gpu_id == 0)
++					printf("step: %d\n", it);
++				err = cudaGetLastError();
++				if(err != 0)
++					printf("cuda debug:: line:%d rank:%d gpu:%d msg:%s\n", __LINE__, inode, gpu_id, cudaGetErrorString(err));
++			}
++
++			// ï¿½ï¿½ï¿½ï¿½ï¿½vï¿½Z
++			t = it * dt;
++
++			dr = 0;
++			XY.x = 0;
++			XY.y = 0;
++			if(Nsrc > it) dr = drv[it];
++			
++			if(iSource == 1 && Nsrc > it){
++				Psrc.x = SPos[it].x / dl;
++				Psrc.y = SPos[it].y / dl;
++			}
++			if(iSource == 0){
++				Msrc.x = Src.x;
++				Msrc.y = Src.y;
++				Msrc.z = Src.p;
++				Driv.w = drv[it];
++				if(phi == 0.0){
++					Driv.w = drv[it];
++				}
++				else{
++					Driv.x += drv[it] * cfl;
++					Driv.y = Driv.x;
++				}
++			}
++			if(iSource == 2){
++				Psrc.x = Src.x + (as * t * t / 2. + vs0 * t) / dl * cos(rads);
++				Psrc.y = Src.y + (as * t * t / 2. + vs0 * t) / dl * sin(rads);
++			}
++//			Msrc.x = int(Psrc.x);
++//			Msrc.y = int(Psrc.y);
++			if(Msrc.x > Ndiv.x-1) Msrc.x = Ndiv.x;
++			if(Msrc.y > Ndiv.y-1) Msrc.y = Ndiv.y;
++			dm.x = Psrc.x - Msrc.x;
++			dm.y = Psrc.y - Msrc.y;
++			XY.x = dm.x * 2 - 1;
++			XY.y = dm.y * 2 - 1;
++//			printf("%d %d %f %f \n", Msrc.x, Msrc.y, XY.x, XY.y);
++
++			ABC_Higdon_store<<<grid, threads>>>(dpp, dp2, Ndiv.x, Nyorg, Nyoff, Nys, Nye);
++
++			// ï¿½Ìˆï¿½vï¿½Z
++			cudaDeviceSynchronize();
++			#pragma omp barrier
++			#pragma omp single
++			MPI_Barrier(MPI_COMM_WORLD);
++			
++			if(Scheme == 0){
++//				SLF<<<grid, threads>>>(dp, dpp, Ndiv.x, Ndiv.y, Src, drv[it], cfl, Nyoff, Nys, Nye, sx, dvp, dvm, g);
++			}
++			else{
++//				IWBmoving<<<grid, threads>>>(dp, dpp, Ndiv.x, Ndiv.y, Msrc, dr, cfl, Nyoff, Nys, Nye, b, XY, iCell, dCell);
++				IWBfixed<<<grid, threads>>>(dp, dpp, Ndiv.x, Ndiv.y, Msrc, Driv, cfl, Nyoff, Nys, Nye, b, iCell, dCell);
++			}
++			cudaDeviceSynchronize();
++			tmp = dpp; dpp = dp; dp = tmp;
++
++			if(Boundary == 0)
++				ABC_Mur<<<grid, threads>>>(dp, dpp, Ndiv.x, Ndiv.y, dRef, Nyoff);
++			else{
++				ABC_Higdon_plane<<<grid, threads>>>(dp, dpp, dp2, Ndiv.x, Nyorg, dRef, Nyoff, Nys, Nye, b1, b2, d1, d2);
++				ABC_Higdon_corner<<<grid, threads>>>(dp, dpp, dp2, Ndiv.x, Nyorg, dRef, Nyoff, Nys, Nye, b1, b2, d1, d2);
++			}
++			cudaDeviceSynchronize();
++			#pragma omp barrier
++			#pragma omp single
++			MPI_Barrier(MPI_COMM_WORLD);
++			// ï¿½ï¿½ï¿½Eï¿½vï¿½Z
++			if(iCell > 0 && Nbnd > 0){
++
++				CE_boundary_Plane2d<<<gridb, threadsb>>>(dp, dpp, aref, dCell, dBid, dBnode, Ndiv.x, cfl, Nbnd);
++				cudaDeviceSynchronize();
++				#pragma omp barrier
++				#pragma omp single
++				MPI_Barrier(MPI_COMM_WORLD);
++
++				CE_boundary_Edge2d<<<gridb, threadsb>>>(dp, dpp, aref, dCell, dBid, dBnode, Ndiv.x, cfl, Nbnd);
++				cudaDeviceSynchronize();
++				#pragma omp barrier
++				#pragma omp single
++				MPI_Barrier(MPI_COMM_WORLD);
++
++			}
++			if(Nreg > 1)
++				ExcangeBoundary(dpt, dppt, dpb, dppb, dp, dpp, mpt, mppt, mpb, mppb, Nem, Nbm, Nydiv, inode, gpu_id, Nygpu);
++
++			// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½ï¿½æ“¾
++			if(iwave > 0){
++				if(iReceiver == 0) ObssEcho<<<gridw, threadsw>>>(dp, Ndiv, Nydiv, Block, iReg, dobs, dwave, dux, duy, cfl, Nwave, itt);
++//				if(iReceiver == 0) WaveObss<<<gridw, threadsw>>>(dp, Ndiv, Nydiv, Block, iReg, dobs, dwave, du, cfl, Nwave, itt);
++				if(iReceiver > 0) MovingReceiver(dp, wave, Ndiv, Nydiv, Block, iReg, Boff, Rcv, RPos, it);
++				cudaDeviceSynchronize();
++			}
++			#pragma omp barrier
++			#pragma omp single
++			MPI_Barrier(MPI_COMM_WORLD);
++
++			if(iwave > 0){
++				if(itt == Nwave - 1 || it == Nt - 1){
++//					SaveWave(dwave, hwave, wave, it, gpu_id, Nydiv, fp2);
++					SaveWaveBin(dwave, hwave, wave, it, gpu_id, Nydiv, fpb);
++					cudaDeviceSynchronize();
++					#pragma omp barrier
++					#pragma omp single
++					MPI_Barrier(MPI_COMM_WORLD);
++				}
++			}
++			cudaDeviceSynchronize();
++			#pragma omp barrier
++			#pragma omp single
++			MPI_Barrier(MPI_COMM_WORLD);
++
++			// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½zï¿½}ï¿½Û‘ï¿½
++			if(iplane > 0 && it % iptime == 0 && it > 0){
++				ipn = 1;
++				Ndx = ceil((double)Ndiv.x / istx);
++				Ndy = ceil((double)Ndiv.y / isty);
++				save_cross_section(dp, pp, Ndiv, inode, gpu_id, it, Nydiv, Boff, iReg, ipn, istx, isty);
++				#pragma omp barrier
++				#pragma omp single
++				MPI_Barrier(MPI_COMM_WORLD);
++			}
++
++		}
++		
++		//ï¿½^ï¿½Cï¿½}ï¿½[ï¿½ï¿½ï¿½~ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô‚ï¿½\ï¿½ï¿½
++		if(inode == 0 && (Nreg == 1 || gpu_id == 0)){
++			float elapsed_time = 0.0;
++			cudaEventRecord(stop,0);
++			cudaEventSynchronize(stop);
++			cudaEventElapsedTime(&elapsed_time, start, stop);
++			printf("time: %f s\n", elapsed_time / 1000.);
++			cudaEventDestroy(start);
++			cudaEventDestroy(stop);
++		}
++
++	}
++	
++	MPI_Barrier(MPI_COMM_WORLD);
++//	fclose(fp2);
++	fclose(fpb);
++	MPI_Finalize();
++
++    return 0;
++
++}
++
+diff --git a/reinforcement_learning/environments/Bat2d1.1AI2/WE-FDTD_T.h b/reinforcement_learning/environments/Bat2d1.1AI2/WE-FDTD_T.h
+new file mode 100755
+index 0000000..fd999b6
+--- /dev/null
++++ b/reinforcement_learning/environments/Bat2d1.1AI2/WE-FDTD_T.h
+@@ -0,0 +1,1255 @@
++void ReadModel(int argc, char* argv[])
++{
++	char buf[200], SrcName[200];
++	float ang;
++	int dum;
++
++//	SrcName = (char*) malloc(sizeof(char)*20); 			// ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½`ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½
++	FILE *fi  = fopen("~/ãƒ‡ã‚¹ã‚¯ãƒˆãƒƒãƒ—/workspace/openBATS/reinforcement_learning/environments/Bat2d1.1AI2/input.dat","r");
++	if(fi == NULL){
++		printf("error:: No input file!\n");
++		MPI_Abort( MPI_COMM_WORLD, 1 );
++		exit(1);
++	}
++
++	if(fgets(buf, sizeof(buf), fi) != NULL);
++	sscanf(buf, "%d", &dum);							// 1ï¿½sï¿½Ú‚ÍƒRï¿½ï¿½ï¿½ï¿½ï¿½g
++	
++	Scheme = 0;
++	Boundary = 0;
++	if(fgets(buf, sizeof(buf), fi) != NULL);
++	sscanf(buf, "%d %d %d", &iCell, &Scheme, &Boundary);	// ï¿½Cï¿½Ó‹ï¿½ï¿½E(0:ï¿½ï¿½`ï¿½C1:ï¿½Cï¿½ï¿½)ï¿½Cï¿½ï¿½@(0:SLF, 1:IWB), ï¿½ï¿½ï¿½Eï¿½ï¿½ï¿½ï¿½(0:Mur1ï¿½ï¿½,1:Higdon2ï¿½ï¿½)
++
++	if(fgets(buf, sizeof(buf), fi) != NULL)
++	sscanf(buf, "%d %d %s", &Ndiv.x, &Ndiv.y, CellName);	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½Zï¿½ï¿½ï¿½fï¿½[ï¿½^ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½
++
++	if(iCell > 0){										// ï¿½Cï¿½Óƒ{ï¿½Nï¿½Zï¿½ï¿½ï¿½ï¿½ï¿½fï¿½ï¿½
++		FILE *fim  = fopen(CellName, "rb");
++		if(fim == NULL){
++			if(inode == 0) printf("error:: No CELL file!\n");
++			MPI_Abort( MPI_COMM_WORLD, 1 );
++			exit(1);
++		}
++		if(fgets(buf, sizeof(buf), fim) != NULL)
++		sscanf(buf, "%d %d", &Ndiv.x, &Ndiv.y);			// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É“Ç‚İï¿½ï¿½ï¿½
++		fclose(fim);
++	}
++	else{												// ï¿½ï¿½`ï¿½ï¿½ï¿½fï¿½ï¿½
++	}
++	Block.x = 4;
++	Block.y = 4;
++	Boff = Block.y / 2;
++//	printf("%d %d\n", Ndiv.x, Ndiv.y);
++
++	for(int ir = 0; ir < 4; ir++)
++		Ref[ir] = 0;
++	if(fgets(buf, sizeof(buf), fi) != NULL);
++	sscanf(buf, "%f %f %f %f %f", &Ref[0], &Ref[1], &Ref[2], &Ref[3], &aref);
++	
++	if(fgets(buf, sizeof(buf), fi) != NULL);
++	sscanf(buf, "%f %f %f", &cfl, &dl, &c0);				// ï¿½ï¿½ï¿½Cï¿½ï¿½t, c0
++	if(Scheme == 0){
++		printf("2D SLF method\n");
++		if(cfl == 0) cfl = 1. / sqrt(2);
++	}
++	if(Scheme == 1){
++		printf("2D IWB method\n");
++		b = 1.0 / 4.0;
++		if(cfl == 0) cfl = 1.;
++	}
++
++	dt = cfl / c0 * dl;
++	
++	if(fgets(buf, sizeof(buf), fi) != NULL);
++	sscanf(buf, "%d", &Nt);								// ï¿½vï¿½Zï¿½Xï¿½eï¿½bï¿½vï¿½ï¿½
++	
++	if(fgets(buf, sizeof(buf), fi) != NULL);
++	sscanf(buf, "%d %s", &iSource, SPosName);			// ï¿½Ú“ï¿½ï¿½`ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Wï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½
++
++	vs0 = 0;
++	as = 0;
++	angs = 0;
++	if(fgets(buf, sizeof(buf), fi) != NULL);
++	sscanf(buf, "%d %d %f %f %f %f", &Src.x, &Src.y, &Src.p, &vs0, &as, &angs);	// ï¿½ï¿½ï¿½ï¿½ï¿½Ê’uï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½xï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½xï¿½Cï¿½ï¿½ï¿½ï¿½
++	if(argc > 1){
++		Src.x = atoi(argv[1]);
++		Src.y = atoi(argv[2]);
++		Src.p = atoi(argv[3]);
++//		printf("arg1: %d  arg2: %d\n", Src.x, Src.y);
++	}
++
++	int it = 0;
++	Nsrc = Nt;
++	if(iSource == 1){
++		SPos = (float2*) malloc(sizeof(float2)*Nt); 		// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½W
++
++		FILE *fpo = fopen(SPosName, "r");
++		if(fpo == NULL){
++			if(inode == 0) printf("error:: No source position file!\n");
++			MPI_Abort( MPI_COMM_WORLD, 1 );
++			exit(1);
++		}
++		while(fgets(buf, sizeof(buf), fpo) != NULL && it < Nt){
++			sscanf(buf, "%f,%f", &SPos[it].x, &SPos[it].y);
++//			printf("%f %f \n", SPos[it].x, SPos[it].y);
++			it++;
++		}
++		Nsrc = it;
++		fclose(fpo);
++	}
++
++	if(Src.x > Ndiv.x || Src.y > Ndiv.y){
++		printf("error:: Invalid source location (%d, %d)\n", Src.x, Src.y);
++		MPI_Abort( MPI_COMM_WORLD, 1 );
++		exit(1);
++	}
++	
++	if(fgets(buf, sizeof(buf), fi) != NULL);
++	sscanf(buf, "%f %d %s", &freq, &Nd, SrcName);					// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(0: ï¿½Aï¿½ï¿½, -1: ï¿½Cï¿½ï¿½ï¿½pï¿½ï¿½ï¿½X)
++	
++	Nw = 0;
++	drv = (float*) malloc(sizeof(float)*Nt); 			// ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½`
++	for(int it = 0; it < Nt; it++){
++		drv[it] = 0.;
++	}
++	if(freq == -1){										// ï¿½ï¿½ï¿½ï¿½ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½`ï¿½ï¿½ï¿½ï¿½
++		printf("%s\n", SrcName);
++		FILE *fi2  = fopen(SrcName, "r");
++		for(int it = 0; it < Nt; it++){
++			if(fgets(buf, sizeof(buf), fi2) != NULL){
++				sscanf(buf, "%f", &drv[it]);
++//				printf("%f\n", drv[it]);
++				Nw++;
++			}
++		}
++		fclose(fi2);
++	}
++	else if(freq == 0){								// ï¿½Cï¿½ï¿½ï¿½pï¿½ï¿½ï¿½X
++		drv[0] = 1.;
++		Nw = 1;
++	}
++	else{
++		if(Nd == 0){										// ï¿½Aï¿½ï¿½ï¿½g
++			for(int it = 0; it < Nt; it++){
++				drv[it] = sin(2 * 3.1415926 * freq * it * dt);
++			}
++			Nw = Nt;
++		}
++		else if(Nd == 1){		// ï¿½ï¿½ï¿½ï¿½ï¿½Kï¿½Eï¿½X
++			double wl = 2.0 / freq / dt;
++			Nw = wl;
++			if(Nw > Nt) Nw = Nt;
++			for(int it = 0; it < 2*Nw; it++){
++				drv[it] = -8*(it-Nw)*exp(-12.0*(it-wl)*(it-wl)/wl/wl)/wl;
++	//			printf("%f\n", drv[it]);
++			}
++		}
++		else{					// ï¿½gï¿½[ï¿½ï¿½ï¿½oï¿½[ï¿½Xï¿½g
++			Nw = 1.0 / freq / dt * Nd;
++			if(Nw > Nt) Nw = Nt;
++			for(int it = 0; it < Nw; it++){
++				drv[it] = sin(2 * 3.1415926 * freq * it * dt);
++			}
++		}
++	}
++
++	if(fgets(buf, sizeof(buf), fi) != NULL);
++	sscanf(buf, "%d %s", &iReceiver, RPosName);			// ï¿½Ú“ï¿½ï¿½`ï¿½ï¿½, ï¿½ó‰¹“_ï¿½ï¿½ï¿½Wï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½
++
++	float sep = 0.01;
++	float obsx, obsy;
++	Nobs = 37;
++	if(iReceiver == 0){
++		obs  = (Pnt*) malloc(sizeof(Pnt)*Nobs); 			// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½W
++		for(int io = 0; io < Nobs; io++){
++			ang = io * 10 * 3.1415926 / 180.;
++			obsx = (Src.x) * dl + sep * cos(ang);
++			obsy = (Src.y) * dl + sep * sin(ang);
++			obs[io].x = obsx / dl;
++			obs[io].y = obsy / dl;
++			obs[io].p = 0;
++			printf("%d %d %f\n", obs[io].x, obs[io].y, obs[io].p);
++		}
++	}
++	it = 0;
++	Nrcv = Nt;
++	if(iReceiver == 1){
++		RPos = (float2*) malloc(sizeof(float2)*Nt); 		// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½W
++
++		FILE *fpo = fopen(RPosName, "r");
++		if(fpo == NULL){
++			if(inode == 0) printf("error:: No receiver position file!\n");
++			MPI_Abort( MPI_COMM_WORLD, 1 );
++			exit(1);
++		}
++		while(fgets(buf, sizeof(buf), fpo) != NULL && it < Nt){
++			sscanf(buf, "%f,%f", &RPos[it].x, &RPos[it].y);
++//			printf("%f %f \n", RPos[it].x, RPos[it].y);
++			it++;
++		}
++		Nrcv = it;
++		fclose(fpo);
++	}
++	if(iReceiver == 2){
++		if(fgets(buf, sizeof(buf), fi) != NULL);
++		sscanf(buf, "%d %d %f %f %f %f", &Rcv.x, &Rcv.y, &Rcv.p, &vr0, &ar, &angr);	// ï¿½ï¿½ï¿½ï¿½ï¿½Ê’uï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½xï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½xï¿½Cï¿½ï¿½ï¿½ï¿½
++	}
++
++	if(fgets(buf, sizeof(buf), fi) != NULL)
++		sscanf(buf, "%d %d", &iplane, &iwave);		// ï¿½Rï¿½ï¿½ï¿½^ï¿½[ï¿½ÊCï¿½gï¿½`ï¿½oï¿½ï¿½
++	if(fgets(buf, sizeof(buf), fi) != NULL)
++		sscanf(buf, "%d %d %d %d %d", &iptime, &istx, &isty, &ipts, &ipte);								// ï¿½Rï¿½ï¿½ï¿½^ï¿½[ï¿½Ôˆï¿½ï¿½ï¿½
++	if(ipte == 0) ipte = Nt;
++	
++	if(fgets(buf, sizeof(buf), fi) != NULL);
++	sscanf(buf, "%d %d", &Ngpu, &GpuId);							// GPUï¿½ï¿½/ï¿½mï¿½[ï¿½h, 1GPUï¿½Ì‚Æ‚ï¿½ï¿½ï¿½GPU ID
++	
++	if(Ngpu < 1){
++		if(inode == 0) printf("error:: Invalid number of GPUs.: %d\n", Ngpu);
++		MPI_Abort( MPI_COMM_WORLD, 1 );
++		exit(1);
++	}
++	Nreg = Nnode * Ngpu;
++		
++	// ï¿½ï¿½ï¿½ï¿½ï¿½`ï¿½Fï¿½bï¿½N
++	int Fx, Fy;
++	Nyorg = Ndiv.y;
++	if(Ndiv.y % (Nreg * Block.y) != 0)
++		Ndiv.y = Nreg * Block.y * ((int)(Ndiv.y / (Nreg * Block.y)) + 1);
++	Fx = Ndiv.x % Block.x;
++	Fy = (int)(Ndiv.y / Nreg) % Block.y;
++	if(Fx + Fy > 0){
++		if( inode == 0 ){
++			printf("error:: Invalid number of divisions.\n" );
++			if(Fx > 0) printf("Nx: %d is invalid\n", Ndiv.x);
++			if(Fy > 0) printf("Ny: %d is invalid\n", Ndiv.y);
++		}
++		MPI_Abort( MPI_COMM_WORLD, 1 );
++		exit(1);
++	}
++
++}
++
++
++int ReadCell(unsigned char* Cell, int iReg, int Nydiv, int Nygpu)
++{
++	unsigned long long id;
++	int Nbnd = 0, dum;
++	char bufm[200];
++		
++	FILE *fim  = fopen(CellName, "rb");		// ï¿½{ï¿½Nï¿½Zï¿½ï¿½ï¿½fï¿½[ï¿½^
++	if(fim == NULL){
++		printf("error:: No CELL file!\n");
++		exit(1);
++	}
++
++	// ï¿½Zï¿½ï¿½ï¿½fï¿½[ï¿½^ï¿½Ç‚İï¿½ï¿½ï¿½
++	if(iReg == 0) printf(" Reading cell data: %s\n", CellName);
++	int* nn = (int*)malloc(sizeof(int)*Ndiv.x);
++	unsigned char* in = (unsigned char*)malloc(sizeof(unsigned char)*Ndiv.x);
++	int lnn = 0;
++	size_t size;
++
++	#pragma omp barrier
++	#pragma omp single
++	MPI_Barrier(MPI_COMM_WORLD);
++	int ix, iy;
++	int Nyoff, Nys, Nye;
++	
++	if(fgets(bufm, sizeof(bufm), fim) != NULL)
++	sscanf(bufm, "%d", &dum);
++//	printf("%d %d\n", dum, dum);
++	
++	Nyoff = Nydiv * iReg - Boff;
++	Nys = Nyoff;
++	Nye = Nyoff + Nygpu - 1;
++	if(iReg == 0) Nys = 0;
++	if(iReg == Nreg-1) Nye = Nyorg - 1;
++		
++//	printf("Nydiv: %d  Nygpu: %d\n", Nydiv, Nygpu);
++//	printf("Nyoff: %d\n", Nyoff);
++//	printf("Nys: %d  Nye: %d\n", Nys, Nye);
++
++	for(int j = 0; j < Nys; j++){
++		size = fread(&lnn, sizeof(int), 1, fim);
++		size = fread(nn, sizeof(int), lnn, fim);
++		size = fread(in, sizeof(unsigned char), lnn, fim);
++	}
++
++	for(int j = 0; j < Nygpu; j++){
++		iy = j + Nyoff;
++		
++		if(iy < Nyorg){
++			if(iy >= Nys && iy <= Nye){
++
++				size = fread(&lnn, sizeof(int), 1, fim);
++//				printf("%u\n", lnn);
++				size = fread(nn, sizeof(int), lnn, fim);
++				size = fread(in, sizeof(unsigned char), lnn, fim);
++				if(size == 0){
++					printf("error:: Illegal boundary data!! at iReg=%d\n", iReg);
++					exit(1);
++				}
++				ix = 0;
++				for(int i = 0; i < lnn; i++){
++					for(int ii = 0; ii < nn[i]; ii++){
++						id = (unsigned long long)Ndiv.x * j + ix;
++						Cell[id] = in[i];
++						ix++;
++						if(Cell[id] > 1) Nbnd++;		// ï¿½ï¿½ï¿½Eï¿½ï¿½ï¿½ï¿½ï¿½fï¿½[ï¿½^ï¿½ï¿½
++					}
++				}
++			}
++		}
++	}
++	fclose(fim);
++
++//	if(Nbnd < 1){
++//		printf("error:: No boundary data!!\n");
++//		exit(1);
++//	}
++	return Nbnd;
++
++}
++
++
++void SetBoundary2d(unsigned char *Cell, unsigned long long *Bid, unsigned short *Bnode, int Nygpu, unsigned long long Nem)
++{
++	unsigned long long id = 0;
++	int node, n[30];
++	int Nx;
++	int bx, by, bb, bid = 0;
++
++	Nx = Ndiv.x;
++	for(int j = 1; j < Nygpu-1; j++){
++		for(int i = 1; i < Nx-1; i++){
++			id = (unsigned long long)Nx * j + i;
++			node = 0;
++			if(Cell[id] > 1){
++				n[0] = Cell[id-1   ];
++				n[1] = Cell[id  +Nx];
++				n[2] = Cell[id+1   ];
++				n[3] = Cell[id  -Nx];
++				n[4] = Cell[id-1-Nx];
++				n[5] = Cell[id-1+Nx];
++				n[6] = Cell[id+1+Nx];
++				n[7] = Cell[id+1-Nx];
++
++				bx = by = 0;
++
++				if(n[0] == 1) {bx = 1; bb = 1;}
++				if(n[1] == 1) {by = 2; bb = 1;}
++				if(n[2] == 1) {bx = 2; bb = 1;}
++				if(n[3] == 1) {by = 1; bb = 1;}
++
++				if(bb == 0){
++					bb = 0;
++						 if(n[4] == 1){bx = 1; by = 1;}
++					else if(n[5] == 1){bx = 1; by = 2;}
++					else if(n[6] == 1){bx = 2; by = 2;}
++					else if(n[7] == 1){bx = 2; by = 1;}
++
++				}
++
++				if((bx+by) == 0){
++					node = 0;
++				}
++				else{
++					node = 9 * bb + 3 * by + bx;
++				}
++				if(node > 0){
++					id = (unsigned long long)Nx * j + i;
++					Bid[bid] = id;
++					Bnode[bid] = (unsigned short)node;
++					++bid;
++					if(id > Nem) printf("%d %d: %lld\n", i, j, id);
++				}
++			}
++		}
++	}
++	return;
++}
++
++
++__global__ void IWBfixed(float* dp, float* dpp, int Nx, int Ny, 
++		int3 Src, float4 Driv, float cfl, int Nyoff, int Nys, int Nye, float b, int 
++		iCell, unsigned char* dCell){
++	
++	const unsigned int tx  = threadIdx.x;
++	const unsigned int ty  = threadIdx.y;
++	const unsigned int bdx = blockDim.x;
++	const unsigned int bdy = blockDim.y;
++	const unsigned int bx  = blockIdx.x;
++	const unsigned int by  = blockIdx.y;
++
++	const unsigned int ix = bx * bdx + tx;
++	const int iy = by * bdy + ty + Nyoff;
++	const int iyd = by * bdy + ty;
++	unsigned long long id = Nx * iyd + ix;
++
++	float d1, d2;
++	unsigned char ce;
++
++	d1 = cfl * cfl * (1 - 2 * b);
++	d2 = cfl * cfl * b;
++	ce = 1;
++	if(iCell > 0) ce = dCell[id];
++	
++	if(ce == 1){
++		if(ix > 0 && ix < Nx-1 && iy > Nys && iy < Nye){
++			dpp[id] = (dp[id+1] + dp[id-1] + dp[id+Nx] + dp[id-Nx] - 4 * dp[id]) * d1
++					+ (dp[id+1+Nx] + dp[id+1-Nx] + dp[id-1+Nx] + dp[id-1-Nx] - 4 * dp[id]) * d2
++					+ 2 * dp[id] - dpp[id];
++
++			if(Src.z == 0){
++				if(ix == Src.x   && iy == Src.y  ) dpp[id] += Driv.w;
++				if(ix == Src.x+1 && iy == Src.y  ) dpp[id] += Driv.w;
++				if(ix == Src.x   && iy == Src.y+1) dpp[id] += Driv.w;
++				if(ix == Src.x+1 && iy == Src.y+1) dpp[id] += Driv.w;
++			}
++			if(Src.z == 1){
++				if(ix == Src.x+1 && iy == Src.y  ) dpp[id] += Driv.x / 2.;
++				if(ix == Src.x+2 && iy == Src.y  ) dpp[id] += Driv.x / 2.;
++				if(ix == Src.x+1 && iy == Src.y+1) dpp[id] += Driv.x / 2.;
++				if(ix == Src.x+2 && iy == Src.y+1) dpp[id] += Driv.x / 2.;
++
++				if(ix == Src.x-1 && iy == Src.y  ) dpp[id] -= Driv.x / 2.;
++				if(ix == Src.x   && iy == Src.y  ) dpp[id] -= Driv.x / 2.;
++				if(ix == Src.x-1 && iy == Src.y+1) dpp[id] -= Driv.x / 2.;
++				if(ix == Src.x   && iy == Src.y+1) dpp[id] -= Driv.x / 2.;
++			}
++			if(Src.z == 2){
++				if(ix == Src.x   && iy == Src.y+1) dpp[id] += Driv.y / 2.;
++				if(ix == Src.x+1 && iy == Src.y+1) dpp[id] += Driv.y / 2.;
++				if(ix == Src.x   && iy == Src.y+2) dpp[id] += Driv.y / 2.;
++				if(ix == Src.x+1 && iy == Src.y+2) dpp[id] += Driv.y / 2.;
++
++				if(ix == Src.x   && iy == Src.y-1) dpp[id] -= Driv.y / 2.;
++				if(ix == Src.x+1 && iy == Src.y-1) dpp[id] -= Driv.y / 2.;
++				if(ix == Src.x   && iy == Src.y)   dpp[id] -= Driv.y / 2.;
++				if(ix == Src.x+1 && iy == Src.y)   dpp[id] -= Driv.y / 2.;
++			}
++		}
++ 	}
++}
++
++
++__global__ void IWBmoving(float* dp, float* dpp, int Nx, int Ny, int2 Src, float Drv, float cfl, int Nyoff, 
++		int Nys, int Nye, float b, float2 XY, int iCell, unsigned char* dCell){
++	
++	const unsigned int tx  = threadIdx.x;
++	const unsigned int ty  = threadIdx.y;
++	const unsigned int bdx = blockDim.x;
++	const unsigned int bdy = blockDim.y;
++	const unsigned int bx  = blockIdx.x;
++	const unsigned int by  = blockIdx.y;
++
++	const unsigned int ix = bx * bdx + tx;
++	const int iy = by * bdy + ty + Nyoff;
++	const int iyd = by * bdy + ty;
++	unsigned long long id = Nx * iyd + ix;
++
++	float d1, d2, cc;
++	float Node[4] = {};
++	unsigned char ce;
++
++	cc = cfl;
++	d1 = cc * cc * (1 - 2 * b);
++	d2 = cc * cc * b;
++	ce = 1;
++	if(iCell > 0) ce = dCell[id];
++	
++	if(ce == 1){
++		if(ix > 0 && ix < Nx-1 && iy > Nys && iy < Nye){
++			dpp[id] = (dp[id+1] + dp[id-1] + dp[id+Nx] + dp[id-Nx] - 4 * dp[id]) * d1
++					+ (dp[id+1+Nx] + dp[id+1-Nx] + dp[id-1+Nx] + dp[id-1-Nx] - 4 * dp[id]) * d2
++					+ 2 * dp[id] - dpp[id];
++
++			Node[0] = (1 - XY.x) * (1 - XY.y) * Drv / 4;
++			Node[1] = (1 + XY.x) * (1 - XY.y) * Drv / 4;
++			Node[2] = (1 + XY.x) * (1 + XY.y) * Drv / 4;
++			Node[3] = (1 - XY.x) * (1 + XY.y) * Drv / 4;
++
++			if(ix == Src.x   && iy == Src.y  )	dpp[id] += Node[0];
++			if(ix == Src.x+1 && iy == Src.y  )	dpp[id] += Node[0];
++			if(ix == Src.x   && iy == Src.y+1)	dpp[id] += Node[0];
++			if(ix == Src.x+1 && iy == Src.y+1)	dpp[id] += Node[0];
++
++			if(ix == Src.x+1 && iy == Src.y  )	dpp[id] += Node[1];
++			if(ix == Src.x+2 && iy == Src.y  )	dpp[id] += Node[1];
++			if(ix == Src.x+1 && iy == Src.y+1)	dpp[id] += Node[1];
++			if(ix == Src.x+2 && iy == Src.y+1)	dpp[id] += Node[1];
++
++			if(ix == Src.x+1 && iy == Src.y+1)	dpp[id] += Node[2];
++			if(ix == Src.x+2 && iy == Src.y+1)	dpp[id] += Node[2];
++			if(ix == Src.x+1 && iy == Src.y+2)	dpp[id] += Node[2];
++			if(ix == Src.x+2 && iy == Src.y+2)	dpp[id] += Node[2];
++
++			if(ix == Src.x   && iy == Src.y+1)	dpp[id] += Node[3];
++			if(ix == Src.x+1 && iy == Src.y+1)	dpp[id] += Node[3];
++			if(ix == Src.x   && iy == Src.y+2)	dpp[id] += Node[3];
++			if(ix == Src.x+1 && iy == Src.y+2)	dpp[id] += Node[3];
++		}
++	}
++}
++
++
++__global__ void CE_boundary_Plane2d(float* dp, float* dpp, float ref, unsigned char* dCell, 
++	unsigned long long *dBid, unsigned short *dBnode, int Nx, float cfl, int Nbnd){
++	
++	const unsigned int tx  = threadIdx.x;
++	const unsigned int bdx = blockDim.x;
++	const unsigned int bx  = blockIdx.x;
++	const unsigned int tid = bx * bdx + tx;
++
++	unsigned long long id;
++	int n, br, bry, brx;
++	unsigned char c;
++
++	if(tid < Nbnd){
++		id = dBid[tid];
++		if(id > 0){
++			n = dBnode[tid];
++			c = dCell[id];
++			if(n > 0 && c > 1){
++				ref = ((1.0 + ref) * cfl - (1.0 - ref)) / ((1.0 + ref) * cfl + (1.0 - ref));
++				br  = (int)(n / 9);
++				bry = (int)((n - br*9) / 3);
++				brx = n % 3;
++
++				if(brx == 1 && bry == 0){
++					dp[id] = dpp[id-1] + ref * (dp[id-1] - dpp[id]);
++				}
++				if(brx == 2 && bry == 0){
++					dp[id] = dpp[id+1] + ref * (dp[id+1] - dpp[id]);
++				}
++				if(brx == 0 && bry == 1){
++					dp[id] = dpp[id-Nx] + ref * (dp[id-Nx] - dpp[id]);
++				}
++				if(brx == 0 && bry == 2){
++					dp[id] = dpp[id+Nx] + ref * (dp[id+Nx] - dpp[id]);
++				}
++			}
++		}
++	}
++	__syncthreads();
++}
++
++
++__global__ void CE_boundary_Edge2d(float* dp, float* dpp, float ref, unsigned char* dCell, 
++	unsigned long long *dBid, unsigned short *dBnode, int Nx, float cfl, int Nbnd){
++	
++	const unsigned int tx  = threadIdx.x;
++	const unsigned int bdx = blockDim.x;
++	const unsigned int bx  = blockIdx.x;
++	const unsigned int tid = bx * bdx + tx;
++
++	unsigned long long id;
++	int n, br, bry, brx, jx, jy;
++	double ref1, ref2, ref3, px, py, pt;
++	double pbx, pby;
++	unsigned char c;
++
++	if(tid < Nbnd){
++		id = dBid[tid];
++		if(id > 0){
++			n = dBnode[tid];
++			c = dCell[id];
++			if(n > 0 && c > 1){
++				ref1 = (1.0 - ref) / (sqrt(2.0) * (1.0 + ref) * cfl + (1.0 - ref));
++				ref2 = (1.0 + ref) * cfl /sqrt(2.0) / (sqrt(2.0) * (1.0 + ref) * cfl + (1.0 - ref));
++				ref3 = ((1.0 + ref) * cfl - (1.0 - ref)) / ((1.0 + ref) * cfl + (1.0 - ref));
++				br  = (int)(n / 9);
++				bry = (int)((n - br*9) / 3);
++				brx = n % 3;
++
++				if(br == 0){
++					if(brx == 1 && bry == 1){
++						jx = -1;
++						jy = -Nx;
++						px = dp[id+jy]+dpp[id+jy]+dpp[id]-(dp[id+jx]+dp[id+jx+jy]+dpp[id+jx]+dpp[id+jx+jy]);
++						py = dp[id+jx]+dpp[id+jx]+dpp[id]-(dp[id+jy]+dp[id+jx+jy]+dpp[id+jy]+dpp[id+jx+jy]);
++						pt = dpp[id]+dpp[id+jx]+dpp[id+jy]+dpp[id+jx+jy]-(dp[id+jx]+dp[id+jy]+dp[id+jx+jy]);
++						dp[id] = ref1 * pt - ref2 *(px + py);
++					}
++					if(brx == 2 && bry == 1){
++						jx =  1;
++						jy = -Nx;
++						px = dp[id+jy]+dpp[id+jy]+dpp[id]-(dp[id+jx]+dp[id+jx+jy]+dpp[id+jx]+dpp[id+jx+jy]);
++						py = dp[id+jx]+dpp[id+jx]+dpp[id]-(dp[id+jy]+dp[id+jx+jy]+dpp[id+jy]+dpp[id+jx+jy]);
++						pt = dpp[id]+dpp[id+jx]+dpp[id+jy]+dpp[id+jx+jy]-(dp[id+jx]+dp[id+jy]+dp[id+jx+jy]);
++						dp[id] = ref1 * pt - ref2 *(px + py);
++					}
++					if(brx == 1 && bry == 2){
++						jx = -1;
++						jy =  Nx;
++						px = dp[id+jy]+dpp[id+jy]+dpp[id]-(dp[id+jx]+dp[id+jx+jy]+dpp[id+jx]+dpp[id+jx+jy]);
++						py = dp[id+jx]+dpp[id+jx]+dpp[id]-(dp[id+jy]+dp[id+jx+jy]+dpp[id+jy]+dpp[id+jx+jy]);
++						pt = dpp[id]+dpp[id+jx]+dpp[id+jy]+dpp[id+jx+jy]-(dp[id+jx]+dp[id+jy]+dp[id+jx+jy]);
++						dp[id] = ref1 * pt - ref2 *(px + py);
++					}
++					if(brx == 2 && bry == 2){
++						jx = 1;
++						jy = Nx;
++						px = dp[id+jy]+dpp[id+jy]+dpp[id]-(dp[id+jx]+dp[id+jx+jy]+dpp[id+jx]+dpp[id+jx+jy]);
++						py = dp[id+jx]+dpp[id+jx]+dpp[id]-(dp[id+jy]+dp[id+jx+jy]+dpp[id+jy]+dpp[id+jx+jy]);
++						pt = dpp[id]+dpp[id+jx]+dpp[id+jy]+dpp[id+jx+jy]-(dp[id+jx]+dp[id+jy]+dp[id+jx+jy]);
++						dp[id] = ref1 * pt - ref2 *(px + py);
++					}
++
++				}
++				else{
++					if(brx == 1 && bry == 1){
++						pbx = dpp[id-1] + ref3 * (dp[id-1] - dpp[id]);
++						pby = dpp[id-Nx] + ref3 * (dp[id-Nx] - dpp[id]);
++						dp[id] = (pbx + pby) / 2.0;
++					}
++					if(brx == 2 && bry == 1){
++						pbx = dpp[id+1] + ref3 * (dp[id+1] - dpp[id]);
++						pby = dpp[id-Nx] + ref3 * (dp[id-Nx] - dpp[id]);
++						dp[id] = (pbx + pby) / 2.0;
++					}
++					if(brx == 1 && bry == 2){
++						pbx = dpp[id-1] + ref3 * (dp[id-1] - dpp[id]);
++						pby = dpp[id+Nx] + ref3 * (dp[id+Nx] - dpp[id]);
++						dp[id] = (pbx + pby) / 2.0;
++					}
++					if(brx == 2 && bry == 2){
++						pbx = dpp[id+1] + ref3 * (dp[id+1] - dpp[id]);
++						pby = dpp[id+Nx] + ref3 * (dp[id+Nx] - dpp[id]);
++						dp[id] = (pbx + pby) / 2.0;
++					}
++				}
++			}
++		}
++	}
++ 	__syncthreads();
++}
++
++
++__global__ void ABC_Mur(float* dp, float* dpp, int Nx, int Ny, float* dRef, int Nyoff)
++{
++	const unsigned int tx  = threadIdx.x;
++	const unsigned int ty  = threadIdx.y;
++	const unsigned int bdx = blockDim.x;
++	const unsigned int bdy = blockDim.y;
++	const unsigned int bx  = blockIdx.x;
++	const unsigned int by  = blockIdx.y;
++
++	const unsigned int ix = bx * bdx + tx;
++	const int iy = by * bdy + ty + Nyoff;
++	const int iyd = by * bdy + ty;
++	unsigned long long id = Nx * iyd + ix;
++
++	if(ix == 0){
++		dp[id] = dpp[id+1] + dRef[0] * dp[id+1] - dRef[0] * dpp[id];
++	}
++	if(ix == Nx-1){
++		dp[id] = dpp[id-1] + dRef[1] * dp[id-1] - dRef[1] * dpp[id];
++	}
++	if(iy == 0){
++		dp[id] = dpp[id+Nx] + dRef[2] * dp[id+Nx] - dRef[2] * dpp[id];
++	}
++	if(iy == Ny-1){
++		dp[id] = dpp[id-Nx] + dRef[3] * dp[id-Nx] - dRef[3] * dpp[id];
++	}
++ 	__syncthreads();
++}
++
++
++__global__ void ABC_Higdon_store(float* dpp, float* dp2, int Nx, int Ny, int Nyoff, int Nys, int Nye)
++{
++	const unsigned int tx  = threadIdx.x;
++	const unsigned int ty  = threadIdx.y;
++	const unsigned int bdx = blockDim.x;
++	const unsigned int bdy = blockDim.y;
++	const unsigned int bx  = blockIdx.x;
++	const unsigned int by  = blockIdx.y;
++
++	const unsigned int ix = bx * bdx + tx;
++	const int iy = by * bdy + ty + Nyoff;
++	const int iyd = by * bdy + ty;
++	unsigned long long id = Nx * iyd + ix;
++
++	if(iy >= Nys && iy <= Nye){
++		if(ix == 0){
++			dp2[iy*3] = dpp[id];
++			dp2[iy*3+1] = dpp[id+1];
++			dp2[iy*3+2] = dpp[id+2];
++		}
++		if(ix == Nx - 1){
++			dp2[iy*3+3*Ny] = dpp[id];
++			dp2[iy*3+3*Ny+1] = dpp[id-1];
++			dp2[iy*3+3*Ny+2] = dpp[id-2];
++		}
++	}
++	if(iy == 0){
++		dp2[ix*3+6*Ny] = dpp[id];
++		dp2[ix*3+6*Ny+1] = dpp[id+Nx];
++		dp2[ix*3+6*Ny+2] = dpp[id+2*Nx];
++	}
++	if(iy == Ny - 1){
++		dp2[ix*3+6*Ny+3*Nx] = dpp[id];
++		dp2[ix*3+6*Ny+3*Nx+1] = dpp[id-Nx];
++		dp2[ix*3+6*Ny+3*Nx+2] = dpp[id-2*Nx];
++	}
++}
++
++
++__global__ void ABC_Higdon_plane(float* dp, float* dpp, float* dp2, int Nx, int Ny, float* dRef, 
++		int Nyoff, int Nys, int Nye, float b1, float b2, float d1, float d2)
++{
++	const unsigned int tx  = threadIdx.x;
++	const unsigned int ty  = threadIdx.y;
++	const unsigned int bdx = blockDim.x;
++	const unsigned int bdy = blockDim.y;
++	const unsigned int bx  = blockIdx.x;
++	const unsigned int by  = blockIdx.y;
++
++	const unsigned int ix = bx * bdx + tx;
++	const int iy = by * bdy + ty + Nyoff;
++	const int iyd = by * bdy + ty;
++	unsigned long long id = Nx * iyd + ix;
++
++	if(ix == 0 && iy >= Nys && iy <= Nye){
++		if(dRef[0] == 1){
++			dp[id] = dp[id+1] + dpp[id+1] - dpp[id];
++		}
++		else{
++			dp[id] = (b1 + b2) * (dp[id+1] - dpp[id])
++				   - b1 * b2 * (dp[id+2] - 2.0 * dpp[id+1] + dp2[iy*3])
++				   - (b1 * (1-d2) + b2*(1-d1)) * (dpp[id+2] - dp2[iy*3+1])
++				   + (1 - d1 + 1 - d2) * dpp[id+1]
++				   - (1 - d1) * (1 - d2) * dp2[iy*3+2];
++		}
++	}
++
++	if(ix == Nx - 1 && iy >= Nys && iy <= Nye){
++		if(dRef[1] == 1){
++			dp[id] = dp[id-1] + dpp[id-1] - dpp[id];
++		}
++		else{
++			dp[id] = (b1 + b2) * (dp[id-1] - dpp[id])
++				   - b1 * b2 * (dp[id-2] - 2.0 * dpp[id-1] + dp2[iy*3+3*Ny])
++				   - (b1 * (1-d2) + b2*(1-d1)) * (dpp[id-2] - dp2[iy*3+3*Ny+1])
++				   + (1 - d1 + 1 - d2) * dpp[id-1]
++				   - (1 - d1) * (1 - d2) * dp2[iy*3+3*Ny+2];
++		}
++	}
++
++	if(iy == 0 && ix > 0 && ix < Nx - 1){
++		if(dRef[2] == 1){
++			dp[id] = dp[id+Nx] + dpp[id+Nx] - dpp[id];
++		}
++		else{
++			dp[id] = (b1 + b2) * (dp[id+Nx] - dpp[id])
++				   - b1 * b2 * (dp[id+2*Nx] - 2.0 * dpp[id+Nx] + dp2[ix*3+6*Ny])
++				   - (b1 * (1-d2) + b2*(1-d1)) * (dpp[id+2*Nx] - dp2[ix*3+6*Ny+1])
++				   + (1 - d1 + 1 - d2) * dpp[id+Nx]
++				   - (1 - d1) * (1 - d2) * dp2[ix*3+6*Ny+2];
++		}
++	}
++
++	if(iy == Ny - 1 && ix > 0 && ix < Nx - 1){
++		if(dRef[3] == 1){
++			dp[id] = dp[id-Nx] + dpp[id-Nx] - dpp[id];
++		}
++		else{
++			dp[id] = (b1 + b2) * (dp[id-Nx] - dpp[id])
++				   - b1 * b2 * (dp[id-2*Nx] - 2.0 * dpp[id-Nx] + dp2[ix*3+6*Ny+3*Nx])
++				   - (b1 * (1-d2) + b2*(1-d1)) * (dpp[id-2*Nx] - dp2[ix*3+6*Ny+3*Nx+1])
++				   + (1 - d1 + 1 - d2) * dpp[id-Nx]
++				   - (1 - d1) * (1 - d2) * dp2[ix*3+6*Ny+3*Nx+2];
++	}
++	}
++	__syncthreads();
++}
++
++
++__global__ void ABC_Higdon_corner(float* dp, float* dpp, float* dp2, int Nx, int Ny, float* dRef, 
++		int Nyoff, int Nys, int Nye, float b1, float b2, float d1, float d2)
++{
++	const unsigned int tx  = threadIdx.x;
++	const unsigned int ty  = threadIdx.y;
++	const unsigned int bdx = blockDim.x;
++	const unsigned int bdy = blockDim.y;
++	const unsigned int bx  = blockIdx.x;
++	const unsigned int by  = blockIdx.y;
++
++	const unsigned int ix = bx * bdx + tx;
++	const int iy = by * bdy + ty + Nyoff;
++	const int iyd = by * bdy + ty;
++	unsigned long long id = Nx * iyd + ix;
++	float p1, p2;
++
++	if(ix == 0 && iy == 0){
++		p1 = (b1 + b2) * (dp[id+1] - dpp[id])
++			- b1 * b2 * (dp[id+2] - 2.0 * dpp[id+1] + dp2[iy*3])
++			- (b1 * (1-d2) + b2*(1-d1)) * (dpp[id+2] - dp2[iy*3+1])
++			+ (1 - d1 + 1 - d2) * dpp[id+1]
++			- (1 - d1) * (1 - d2) * dp2[iy*3+2];
++		p2 = (b1 + b2) * (dp[id+Nx] - dpp[id])
++			- b1 * b2 * (dp[id+2*Nx] - 2.0 * dpp[id+Nx] + dp2[ix*3+6*Ny])
++			- (b1 * (1-d2) + b2*(1-d1)) * (dpp[id+2*Nx] - dp2[ix*3+6*Ny+1])
++			+ (1 - d1 + 1 - d2) * dpp[id+Nx]
++			- (1 - d1) * (1 - d2) * dp2[ix*3+6*Ny+2];
++		dp[id] = (p1 + p2) / 2.0;
++	}
++	if(ix == Nx - 1 && iy == 0){
++		p1 = (b1 + b2) * (dp[id-1] - dpp[id])
++			- b1 * b2 * (dp[id-2] - 2.0 * dpp[id-1] + dp2[iy*3+3*Ny])
++			- (b1 * (1-d2) + b2*(1-d1)) * (dpp[id-2] - dp2[iy*3+3*Ny+1])
++			+ (1 - d1 + 1 - d2) * dpp[id-1]
++			- (1 - d1) * (1 - d2) * dp2[iy*3+3*Ny+2];
++		p2 = (b1 + b2) * (dp[id+Nx] - dpp[id])
++			- b1 * b2 * (dp[id+2*Nx] - 2.0 * dpp[id+Nx] + dp2[ix*3+6*Ny])
++			- (b1 * (1-d2) + b2*(1-d1)) * (dpp[id+2*Nx] - dp2[ix*3+6*Ny+1])
++			+ (1 - d1 + 1 - d2) * dpp[id+Nx]
++			- (1 - d1) * (1 - d2) * dp2[ix*3+6*Ny+2];
++		dp[id] = (p1 + p2) / 2.0;
++	}
++	if(ix == 0 && iy == Ny - 1){
++		p1 = (b1 + b2) * (dp[id+1] - dpp[id])
++			- b1 * b2 * (dp[id+2] - 2.0 * dpp[id+1] + dp2[iy*3])
++			- (b1 * (1-d2) + b2*(1-d1)) * (dpp[id+2] - dp2[iy*3+1])
++			+ (1 - d1 + 1 - d2) * dpp[id+1]
++			- (1 - d1) * (1 - d2) * dp2[iy*3+2];
++		p2 = (b1 + b2) * (dp[id-Nx] - dpp[id])
++			- b1 * b2 * (dp[id-2*Nx] - 2.0 * dpp[id-Nx] + dp2[ix*3+6*Ny+3*Nx])
++			- (b1 * (1-d2) + b2*(1-d1)) * (dpp[id-2*Nx] - dp2[ix*3+6*Ny+3*Nx+1])
++			+ (1 - d1 + 1 - d2) * dpp[id-Nx]
++			- (1 - d1) * (1 - d2) * dp2[ix*3+6*Ny+3*Nx+2];
++		dp[id] = (p1 + p2) / 2.0;
++	}
++	if(ix == Nx - 1 && iy == Ny - 1){
++		p1 = (b1 + b2) * (dp[id-1] - dpp[id])
++			- b1 * b2 * (dp[id-2] - 2.0 * dpp[id-1] + dp2[iy*3+3*Ny])
++			- (b1 * (1-d2) + b2*(1-d1)) * (dpp[id-2] - dp2[iy*3+3*Ny+1])
++			+ (1 - d1 + 1 - d2) * dpp[id-1]
++			- (1 - d1) * (1 - d2) * dp2[iy*3+3*Ny+2];
++		p2 = (b1 + b2) * (dp[id-Nx] - dpp[id])
++			- b1 * b2 * (dp[id-2*Nx] - 2.0 * dpp[id-Nx] + dp2[ix*3+6*Ny+3*Nx])
++			- (b1 * (1-d2) + b2*(1-d1)) * (dpp[id-2*Nx] - dp2[ix*3+6*Ny+3*Nx+1])
++			+ (1 - d1 + 1 - d2) * dpp[id-Nx]
++			- (1 - d1) * (1 - d2) * dp2[ix*3+6*Ny+3*Nx+2];
++		dp[id] = (p1 + p2) / 2.0;
++	}
++	__syncthreads();
++}
++
++
++void ExcangeBoundary(float* dpt, float* dppt, float* dpb, float* dppb, float* dp, float* dpp, 
++	float* mpt, float* mppt, float* mpb, float* mppb, int Nem, int Nbm, int Nydiv, int inode, 
++	int gpu_id, int Nygpu)
++{
++	// ï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^ï¿½]ï¿½ï¿½(ï¿½fï¿½oï¿½Cï¿½Xï¿½ï¿½ï¿½zï¿½Xï¿½g)
++	if(Nnode > 1 || Ngpu > 1){
++		cudaMemcpy(dpt+ 2*Nbm*gpu_id, dp+ Nbm*(Nygpu-Block.y), sizeof(float)*2*Nbm, cudaMemcpyDeviceToHost);
++		cudaMemcpy(dppt+2*Nbm*gpu_id, dpp+Nbm*(Nygpu-Block.y), sizeof(float)*2*Nbm, cudaMemcpyDeviceToHost);
++		cudaMemcpy(dpb+ 2*Nbm*gpu_id, dp+ Nbm*(Block.y-Boff),  sizeof(float)*2*Nbm, cudaMemcpyDeviceToHost);
++		cudaMemcpy(dppb+2*Nbm*gpu_id, dpp+Nbm*(Block.y-Boff),  sizeof(float)*2*Nbm, cudaMemcpyDeviceToHost);
++	}
++
++	cudaDeviceSynchronize();
++	#pragma omp barrier
++	#pragma omp single
++	MPI_Barrier(MPI_COMM_WORLD);
++
++	// ï¿½ï¿½wï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^ï¿½]ï¿½ï¿½(ï¿½mï¿½[ï¿½hï¿½ï¿½)
++	if(Nnode > 1){
++		#pragma omp single
++		{
++			if(inode == 0){
++				MPI_Send((void*)(dpt+ 2*Nbm*(Ngpu-1)), 2*Nbm, MPI_FLOAT, inode+1, HBU_TO_HBD, MPI_COMM_WORLD);
++				MPI_Send((void*)(dppt+2*Nbm*(Ngpu-1)), 2*Nbm, MPI_FLOAT, inode+1, HBU_TO_HBD, MPI_COMM_WORLD);
++			}
++			else if(inode == Nnode - 1){
++				MPI_Recv((void*)mpt,  2*Nbm, MPI_FLOAT, inode-1, HBU_TO_HBD, MPI_COMM_WORLD, &mpi_stat);
++				MPI_Recv((void*)mppt, 2*Nbm, MPI_FLOAT, inode-1, HBU_TO_HBD, MPI_COMM_WORLD, &mpi_stat);
++			}
++			else{
++				MPI_Sendrecv((void*)(dpt+2*Nbm*(Ngpu-1)), 2*Nbm, MPI_FLOAT, inode+1, HBU_TO_HBD, 
++							(void*)mpt, 2*Nbm, MPI_FLOAT, inode-1, HBU_TO_HBD, MPI_COMM_WORLD, &mpi_stat);
++				MPI_Sendrecv((void*)(dppt+2*Nbm*(Ngpu-1)), 2*Nbm, MPI_FLOAT, inode+1, HBU_TO_HBD, 
++							(void*)mppt, 2*Nbm, MPI_FLOAT, inode-1, HBU_TO_HBD, MPI_COMM_WORLD, &mpi_stat);
++			}
++		}
++	}
++
++	#pragma omp barrier
++	#pragma omp single
++	MPI_Barrier(MPI_COMM_WORLD);
++
++	// ï¿½ï¿½ï¿½wï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^ï¿½]ï¿½ï¿½(ï¿½mï¿½[ï¿½hï¿½ï¿½)
++	if(Nnode > 1){
++		#pragma omp single
++		{
++			if(inode == 0){
++				MPI_Recv((void*)mpb,  2*Nbm, MPI_FLOAT, inode+1, HBD_TO_HBU, MPI_COMM_WORLD, &mpi_stat);
++				MPI_Recv((void*)mppb, 2*Nbm, MPI_FLOAT, inode+1, HBD_TO_HBU, MPI_COMM_WORLD, &mpi_stat);
++			}
++			else if(inode == Nnode - 1){
++				MPI_Send((void*)dpb,  2*Nbm, MPI_FLOAT, inode-1, HBD_TO_HBU, MPI_COMM_WORLD);
++				MPI_Send((void*)dppb, 2*Nbm, MPI_FLOAT, inode-1, HBD_TO_HBU, MPI_COMM_WORLD);
++			}
++			else{
++				MPI_Sendrecv((void*)dpb, 2*Nbm, MPI_FLOAT, inode-1, HBD_TO_HBU, 
++							(void*)mpb, 2*Nbm, MPI_FLOAT, inode+1, HBD_TO_HBU, MPI_COMM_WORLD, &mpi_stat);
++				MPI_Sendrecv((void*)dppb, 2*Nbm, MPI_FLOAT, inode-1, HBD_TO_HBU, 
++							(void*)mppb, 2*Nbm, MPI_FLOAT, inode+1, HBD_TO_HBU, MPI_COMM_WORLD, &mpi_stat);
++			}
++		}
++	}
++
++	#pragma omp barrier
++	#pragma omp single
++	MPI_Barrier(MPI_COMM_WORLD);
++
++	// ï¿½ï¿½ï¿½Eï¿½fï¿½[ï¿½^ï¿½]ï¿½ï¿½(ï¿½zï¿½Xï¿½gï¿½ï¿½ï¿½fï¿½oï¿½Cï¿½X)
++	if(gpu_id > 0){
++		cudaMemcpy(dp,  dpt+ 2*Nbm*(gpu_id-1), sizeof(float)*2*Nbm, cudaMemcpyHostToDevice);
++		cudaMemcpy(dpp, dppt+2*Nbm*(gpu_id-1), sizeof(float)*2*Nbm, cudaMemcpyHostToDevice);
++	}
++	else{
++		if(inode > 0){
++			cudaMemcpy(dp,  mpt,  sizeof(float)*2*Nbm, cudaMemcpyHostToDevice);
++			cudaMemcpy(dpp, mppt, sizeof(float)*2*Nbm, cudaMemcpyHostToDevice);
++		}
++	}
++	if(gpu_id < Ngpu - 1){
++		cudaMemcpy(dp+ (Nygpu-Boff)*Nbm, dpb+ 2*Nbm*(gpu_id+1), sizeof(float)*2*Nbm, cudaMemcpyHostToDevice);
++		cudaMemcpy(dpp+(Nygpu-Boff)*Nbm, dppb+2*Nbm*(gpu_id+1), sizeof(float)*2*Nbm, cudaMemcpyHostToDevice);
++	}
++	else{
++		if(inode < Nnode-1){
++			cudaMemcpy(dp+ (Nygpu-Boff)*Nbm, mpb,  sizeof(float)*2*Nbm, cudaMemcpyHostToDevice);
++			cudaMemcpy(dpp+(Nygpu-Boff)*Nbm, mppb, sizeof(float)*2*Nbm, cudaMemcpyHostToDevice);
++		}
++	}
++	cudaDeviceSynchronize();
++	#pragma omp barrier
++	#pragma omp single
++	MPI_Barrier(MPI_COMM_WORLD);
++
++}
++
++
++// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½zï¿½Û‘ï¿½
++void save_cross_section(float* dp, float* pp, int3 Ndiv, int inode, int gpu_id, int it, int Nydiv, int Boff, 
++	int iReg, int ipn, int istx, int isty)
++{
++	float* pobs  = (float*) malloc(sizeof(float));		 	// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½
++	int id, iy, Nd;
++	long long idd;
++	int ii;
++	char filename[200];
++
++	// xyï¿½ï¿½ï¿½Ê•Û‘ï¿½
++	Nd = Ndx * Ndy;
++	idd = 0;
++
++	ii = 0;
++	for(int j = 0; j < Nydiv; j++){
++		iy = iReg * Nydiv + j;
++//		printf("%d %d %d %d\n", Ndx, Ndy, iReg, iy/isty);
++		if((iy % isty) == 0){
++			for(int i = 0; i < Ndiv.x; i+=istx){
++				id = (j + Boff) * Ndiv.x + i;
++				cudaMemcpy(pobs, dp+id, sizeof(float), cudaMemcpyDeviceToHost);
++				idd = (iy/isty) * Ndx + ii;
++//				if(i == 0) printf("%d %d %d %d\n", Ndx, Ndy, iReg, iy/isty);
++//				if(idd > Ndx*Ndy) printf("%d %d %d %d\n", Ndx, Ndy, ii, iy/isty);
++				pp[idd] = (*pobs);
++				ii++;
++			}
++			ii = 0;
++		}
++	}
++
++	#pragma omp barrier
++	#pragma omp single
++	MPI_Barrier(MPI_COMM_WORLD);
++	// ï¿½mï¿½[ï¿½h0ï¿½Ö“]ï¿½ï¿½
++	if(gpu_id == 0 && Nnode > 1){
++		for(int ip = 1; ip < Nnode; ip++){
++			if(inode == ip)
++				MPI_Send((void*)(pp+ip*Nd), Nd, MPI_FLOAT, 0, HBD_TO_HBU, MPI_COMM_WORLD);
++			if(inode == 0)
++				MPI_Recv((void*)(pp+ip*Nd), Nd, MPI_FLOAT, ip, HBD_TO_HBU, MPI_COMM_WORLD, &mpi_stat);
++			MPI_Barrier(MPI_COMM_WORLD);
++		}
++	}
++
++	#pragma omp barrier
++	#pragma omp single
++	MPI_Barrier(MPI_COMM_WORLD);
++	if(Nnode == 1 || (inode == 0 && gpu_id == 0)){
++		if(ipn == 0){
++			sprintf(filename, "output%d.dat", it);	// ï¿½oï¿½Íƒtï¿½@ï¿½Cï¿½ï¿½
++			FILE *fpo  = fopen(filename,"w");
++			for(int j = 0; j < Ndy; j++){
++				for(int i = 0; i < Ndx; i++){
++					id = j * Ndiv.x + i;
++					fprintf(fpo, "%e\t", pp[id]);
++				}
++				fprintf(fpo, "\n");
++			}
++			fclose(fpo);
++		}
++		else{
++			sprintf(filename, "output%d.bin", it);	// ï¿½oï¿½Íƒtï¿½@ï¿½Cï¿½ï¿½
++			FILE *fpo  = fopen(filename,"wb");
++			fwrite(&Ndx, sizeof(int), 1, fpo);
++			fwrite(&Ndy, sizeof(int), 1, fpo);
++			fwrite(pp, sizeof(float), Ndx*Ndy, fpo);
++			fclose(fpo);
++		}
++	}
++}
++
++
++void MovingReceiver(float* dp, float* wave, int3 Ndiv, int Nydiv, int3 Block, int iReg, int Boff, Pnt Rcv, float2* RPos, int it){
++
++	float* pobs = (float*) malloc(sizeof(float)*4);		 	// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½
++	int ix, iy, itt;
++	unsigned long long id;
++	float Node[4] = {};
++	float pp;
++	float2 XY, Prcv, dm;
++	int2 Mrcv;
++	float rad = angr / 180. * M_PI;
++
++	if(iReceiver == 0) return;
++	XY.x = 0;
++	XY.y = 0;
++	for(int ii = 0; ii < 4; ii++)
++		pobs[ii] = 0;
++		
++	if(iReceiver == 1){
++		Prcv.x = RPos[it].x / dl;
++		Prcv.y = RPos[it].y / dl;
++	}
++	if(iReceiver == 2){
++		Prcv.x = Rcv.x + (ar * t * t / 2. + vr0 * t) / dl * cos(rad);
++		Prcv.y = Rcv.y + (ar * t * t / 2. + vr0 * t) / dl * sin(rad);
++	}
++
++	Mrcv.x = int(Prcv.x);
++	Mrcv.y = int(Prcv.y);
++	if(Mrcv.x > Ndiv.x-1) Mrcv.x = Ndiv.x;
++	if(Mrcv.y > Ndiv.y-1) Mrcv.y = Ndiv.y;
++	dm.x = Prcv.x - Mrcv.x;
++	dm.y = Prcv.y - Mrcv.y;
++	XY.x = dm.x * 2 - 1;
++	XY.y = dm.y * 2 - 1;
++//	printf("%f %f %f %f \n", dm.x, dm.y, XY.x, XY.y);
++
++	if(Mrcv.y / Nydiv == iReg){
++		ix = Mrcv.x;
++		iy = Mrcv.y % Nydiv;
++		id = (iy + Boff) * Ndiv.x + ix;
++		cudaMemcpy(pobs,   dp+id, sizeof(float)*2, cudaMemcpyDeviceToHost);
++		iy = (Mrcv.y+1) % Nydiv;
++		id = (iy + Boff) * Ndiv.x + ix;
++		cudaMemcpy(pobs+2, dp+id, sizeof(float)*2, cudaMemcpyDeviceToHost);
++	}
++	
++	Node[0] = (1 - XY.x) * (1 - XY.y) * pobs[0] / 4;
++	Node[1] = (1 + XY.x) * (1 - XY.y) * pobs[1] / 4;
++	Node[2] = (1 - XY.x) * (1 + XY.y) * pobs[2] / 4;
++	Node[3] = (1 + XY.x) * (1 + XY.y) * pobs[3] / 4;
++	
++	pp = 0;
++	for(int i = 0; i < 4; i++)
++		pp += Node[i];
++	itt = it % Nwave;
++	wave[itt] = pp;
++//	printf("%f\n", pp);
++	if(abs(wave[itt]) > 100.0 || isnan(wave[itt]) != 0){
++		printf("Diverged! %d: %e\n", it, wave[itt]);
++		#pragma omp barrier
++		#pragma omp single
++		MPI_Barrier(MPI_COMM_WORLD);
++		exit(1);
++	}
++}
++
++/* ï¿½ï¿½ï¿½xï¿½|ï¿½eï¿½ï¿½ï¿½Vï¿½ï¿½ï¿½ï¿½?
++__global__ void WaveObss(float* dp, float* dpp, int3 Ndiv, int Nydiv, int3 Block, int iReg, 
++		Pnt* dobs, float* dwave, float* du, float cfl, int Nwave, int it, float dt){
++
++	const unsigned int tx  = threadIdx.x;
++	const unsigned int bdx = blockDim.x;
++	const unsigned int bx  = blockIdx.x;
++	const unsigned int io = bx * bdx + tx;
++
++	unsigned long long id;
++	float ux, uy, p, phi;
++
++	phi = dobs[io].p / 180. * M_PI;
++	if(dobs[io].y / Nydiv == iReg){
++		id = (dobs[io].y % Nydiv + Block.y / 2) * Ndiv.x + dobs[io].x;
++		if(phi == 0.0){
++			dwave[io*Nwave+it] = dp[id];
++		}
++		else{
++			ux = -(dp[id+1] - dp[id-1]) * cfl / 2.;
++			uy = -(dp[id+Ndiv.x] - dp[id-Ndiv.x]) * cfl / 2.;
++			p  = (dp[id] - dpp[id]);
++			dwave[io*Nwave+it] = (ux * cos(phi) + uy * sin(phi) + p) / 2.;
++		}
++	}
++}
++*/
++
++__global__ void WaveObss(float* dp, int3 Ndiv, int Nydiv, int3 Block, int iReg, 
++		Pnt* dobs, float* dwave, float* du, float cfl, int Nwave, int it){
++
++	const unsigned int tx  = threadIdx.x;
++	const unsigned int bdx = blockDim.x;
++	const unsigned int bx  = blockIdx.x;
++	const unsigned int io = bx * bdx + tx;
++
++	unsigned long long id;
++	float ux, uy, phi;
++
++	phi = dobs[io].p / 180. * M_PI;
++	if(dobs[io].y / Nydiv == iReg){
++		id = (dobs[io].y % Nydiv + Block.y / 2) * Ndiv.x + dobs[io].x;
++		if(phi == 0.0){
++			dwave[io*Nwave+it] = dp[id];
++		}
++		else{
++			ux = (dp[id+1] - dp[id-1]) * cfl / 2.;
++			uy = (dp[id+Ndiv.x] - dp[id-Ndiv.x]) * cfl / 2.;
++			du[io] = du[io] + ux * cos(phi) + uy * sin(phi);
++			dwave[io*Nwave+it] = (du[io] + dp[id]) / 2.;
++//			printf("%f \n", ux * cos(phi) + uy * sin(phi));
++		}
++	}
++}
++
++
++__global__ void ObssEcho(float* dp, int3 Ndiv, int Nydiv, int3 Block, int iReg, 
++		Pnt* dobs, float* dwave, float* dux, float* duy, float cfl, int Nwave, int it){
++
++	const unsigned int tx  = threadIdx.x;
++	const unsigned int bdx = blockDim.x;
++	const unsigned int bx  = blockIdx.x;
++	const unsigned int io = bx * bdx + tx;
++
++	unsigned long long id;
++
++	if(dobs[io].y / Nydiv == iReg){
++		id = (dobs[io].y % Nydiv + Block.y / 2) * Ndiv.x + dobs[io].x;
++		dux[io] = dux[io] + (dp[id+1] - dp[id-1]) * cfl / 2.;
++		duy[io] = duy[io] + (dp[id+Ndiv.x] - dp[id-Ndiv.x]) * cfl / 2.;
++		dwave[io*Nwave*3+it] = dp[id];
++		dwave[io*Nwave*3+it+Nwave] = dux[io];
++		dwave[io*Nwave*3+it+2*Nwave] = duy[io];
++//		printf("%f \n", ux * cos(phi) + uy * sin(phi));
++	}
++}
++
++
++void SaveWaveBin(float* dwave, float* hwave, float* wave, int it, int gpu_id, int Nydiv, FILE *fpb)
++{
++//	double ux, uy, phi2, uu;
++	int Nw;
++
++	// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½ï¿½æ“¾
++	Nw = (it % Nwave) + 1;
++	cudaMemcpy(hwave, dwave, sizeof(float)*Nwave*Nobs*3, cudaMemcpyDeviceToHost);
++		
++	for(int io = 0; io < Nobs; io++){
++		for(int ii = 0; ii < Nw; ii++){
++			if(abs(hwave[io*Nwave*3+ii]) > 1.0e7 || isnan(hwave[io*Nwave*3+ii]) != 0){
++				printf("Diverged! %d: %e\n", it, hwave[io*Nwave*3+ii]);
++				#pragma omp barrier
++				#pragma omp single
++				MPI_Barrier(MPI_COMM_WORLD);
++				cudaDeviceSynchronize();
++				cudaDeviceReset();
++				exit(1);
++			}
++			wave[io*Nwave*3+ii] = hwave[io*Nwave*3+ii];
++			wave[io*Nwave*3+Nwave+ii] = hwave[io*Nwave*3+Nwave+ii];
++			wave[io*Nwave*3+2*Nwave+ii] = hwave[io*Nwave*3+2*Nwave+ii];
++		}
++	}
++
++	if(Nnode > 1 && gpu_id == 0){
++		for(int io = 0; io < Nobs; io++){
++			int inod = obs[io].y / (Ngpu * Nydiv);
++			MPI_Bcast((wave+io*Nwave*3), Nwave, MPI_REAL, inod, MPI_COMM_WORLD);
++			MPI_Barrier(MPI_COMM_WORLD);
++		}
++	}
++	#pragma omp barrier
++	#pragma omp single
++	MPI_Barrier(MPI_COMM_WORLD);
++
++	if(Nnode == 1 || (inode == 0 && gpu_id == 0)){
++		for(int ii = 0; ii < Nw; ii++){
++			for(int io = 0; io < Nobs; io++){
++				fwrite(wave+io*Nwave*3+ii, sizeof(float), 1, fpb);
++				fwrite(wave+io*Nwave*3+Nwave+ii, sizeof(float), 1, fpb);
++				fwrite(wave+io*Nwave*3+2*Nwave+ii, sizeof(float), 1, fpb);
++			}
++		}
++	}
++}
++
++
++void SaveWave(float* dwave, float* hwave, float* wave, int it, int gpu_id, int Nydiv, FILE *fp2)
++{
++	int Nw;
++	
++	Nw = (it % Nwave) + 1;
++	// ï¿½Ï‘ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½ï¿½æ“¾
++	if(iReceiver == 0){
++		cudaMemcpy(hwave, dwave, sizeof(float)*Nwave*Nobs*3, cudaMemcpyDeviceToHost);
++
++		for(int io = 0; io < Nobs; io++){
++			for(int ii = 0; ii < Nw; ii++){
++				if(abs(hwave[io*Nwave*3+ii]) > 1.0e7 || isnan(hwave[io*Nwave*3+ii]) != 0){
++					printf("Diverged! %d: %e\n", it, hwave[io*Nwave*3+ii]);
++					#pragma omp barrier
++					#pragma omp single
++					MPI_Barrier(MPI_COMM_WORLD);
++					cudaDeviceSynchronize();
++					cudaDeviceReset();
++					exit(1);
++				}
++				wave[io*Nwave*3+ii] = hwave[io*Nwave*3+ii];
++				wave[io*Nwave*3+Nwave+ii] = hwave[io*Nwave*3+Nwave+ii];
++				wave[io*Nwave*3+2*Nwave+ii] = hwave[io*Nwave*3+2*Nwave+ii];
++			}
++		}
++	}
++	#pragma omp barrier
++	#pragma omp single
++	MPI_Barrier(MPI_COMM_WORLD);
++
++	if(Nnode > 1 && gpu_id == 0){
++		for(int io = 0; io < Nobs; io++){
++			int inod = obs[io].y / (Ngpu * Nydiv);
++			MPI_Bcast((wave+io*Nwave*3), Nwave, MPI_REAL, inod, MPI_COMM_WORLD);
++			MPI_Barrier(MPI_COMM_WORLD);
++		}
++	}
++	#pragma omp barrier
++	#pragma omp single
++	MPI_Barrier(MPI_COMM_WORLD);
++
++	if(Nnode == 1 || (inode == 0 && gpu_id == 0)){
++		for(int ii = 0; ii < Nw; ii++){
++			for(int io = 0; io < Nobs; io++){
++				fprintf(fp2, "%e,%e,%e,", wave[io*Nwave*3+ii], wave[io*Nwave*3+Nwave+ii],wave[io*Nwave*3+2*Nwave+ii]);
++			}
++			fprintf(fp2, "\n");
++		}
++	}
++}
++
++
+diff --git a/reinforcement_learning/environments/Bat2d1.1AI2/cell.dat b/reinforcement_learning/environments/Bat2d1.1AI2/cell.dat
+old mode 100644
+new mode 100755
+diff --git a/reinforcement_learning/environments/Bat2d1.1AI2/cell0.dat b/reinforcement_learning/environments/Bat2d1.1AI2/cell0.dat
+old mode 100644
+new mode 100755
+diff --git a/reinforcement_learning/environments/Bat2d1.1AI2/cell1.dat b/reinforcement_learning/environments/Bat2d1.1AI2/cell1.dat
+old mode 100644
+new mode 100755
+diff --git a/reinforcement_learning/environments/Bat2d1.1AI2/cell2.dat b/reinforcement_learning/environments/Bat2d1.1AI2/cell2.dat
+old mode 100644
+new mode 100755
+diff --git a/reinforcement_learning/environments/Bat2d1.1AI2/cell3.dat b/reinforcement_learning/environments/Bat2d1.1AI2/cell3.dat
+old mode 100644
+new mode 100755
+diff --git a/reinforcement_learning/environments/Bat2d1.1AI2/cell_all.dat b/reinforcement_learning/environments/Bat2d1.1AI2/cell_all.dat
+old mode 100644
+new mode 100755
+diff --git a/reinforcement_learning/environments/Bat2d1.1AI2/directivity2.xlsx b/reinforcement_learning/environments/Bat2d1.1AI2/directivity2.xlsx
+old mode 100644
+new mode 100755
+diff --git a/reinforcement_learning/environments/Bat2d1.1AI2/echo.csv b/reinforcement_learning/environments/Bat2d1.1AI2/echo.csv
+old mode 100644
+new mode 100755
+diff --git a/reinforcement_learning/environments/Bat2d1.1AI2/input.dat b/reinforcement_learning/environments/Bat2d1.1AI2/input.dat
+old mode 100644
+new mode 100755
+index 972b748..1f92ce7
+--- a/reinforcement_learning/environments/Bat2d1.1AI2/input.dat
++++ b/reinforcement_learning/environments/Bat2d1.1AI2/input.dat
+@@ -1,13 +1,13 @@
+-//2ŸŒ³IWB-FDTD–@@ˆÚ“®‰¹Œ¹/ó‰¹“_—p(©“®¶¬)
+-1  1  1   // ƒ‚ƒfƒ‹ƒ^ƒCƒv(0:‹éŒ`,1:”CˆÓ), è–@ (0:SLF, 1:IWB), ‹«ŠEğŒ(0:Mur1Ÿ,1:Higdon2Ÿ)
+-7000  3000  cell.dat  	// x, y•ûŒü•ªŠ„”Nx, Ny, ƒZƒ‹ƒf[ƒ^–¼(‚Ç‚¿‚ç‚©w’è)
+-0.0 0.0 0.0 0.0  0.99  // -x,x,-y,y‹«ŠEğŒ, ”CˆÓ‹«ŠE”½Ë—¦
++//2ï¿½ï¿½ï¿½ï¿½IWB-FDTDï¿½@ï¿½@ï¿½Ú“ï¿½ï¿½ï¿½ï¿½ï¿½/ï¿½ó‰¹“_ï¿½p(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
++1  1  1   // ï¿½ï¿½ï¿½fï¿½ï¿½ï¿½^ï¿½Cï¿½v(0:ï¿½ï¿½`,1:ï¿½Cï¿½ï¿½), ï¿½ï¿½@ (0:SLF, 1:IWB), ï¿½ï¿½ï¿½Eï¿½ï¿½ï¿½ï¿½(0:Mur1ï¿½ï¿½,1:Higdon2ï¿½ï¿½)
++7000  3000  cell.dat  	// x, yï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Nx, Ny, ï¿½Zï¿½ï¿½ï¿½fï¿½[ï¿½^ï¿½ï¿½(ï¿½Ç‚ï¿½ï¿½ç‚©ï¿½wï¿½ï¿½)
++0.0 0.0 0.0 0.0  0.99  // -x,x,-y,yï¿½ï¿½ï¿½Eï¿½ï¿½ï¿½ï¿½, ï¿½Cï¿½Ó‹ï¿½ï¿½Eï¿½ï¿½ï¿½Ë—ï¿½
+ 0.98  0.0005  340  	// CFL, dl, c0
+-12246  			// ŒvZƒXƒeƒbƒv”Nt
+-0  none	// ‰¹Œ¹ˆÚ“®•û–@(0:ŒÅ’èC1:À•Wƒtƒ@ƒCƒ‹C2:’¼üˆÚ“®)
+-1800  1500  0  0  0  0  // (ƒtƒ@ƒCƒ‹‚Ì‚Í–³‹)‰¹Œ¹ˆÊ’usrc_x, y, •ûŒü(ƒÓ), ‰¹Œ¹‘¬“x, ‰Á‘¬“xCŠp“x
+-0  10  none  	// freq(-1:ƒtƒ@ƒCƒ‹C0:ƒCƒ“ƒpƒ‹ƒX), ƒo[ƒXƒg”g”Nd (0: ˜A‘±, 1:”÷•ªƒKƒEƒX)
+-0  none	// ó‰¹“_ˆÚ“®•û–@(0:ŒÅ’èC1:À•Wƒtƒ@ƒCƒ‹C2:’¼üˆÚ“®)
+-0 1 				//‰¹ˆ³•ª•zo—Í(0:‚È‚µ), ”gŒ`
+-1000 4 4 0 300000 		// ŠÔŠÔŠuC‰¹ˆ³•ª•zŠÔˆø‚«(x,y•ûŒü)CŠJnCI—¹
+-1   1				// GPU”/ƒm[ƒh, GPU ID
++12246  			// ï¿½vï¿½Zï¿½Xï¿½eï¿½bï¿½vï¿½ï¿½Nt
++0  none	// ï¿½ï¿½ï¿½ï¿½ï¿½Ú“ï¿½ï¿½ï¿½ï¿½@(0:ï¿½Å’ï¿½C1:ï¿½ï¿½ï¿½Wï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½C2:ï¿½ï¿½ï¿½ï¿½ï¿½Ú“ï¿½)
++1800  1500  0  0  0  0  // (ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½Ìï¿½ï¿½Í–ï¿½ï¿½ï¿½)ï¿½ï¿½ï¿½ï¿½ï¿½Ê’usrc_x, y, ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½), ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½x, ï¿½ï¿½ï¿½ï¿½ï¿½xï¿½Cï¿½pï¿½x
++0  10  none  	// freq(-1:ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½C0:ï¿½Cï¿½ï¿½ï¿½pï¿½ï¿½ï¿½X), ï¿½oï¿½[ï¿½Xï¿½gï¿½gï¿½ï¿½Nd (0: ï¿½Aï¿½ï¿½, 1:ï¿½ï¿½ï¿½ï¿½ï¿½Kï¿½Eï¿½X)
++0  none	// ï¿½ó‰¹“_ï¿½Ú“ï¿½ï¿½ï¿½ï¿½@(0:ï¿½Å’ï¿½C1:ï¿½ï¿½ï¿½Wï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½C2:ï¿½ï¿½ï¿½ï¿½ï¿½Ú“ï¿½)
++0 1 				//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½zï¿½oï¿½ï¿½(0:ï¿½È‚ï¿½), ï¿½gï¿½`
++1000 4 4 0 300000 		// ï¿½ï¿½ï¿½ÔŠÔŠuï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½zï¿½Ôˆï¿½ï¿½ï¿½(x,yï¿½ï¿½ï¿½ï¿½)ï¿½Cï¿½Jï¿½nï¿½Cï¿½Iï¿½ï¿½
++1   0				// GPUï¿½ï¿½/ï¿½mï¿½[ï¿½h, GPU ID
+diff --git a/reinforcement_learning/environments/Bat2d1.1AI2/spcont.m b/reinforcement_learning/environments/Bat2d1.1AI2/spcont.m
+old mode 100644
+new mode 100755
+diff --git a/reinforcement_learning/environments/Bat2d1.1AI2/wave0_x1000_y1500.bin b/reinforcement_learning/environments/Bat2d1.1AI2/wave0_x1000_y1500.bin
+old mode 100644
+new mode 100755
+diff --git a/reinforcement_learning/environments/Bat2d1.1AI2/waveX_x1000_y1500.bin b/reinforcement_learning/environments/Bat2d1.1AI2/waveX_x1000_y1500.bin
+old mode 100644
+new mode 100755
+diff --git a/reinforcement_learning/environments/Bat2d1.1AI2/waveY_x1000_y1500.bin b/reinforcement_learning/environments/Bat2d1.1AI2/waveY_x1000_y1500.bin
+old mode 100644
+new mode 100755
+diff --git "a/reinforcement_learning/environments/Bat2d1.1AI2/\345\274\267\345\214\226\345\255\246\347\277\222\347\224\250\343\203\207\343\203\274\343\202\277\344\275\234\346\210\220\347\260\241\346\230\223\343\203\236\343\203\213\343\203\245\343\202\242\343\203\253.docx" "b/reinforcement_learning/environments/Bat2d1.1AI2/\345\274\267\345\214\226\345\255\246\347\277\222\347\224\250\343\203\207\343\203\274\343\202\277\344\275\234\346\210\220\347\260\241\346\230\223\343\203\236\343\203\213\343\203\245\343\202\242\343\203\253.docx"
+old mode 100644
+new mode 100755
+diff --git a/reinforcement_learning/environments/fdtd_bat.py b/reinforcement_learning/environments/fdtd_bat.py
+index d37d8ec..1e29cfd 100644
+--- a/reinforcement_learning/environments/fdtd_bat.py
++++ b/reinforcement_learning/environments/fdtd_bat.py
+@@ -158,13 +158,13 @@ class LidarBat(object):
+                 f'{self.bat_vec[0]}_{self.bat_vec[1]}.bin is not exist in data base.')
+             print("FDTD.exe for sound pressure start")
+             subprocess.run(
+-                f"./environments/Bat2d1.1AI2/WE-FDTD.exe {self.bat_vec[0]} {self.bat_vec[1]} 0", shell=True)
++                f"./environments/Bat2d1.1AI2/WE-FDTD_T.exe {self.bat_vec[0]} {self.bat_vec[1]} 0", shell=True)
+             print("FDTD.exe for particle velocity x start")
+             subprocess.run(
+-                f"./environments/Bat2d1.1AI2/WE-FDTD.exe {self.bat_vec[0]} {self.bat_vec[1]} 1", shell=True)
++                f"./environments/Bat2d1.1AI2/WE-FDTD_T.exe {self.bat_vec[0]} {self.bat_vec[1]} 1", shell=True)
+             print("FDTD.exe for particle velocity y start")
+             subprocess.run(
+-                f"./environments/Bat2d1.1AI2/WE-FDTD.exe {self.bat_vec[0]} {self.bat_vec[1]} 2", shell=True)
++                f"./environments/Bat2d1.1AI2/WE-FDTD_T.exe {self.bat_vec[0]} {self.bat_vec[1]} 2", shell=True)
+         # get echoes impulse response
+         echoes = self.Ears.get_echoes(
+             position, pulse_angle, self.angle, self.angle_r_ear, self.angle_l_ear)
+diff --git a/reinforcement_learning/ppo_pfrl.py b/reinforcement_learning/ppo_pfrl.py
+index 44ee921..9d904bc 100644
+--- a/reinforcement_learning/ppo_pfrl.py
++++ b/reinforcement_learning/ppo_pfrl.py
+@@ -61,7 +61,7 @@ def main():
+     parser.add_argument('--batchsize', type=int, default=64) #--batch-sizeã¨ã®é•ã„...
+     parser.add_argument('--epochs', type=int, default=10) #ã‚¨ãƒãƒƒã‚¯æ•°ï¼šï¼‘ã¤ã®è¨“ç·´ãƒ‡ãƒ¼ã‚¿ã‚’ä½•å›ç¹°ã‚Šè¿”ã—ã¦å­¦ç¿’ã•ã›ã‚‹ã‹
+     parser.add_argument('--entropy-coef', type=float, default=0.0) #ã‚¨ãƒ³ãƒˆãƒ­ãƒ”ãƒ¼ä¿‚æ•°ï¼šæå¤±é–¢æ•°ã«åŠ ãˆã‚‹â†’æ¢ç´¢ãŒè¡Œã‚ã‚Œãªããªã‚‹ã®ã‚’é˜²ã
+-    parser.add_argument('--gpu', type=int, default=0)
++    parser.add_argument('--gpu', type=int, default=1)
+     args = parser.parse_args() #å¼•æ•°ã‚’è§£æ
+ 
+     logging.basicConfig(level=args.logger_level) #ãƒ­ã‚°ã®è¡¨ç¤ºæ–¹æ³•ã®ï¼‘ã¤
