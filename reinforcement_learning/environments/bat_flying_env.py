@@ -69,7 +69,7 @@ class BatFlyingEnv(gym.Env):
         self.dt = 0.005  # [s]
         #time from emitting pulse [s]
         self.spend_time_from_pulse = 0.1
-        self.min_IPI = 5
+        self.min_IPI = 0.1
 
         self.lower_bound_freq_emit_pulse = 0.3
 
@@ -96,6 +96,7 @@ class BatFlyingEnv(gym.Env):
         # self.goal_area = () if goal_area is None else goal_area
         self.max_flying_angle = math.pi / 18  # [rad]
         self.max_pulse_angle = math.pi / 4  # [rad]
+        self.straight_angle = math.pi * 0 # [rad]
 
         # env settings
         self.action_low = np.array([-1.0, -1.0, 0])
@@ -132,14 +133,16 @@ class BatFlyingEnv(gym.Env):
         return [seed]
 
     def step(self, action):
+        '''
+        stepが刻まれると飛行・パルス放射・旋回角度による報酬が与えられる
+        '''
         action = np.clip(action, self.action_low, self.action_high)
         step_reward = self.fliyng_reward
         done = False
         flying_angle, pulse_angle, pulse_proba = action
-        step_reward += self.flying_angle_reward * np.abs(flying_angle)
 
         bat_p0 = Point(*self.bat.bat_vec)
-        self.bat.move(flying_angle * self.max_flying_angle)
+        self.bat.move(self.straight_angle)         
         bat_p1 = Point(*self.bat.bat_vec)
         bat_seg = Segment(bat_p0, bat_p1)
         for w in self.walls:
@@ -155,12 +158,16 @@ class BatFlyingEnv(gym.Env):
         self.spend_time_from_pulse += self.dt
         if self.spend_time_from_pulse >= self.min_IPI:
             if np.random.rand() < pulse_proba/2 + self.lower_bound_freq_emit_pulse:
+                print("pulse_emit")                 
+                step_reward += self.flying_angle_reward * np.abs(flying_angle)
+                self.bat.move(flying_angle * self.max_flying_angle)
                 self.bat.emit_pulse(pulse_angle * self.max_pulse_angle, self.walls)
                 self.bat.emit = True
                 self.last_pulse_angle = pulse_angle
                 step_reward += self.pulse_reward
                 step_reward += self.pulse_angle_reward * np.abs(pulse_angle)
                 self.spend_time_from_pulse = 0.0
+                self._update_observation()                
             else:
                 self.bat.emit = False
         else:
@@ -173,7 +180,14 @@ class BatFlyingEnv(gym.Env):
         self.t += self.dt
         if 5 < self.t:
             done = True
-        self._update_observation()
+
+        if self.bat.emit:
+            self.count+=1
+        if done:
+            print("pulse count:", self.count)
+
+        print(f"state:\n{self.bat.state}")
+                    
         return self.state, step_reward, done, {}
 
     def reset(self):
