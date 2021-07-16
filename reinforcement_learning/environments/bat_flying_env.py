@@ -143,16 +143,6 @@ class BatFlyingEnv(gym.Env):
 
         bat_p0 = Point(*self.bat.bat_vec)
         self.bat.move(self.straight_angle)         
-        bat_p1 = Point(*self.bat.bat_vec)
-        bat_seg = Segment(bat_p0, bat_p1)
-        for w in self.walls:
-            c_p = cal_cross_point(bat_seg, w)
-            if is_point_in_segment(c_p, w) and is_point_in_segment(c_p, bat_seg):
-                wall_vec = w.p0.unpack() - w.p1.unpack()
-                self.bat.bump(bat_p0.unpack(), wall_vec)
-                step_reward += self.bump_reward
-                done = True
-
         
         # freq emit pulse [0.3, 0.8]
         self.spend_time_from_pulse += self.dt
@@ -172,6 +162,16 @@ class BatFlyingEnv(gym.Env):
                 self.bat.emit = False
         else:
             self.bat.emit = False
+
+        bat_p1 = Point(*self.bat.bat_vec)
+        bat_seg = Segment(bat_p0, bat_p1)
+        for w in self.walls:
+            c_p = cal_cross_point(bat_seg, w)
+            if is_point_in_segment(c_p, w) and is_point_in_segment(c_p, bat_seg):
+                wall_vec = w.p0.unpack() - w.p1.unpack()
+                self.bat.bump(bat_p0.unpack(), wall_vec)
+                step_reward += self.bump_reward
+                done = True        
 
         if np.linalg.norm(self.bat.v_vec) < 1:
             step_reward += self.low_speed_reward
