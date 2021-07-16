@@ -3,6 +3,7 @@ reinforcement_env/
 FDTD/fdtd_env
 FDTD/python_base
 reinforcement_learning/__pycache__/
+reinforcement_learning/data/
 *.py[cod]
 *$py.class
 FDTD/__pycache__/
