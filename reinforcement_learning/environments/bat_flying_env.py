@@ -157,7 +157,7 @@ class BatFlyingEnv(gym.Env):
         # freq emit pulse [0.3, 0.8]
         self.spend_time_from_pulse += self.dt
         if self.spend_time_from_pulse >= self.min_IPI:
-            if np.random.rand() < pulse_proba/2 + self.lower_bound_freq_emit_pulse:
+            if pulse_proba >= 0.5:
                 print("pulse_emit")                 
                 step_reward += self.flying_angle_reward * np.abs(flying_angle)
                 self.bat.move(flying_angle * self.max_flying_angle)
