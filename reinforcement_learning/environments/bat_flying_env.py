@@ -248,16 +248,18 @@ class BatFlyingEnv(gym.Env):
         from gym.envs.classic_control import rendering
         if self.viewer is None:
             self.viewer = rendering.Viewer(screen_width, screen_height)
-            r = (self.bat.size * scale) / 2
-            wing = 4 * math.pi / 5  # angle [rad]
-            nose_x, nose_y = r, 0
-            r_x, r_y = r * math.cos(-wing), r * math.sin(-wing)
-            l_x, l_y = r * math.cos(+wing), r * math.sin(+wing)
-            bat_geom = rendering.FilledPolygon([
-                (nose_x, nose_y),
-                (r_x, r_y),
-                (l_x, l_y)])
-            bat_geom.set_color(0, 0, 0)
+            #r = (self.bat.size * scale) / 2
+            #wing = 4 * math.pi / 5  # angle [rad]
+            #nose_x, nose_y = r, 0
+            #r_x, r_y = r * math.cos(-wing), r * math.sin(-wing)
+            #l_x, l_y = r * math.cos(+wing), r * math.sin(+wing)
+            #bat_geom = rendering.FilledPolygon([
+                #(nose_x, nose_y),
+                #(r_x, r_y),
+                #(l_x, l_y)])
+            # bat_geom.set_color(0, 0, 0)                
+            fname = path.join(path.dirname(__file__), "bat.PNG")
+            bat_geom = rendering.Image(fname, self.bat.total_length*scale, self.bat.wing_span*scale)          
             self.battrans = rendering.Transform()
             bat_geom.add_attr(self.battrans)
             self.viewer.add_geom(bat_geom)
