@@ -94,6 +94,23 @@ class BatFlyingEnv(gym.Env):
         walls = [w0, w1, w2, w3]
         self.walls = [] if walls is None else walls
 
+        #setting chains
+        l = 0.05
+        chains_point = ((1.0, 1.8), (3.0, 2.8),
+                        (3.0, 1.8), (3.0, 0.8), (5.0, 1.8))
+        for c in chains_point:
+            c1 = Segment(Point(c[0], c[1]), Point(c[0], c[1]+l))
+            self.walls.append(c1)
+            c2 = Segment(Point(c[0], c[1]), Point(c[0]+l, c[1]))
+            self.walls.append(c2)
+            c3 = Segment(Point(c[0]+l, c[1]), Point(c[0]+l, c[1]+l))
+            self.walls.append(c3)
+            c4 = Segment(Point(c[0], c[1]+l), Point(c[0]+l, c[1]+l))
+            self.walls.append(c4)
+
+        print(self.walls)
+        self.make_field_arr()
+
         # self.goal_area = () if goal_area is None else goal_area
         self.max_flying_angle = math.pi / 18  # [rad]
         self.max_pulse_angle = math.pi / 4  # [rad]
@@ -128,6 +145,45 @@ class BatFlyingEnv(gym.Env):
         self.viewer = None
         self.state = None
         self.seed()
+
+    def make_field_arr(self):
+        field_arr = np.zeros((int(self.world_height/self.discrete_length),
+                             int(self.world_width/self.discrete_length)))
+        for wall in self.walls:
+            print((wall.p0.x/self.discrete_length), (wall.p1.x/self.discrete_length), (wall.p0.y/self.discrete_length), (wall.p1.y/self.discrete_length))
+            
+            if wall.p0.y <= wall.p1.y:
+                y1 = int(wall.p1.y/self.discrete_length)
+                y2 = int(wall.p0.y/self.discrete_length)
+            elif wall.p0.y > wall.p1.y:
+                y1 = int(wall.p0.y/self.discrete_length)
+                y2 = int(wall.p1.y/self.discrete_length)
+
+            if wall.p0.x <= wall.p1.x:
+                x1 = int(wall.p1.x/self.discrete_length)
+                x2 = int(wall.p0.x/self.discrete_length)
+            elif wall.p0.x > wall.p1.x:
+                x1 = int(wall.p0.x/self.discrete_length)
+                x2 = int(wall.p1.x/self.discrete_length)            
+
+            if x1 == x2 and y1 == y2:
+                field_arr[y1, x1] = 1
+                print(1)
+
+            elif y1 == y2:
+                field_arr[y1, x2:x1+1] = 1
+                print(2)
+
+            elif x1 == x2:
+                field_arr[y2:y1+1, x2] = 1           
+                print(3)
+
+            else:    
+                field_arr[y2:y1+1, x2:x1+1] = 1
+                print(4)
+
+        self.field_arr = field_arr
+
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -188,6 +244,7 @@ class BatFlyingEnv(gym.Env):
             print("pulse count:", self.count)
 
         print(f"state:\n{self.bat.state}")
+        print
                     
         return self.state, step_reward, done, {}
 
@@ -209,26 +266,27 @@ class BatFlyingEnv(gym.Env):
         self._update_observation()
 
     def _reset_walls(self):
-        self.walls = self.walls[:4]
-        p = np.linspace(1.5, 3.5, 3)
-        # p = np.array([1.5, 3])
-        # xs, ys = np.meshgrid(p, p)
-        # xs = xs.ravel() + self.np_random.uniform(-0.3, 0.3, 9)
-        # ys = ys.ravel() + self.np_random.uniform(-0.3, 0.3, 9)
-        # angles = self.np_random.uniform(-math.pi, math.pi, 9)
-        # l = 0.3  # wall length
-        # for x, y, a in zip(xs, ys, angles):
-        #     c, s = (l / 2) * cos_sin(a)
-        #     p0 = Point(x + c, y + s)
-        #     p1 = Point(x - c, y - s)
-        #     self.walls.append(Segment(p0, p1))
-        l = 0.66  # wall length
-        acrilyc_panel0 = Segment(Point(1, 1.5), Point(1, 1.5-l))
-        self.walls.append(acrilyc_panel0)
-        acrilyc_panel1 = Segment(Point(2, 0), Point(2, l))
-        self.walls.append(acrilyc_panel1)
-        acrilyc_panel2 = Segment(Point(3, 1.5), Point(3, 1.5-l))
-        self.walls.append(acrilyc_panel2)
+        pass
+        # self.walls = self.walls[:4]
+        # p = np.linspace(1.5, 3.5, 3)
+        # # p = np.array([1.5, 3])
+        # # xs, ys = np.meshgrid(p, p)
+        # # xs = xs.ravel() + self.np_random.uniform(-0.3, 0.3, 9)
+        # # ys = ys.ravel() + self.np_random.uniform(-0.3, 0.3, 9)
+        # # angles = self.np_random.uniform(-math.pi, math.pi, 9)
+        # # l = 0.3  # wall length
+        # # for x, y, a in zip(xs, ys, angles):
+        # #     c, s = (l / 2) * cos_sin(a)
+        # #     p0 = Point(x + c, y + s)
+        # #     p1 = Point(x - c, y - s)
+        # #     self.walls.append(Segment(p0, p1))
+        # l = 0.66  # wall length
+        # acrilyc_panel0 = Segment(Point(1, 1.5), Point(1, 1.5-l))
+        # self.walls.append(acrilyc_panel0)
+        # acrilyc_panel1 = Segment(Point(2, 0), Point(2, l))
+        # self.walls.append(acrilyc_panel1)
+        # acrilyc_panel2 = Segment(Point(3, 1.5), Point(3, 1.5-l))
+        # self.walls.append(acrilyc_panel2)
 
     def _update_observation(self):
         obs = np.copy(self.bat.state)
