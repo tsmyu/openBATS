@@ -244,7 +244,6 @@ class BatFlyingEnv(gym.Env):
             print("pulse count:", self.count)
 
         print(f"state:\n{self.bat.state}")
-        print
                     
         return self.state, step_reward, done, {}
 
