@@ -3,7 +3,7 @@ import gym
 from gym import spaces, logger
 from gym.utils import seeding
 import numpy as np
-from os import path 
+from os import path
 
 # from .lidar_bat import *
 from .lidar_bat import *
@@ -68,7 +68,7 @@ class BatFlyingEnv(gym.Env):
         self.discrete_length = discrete_length
         # self.dt = 0.01  # [s]
         self.dt = 0.005  # [s]
-        #time from emitting pulse [s]
+        # time from emitting pulse [s]
         self.spend_time_from_pulse = 0.1
         self.min_IPI = 0.1
 
@@ -80,6 +80,7 @@ class BatFlyingEnv(gym.Env):
         self.bump_reward = -100
         self.low_speed_reward = -100
         self.fliyng_reward = 1
+        self.previous_bat_angle = 0
 
         # walls settings
         margin = 0.01
@@ -94,7 +95,7 @@ class BatFlyingEnv(gym.Env):
         walls = [w0, w1, w2, w3]
         self.walls = [] if walls is None else walls
 
-        #setting chains
+        # setting chains
         l = 0.05
         chains_point = ((1.0, 1.8), (3.0, 2.8),
                         (3.0, 1.8), (3.0, 0.8), (5.0, 1.8))
@@ -114,7 +115,7 @@ class BatFlyingEnv(gym.Env):
         # self.goal_area = () if goal_area is None else goal_area
         self.max_flying_angle = math.pi / 18  # [rad]
         self.max_pulse_angle = math.pi / 4  # [rad]
-        self.straight_angle = math.pi * 0 # [rad]
+        self.straight_angle = math.pi * 0  # [rad]
 
         # env settings
         self.action_low = np.array([-1.0, -1.0, 0])
@@ -140,7 +141,8 @@ class BatFlyingEnv(gym.Env):
         #     dtype=np.float32)
         high = np.ones((2, 81, 12245), dtype=int)
         low = np.zeros((2, 81, 12245), dtype=int)
-        self.observation_space = spaces.Box(np.array([low]*self.bat.n_memory), np.array([high]*self.bat.n_memory), dtype=int)
+        self.observation_space = spaces.Box(np.array(
+            [low]*self.bat.n_memory), np.array([high]*self.bat.n_memory), dtype=int)
 
         self.viewer = None
         self.state = None
@@ -150,8 +152,9 @@ class BatFlyingEnv(gym.Env):
         field_arr = np.zeros((int(self.world_height/self.discrete_length),
                              int(self.world_width/self.discrete_length)))
         for wall in self.walls:
-            print((wall.p0.x/self.discrete_length), (wall.p1.x/self.discrete_length), (wall.p0.y/self.discrete_length), (wall.p1.y/self.discrete_length))
-            
+            print((wall.p0.x/self.discrete_length), (wall.p1.x/self.discrete_length),
+                  (wall.p0.y/self.discrete_length), (wall.p1.y/self.discrete_length))
+
             if wall.p0.y <= wall.p1.y:
                 y1 = int(wall.p1.y/self.discrete_length)
                 y2 = int(wall.p0.y/self.discrete_length)
@@ -164,7 +167,7 @@ class BatFlyingEnv(gym.Env):
                 x2 = int(wall.p0.x/self.discrete_length)
             elif wall.p0.x > wall.p1.x:
                 x1 = int(wall.p0.x/self.discrete_length)
-                x2 = int(wall.p1.x/self.discrete_length)            
+                x2 = int(wall.p1.x/self.discrete_length)
 
             if x1 == x2 and y1 == y2:
                 field_arr[y1, x1] = 1
@@ -175,19 +178,67 @@ class BatFlyingEnv(gym.Env):
                 print(2)
 
             elif x1 == x2:
-                field_arr[y2:y1+1, x2] = 1           
+                field_arr[y2:y1+1, x2] = 1
                 print(3)
 
-            else:    
+            else:
                 field_arr[y2:y1+1, x2:x1+1] = 1
                 print(4)
 
         self.field_arr = field_arr
 
-
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
+
+    def point_rotaion(self, position, angle):
+
+        return [position[0]*math.cos(angle) - position[1]*math.sin(angle), position[0]*math.sin(angle) + position[1]*math.cos(angle)]
+    
+    def get_square_points(self, bat_position, bat_angle):
+        bat_angle = -bat_angle
+        bat_wing_span = self.bat.wing_span / self.discrete_length
+        bat_total_length = self.bat.total_length / self.discrete_length
+        # 原点中心での座標を求めた後、コウモリの位置をたす
+        p0_origin = [bat_wing_span/2, -bat_total_length/2]
+        p1_origin = [bat_wing_span/2, bat_total_length/2]
+        p2_origin = [-bat_wing_span/2, bat_total_length/2]
+        p3_origin = [-bat_wing_span/2, -bat_total_length/2]
+
+        p0_rotaion = self.point_rotaion(p0_origin, bat_angle)
+        p1_rotaion = self.point_rotaion(p1_origin, bat_angle)
+        p2_rotaion = self.point_rotaion(p2_origin, bat_angle)
+        p3_rotaion = self.point_rotaion(p3_origin, bat_angle)
+
+        bat_x_pos = bat_position.x / self.discrete_length
+        bat_y_pos = bat_position.y / self.discrete_length
+        p0 = [p0_rotaion[0] + bat_x_pos, p0_rotaion[1] + bat_y_pos]
+        p1 = [p1_rotaion[0] + bat_x_pos, p1_rotaion[1] + bat_y_pos]
+        p2 = [p2_rotaion[0] + bat_x_pos, p2_rotaion[1] + bat_y_pos]
+        p3 = [p3_rotaion[0] + bat_x_pos, p3_rotaion[1] + bat_y_pos]
+
+        return p0, p1, p2, p3
+
+    def make_bat_position_arr(self, bat_position_00, bat_position_01, bat_angle_00, bat_angle_01):
+        """
+        コウモリの位置を1にそれ以外を0とする空間のarrayを作成する
+        """
+        field_arr = np.zeros((int(self.world_height / self.discrete_length),
+                             int(self.world_width / self.discrete_length)))
+        p00, p01, p02, p03 = self.get_square_points(bat_position_00, bat_angle_00)
+        p10, p11, p12, p13 = self.get_square_points(bat_position_01, bat_angle_01)
+
+        p_xmin = int(np.min([p00[0], p01[0], p02[0], p03[0], p10[0], p11[0], p12[0], p13[0]]))
+        p_xmax = math.ceil(np.max([p00[0], p01[0], p02[0], p03[0], p10[0], p11[0], p12[0], p13[0]]))
+        p_ymin = int(np.min([p00[1], p01[1], p02[1], p03[1], p10[1], p11[1], p12[1], p13[1]]))
+        p_ymax = math.ceil(np.max([p00[1], p01[1], p02[1], p03[1], p10[1], p11[1], p12[1], p13[1]]))
+
+        field_arr[p_xmin:, :] += 1
+        field_arr[:p_xmax, :] += 1
+        field_arr[:, p_ymin:] += 1
+        field_arr[:, :p_ymax] += 1
+
+        return field_arr
 
     def step(self, action):
         '''
@@ -199,22 +250,23 @@ class BatFlyingEnv(gym.Env):
         flying_angle, pulse_angle, pulse_proba = action
 
         bat_p0 = Point(*self.bat.bat_vec)
-        self.bat.move(self.straight_angle)         
-        
+        self.bat.move(self.straight_angle)
+
         # freq emit pulse [0.3, 0.8]
         self.spend_time_from_pulse += self.dt
         if self.spend_time_from_pulse >= self.min_IPI:
             if pulse_proba >= 0.5:
-                print("pulse_emit")                 
+                print("pulse_emit")
                 step_reward += self.flying_angle_reward * np.abs(flying_angle)
                 self.bat.move(flying_angle * self.max_flying_angle)
-                self.bat.emit_pulse(pulse_angle * self.max_pulse_angle, self.walls)
+                self.bat.emit_pulse(
+                    pulse_angle * self.max_pulse_angle, self.walls)
                 self.bat.emit = True
                 self.last_pulse_angle = pulse_angle
                 step_reward += self.pulse_reward
                 step_reward += self.pulse_angle_reward * np.abs(pulse_angle)
                 self.spend_time_from_pulse = 0.0
-                self._update_observation()                
+                self._update_observation()
             else:
                 self.bat.emit = False
         else:
@@ -222,13 +274,15 @@ class BatFlyingEnv(gym.Env):
 
         bat_p1 = Point(*self.bat.bat_vec)
         bat_seg = Segment(bat_p0, bat_p1)
-        for w in self.walls:
-            c_p = cal_cross_point(bat_seg, w)
-            if is_point_in_segment(c_p, w) and is_point_in_segment(c_p, bat_seg):
-                wall_vec = w.p0.unpack() - w.p1.unpack()
-                self.bat.bump(bat_p0.unpack(), wall_vec)
-                step_reward += self.bump_reward
-                done = True        
+        bat_position_arr = self.make_bat_position_arr(
+            bat_p0, bat_p1, self.previous_bat_angle * self.max_flying_angle, flying_angle * self.max_flying_angle)
+
+        flag_bump = get_flag_bump(bat_position_arr, self.field_arr)
+        if flag_bump:
+            # wall_vec = w.p0.unpack() - w.p1.unpack()
+            # self.bat.bump(bat_p0.unpack(), wall_vec)
+            step_reward += self.bump_reward
+            done = True
 
         if np.linalg.norm(self.bat.v_vec) < 1:
             step_reward += self.low_speed_reward
@@ -239,12 +293,15 @@ class BatFlyingEnv(gym.Env):
             done = True
 
         if self.bat.emit:
-            self.count+=1
+            self.count += 1
         if done:
             print("pulse count:", self.count)
 
         print(f"state:\n{self.bat.state}")
-                    
+
+        #　一個前のbat_angleを更新する
+        self.previous_bat_angle = flying_angle
+
         return self.state, step_reward, done, {}
 
     def reset(self):
@@ -307,17 +364,18 @@ class BatFlyingEnv(gym.Env):
         if self.viewer is None:
             self.viewer = rendering.Viewer(screen_width, screen_height)
             #r = (self.bat.size * scale) / 2
-            #wing = 4 * math.pi / 5  # angle [rad]
+            # wing = 4 * math.pi / 5  # angle [rad]
             #nose_x, nose_y = r, 0
             #r_x, r_y = r * math.cos(-wing), r * math.sin(-wing)
             #l_x, l_y = r * math.cos(+wing), r * math.sin(+wing)
-            #bat_geom = rendering.FilledPolygon([
-                #(nose_x, nose_y),
-                #(r_x, r_y),
-                #(l_x, l_y)])
-            # bat_geom.set_color(0, 0, 0)                
+            # bat_geom = rendering.FilledPolygon([
+            #(nose_x, nose_y),
+            #(r_x, r_y),
+            # (l_x, l_y)])
+            # bat_geom.set_color(0, 0, 0)
             fname = path.join(path.dirname(__file__), "bat.PNG")
-            bat_geom = rendering.Image(fname, self.bat.total_length*scale, self.bat.wing_span*scale)          
+            bat_geom = rendering.Image(
+                fname, self.bat.total_length*scale, self.bat.wing_span*scale)
             self.battrans = rendering.Transform()
             bat_geom.add_attr(self.battrans)
             self.viewer.add_geom(bat_geom)
