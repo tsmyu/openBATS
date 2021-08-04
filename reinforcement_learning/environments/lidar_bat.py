@@ -54,13 +54,22 @@ def cal_cross_point(s0: Segment, s1: Segment) -> Point:
     y = (d1 * (y1 - y0) - d2 * (y3 - y2)) / den
     return Point(x, y)
 
+def get_flag_dump(bat_position_arr, field_arr) -> bool:
+
+    field_all = bat_position_arr + field_arr
+    print(np.max(field_all))
+    if np.max(field_all) == 5:
+        return True
+    else:
+        return False
+
 def rotate_vector(v, angle):
     '''
     vを回転
     '''
     return np.array(
         [[np.cos(angle), -np.sin(angle)], 
-         [np.sin(angle), np.cos(angle)]]) @ v
+        [np.sin(angle), np.cos(angle)]]) @ v
 
 def is_point_in_segment(p: Point, s: Segment) -> bool:
     '''
