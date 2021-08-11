@@ -42,13 +42,6 @@ def cal_cross_point(s0: Segment, s1: Segment) -> Point:
     y = (d1 * (y1 - y0) - d2 * (y3 - y2)) / den
     return Point(x, y)
 
-def get_flag_bump(bat_position_arr, field_arr) -> bool:
-    field_all = bat_position_arr + field_arr
-    if np.max(field_all) == 5:
-        return True
-    else:
-        return False
-
 
 def rotate_vector(v, angle):
     return np.array(

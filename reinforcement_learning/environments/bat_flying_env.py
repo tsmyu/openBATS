@@ -109,11 +109,13 @@ class BatFlyingEnv(gym.Env):
             c4 = Segment(Point(c[0], c[1]+l), Point(c[0]+l, c[1]+l))
             self.walls.append(c4)
 
-        #self.wallの最初の４データは周囲の壁のため使用しない
+        # self.wallの最初の4データは周囲の壁のため使用しない
         self.wall_points = []
         for wall in self.walls[4:]:
-            self.wall_points.append([int(wall.p0.x/self.discrete_length), int(wall.p0.y/self.discrete_length)])
-            self.wall_points.append([int(wall.p1.x/self.discrete_length), int(wall.p1.y/self.discrete_length)])
+            self.wall_points.append(
+                [int(wall.p0.x / self.discrete_length), int(wall.p0.y / self.discrete_length)])
+            self.wall_points.append(
+                [int(wall.p1.x / self.discrete_length), int(wall.p1.y / self.discrete_length)])
 
         # self.goal_area = () if goal_area is None else goal_area
         self.max_flying_angle = math.pi / 18  # [rad]
@@ -158,7 +160,7 @@ class BatFlyingEnv(gym.Env):
     def point_rotaion(self, position, angle):
 
         return [position[0]*math.cos(angle) - position[1]*math.sin(angle), position[0]*math.sin(angle) + position[1]*math.cos(angle)]
-    
+
     def get_square_points(self, bat_position, bat_angle):
         bat_angle = -bat_angle
         bat_wing_span = self.bat.wing_span
@@ -174,8 +176,8 @@ class BatFlyingEnv(gym.Env):
         p2_rotaion = self.point_rotaion(p2_origin, bat_angle)
         p3_rotaion = self.point_rotaion(p3_origin, bat_angle)
 
-        bat_x_pos = bat_position.x / self.discrete_length
-        bat_y_pos = bat_position.y / self.discrete_length
+        bat_x_pos = bat_position.x
+        bat_y_pos = bat_position.y
         p0 = [p0_rotaion[0] + bat_x_pos, p0_rotaion[1] + bat_y_pos]
         p1 = [p1_rotaion[0] + bat_x_pos, p1_rotaion[1] + bat_y_pos]
         p2 = [p2_rotaion[0] + bat_x_pos, p2_rotaion[1] + bat_y_pos]
@@ -183,15 +185,17 @@ class BatFlyingEnv(gym.Env):
 
         return [p0, p1, p2, p3]
 
-    def get_distance(self, point_1, point_2):
-        distance = np.sqrt((point_1[0] - point_2[0])**2 + (point_1[1] - point_2[1])**2)
+    def get_distancce(self, bat_position_p0, bat_position_p1):
+        distance = np.sqrt(
+            (bat_position_p0[0] - bat_position_p1[0])**2 + (bat_position_p0[1] - bat_position_p1[1])**2)
+
         return distance
 
     def get_bat_area(self, bat_position_p0, bat_position_p1):
         bat_area = []
-        if self.get_distance(bat_position_p0[0], bat_position_p1[0]) > self.get_distance(bat_position_p1[0], bat_position_p0[1]):
+        if self.get_distancce(bat_position_p1[0], bat_position_p0[0]) > self.get_distancce(bat_position_p1[0], bat_position_p0[1]):
             return [bat_position_p0[1], bat_position_p1[1], bat_position_p1[2], bat_position_p0[2]]
-        elif self.get_distance(bat_position_p0[0], bat_position_p1[0]) < self.get_distance(bat_position_p1[0], bat_position_p0[1]):
+        elif self.get_distancce(bat_position_p1[0], bat_position_p0[0]) < self.get_distancce(bat_position_p1[0], bat_position_p0[1]):
             return [bat_position_p1[0], bat_position_p0[0], bat_position_p1[3], bat_position_p0[3]]
         else:
             raise ValueError
@@ -206,17 +210,19 @@ class BatFlyingEnv(gym.Env):
             else:
                 bat_point_s = bat_area[i]
                 bat_point_e = bat_area[i+1]
-            bat_points_list.append([bat_point_e[0] / self.discrete_length, bat_point_s[0] / self.discrete_length, bat_point_e[1] / self.discrete_length, bat_point_s[1] / self.discrete_length])
+            bat_points_list.append(
+                [bat_point_e[0] / self.discrete_length, bat_point_s[0] / self.discrete_length, bat_point_e[1] / self.discrete_length, bat_point_s[1] / self.discrete_length])
         for wall_p in self.wall_points:
             if flag_in_bat:
                 return True
             for bat_point in bat_points_list:
                 wall_vec = [wall_p[0] - bat_point[1], wall_p[1] - bat_point[3]]
-                bat_vec = [bat_point[0] - bat_point[1], bat_point[2] - bat_point[3]]
-                cross_product = np.cross(bat_vec, wall_vec)
-                if cross_product < 0:
+                bat_vec = [bat_point[0] - bat_point[1],
+                           bat_point[2] - bat_point[3]]
+                corss_product = np.cross(bat_vec, wall_vec)
+                if corss_product < 0:
                     flag_in_bat = True
-                elif cross_product >= 0:
+                elif corss_product >= 0:
                     flag_in_bat = False
                     break
 
@@ -255,16 +261,19 @@ class BatFlyingEnv(gym.Env):
             self.bat.emit = False
 
         bat_p1 = Point(*self.bat.bat_vec)
-        bat_seg = Segment(bat_p0, bat_p1)
-        bat_position_p0 = self.get_square_points(bat_p0, self.previous_bat_angle * self.max_flying_angle)
-        bat_position_p1 = self.get_square_points(bat_p1, flying_angle * self.max_flying_angle)
+        bat_position_p0 = self.get_square_points(
+            bat_p0, self.previous_bat_angle * self.max_flying_angle)
+        bat_position_p1 = self.get_square_points(
+            bat_p1, flying_angle * self.max_flying_angle)
         bat_area = self.get_bat_area(bat_position_p0, bat_position_p1)
         bat_seg_list = []
         for i in range(len(bat_area)):
             if i == len(bat_area)-1:
-                bat_seg_list.append(Segment(Point(bat_area[i][0], bat_area[i][1]), Point(bat_area[0][0], bat_area[0][1])))
+                bat_seg_list.append(Segment(
+                    Point(bat_area[i][0], bat_area[i][1]), Point(bat_area[0][0], bat_area[0][1])))
             else:
-                bat_seg_list.append(Segment(Point(bat_area[i][0], bat_area[i][1]), Point(bat_area[i+1][0], bat_area[i+1][1])))
+                bat_seg_list.append(Segment(Point(bat_area[i][0], bat_area[i][1]), Point(
+                    bat_area[i+1][0], bat_area[i+1][1])))
 
         for bat_seg in bat_seg_list:
             for w in self.walls:
@@ -275,8 +284,8 @@ class BatFlyingEnv(gym.Env):
                     step_reward += self.bump_reward
                     done = True
         if not done:
-            flag_in_bat = self.get_flag_in_bat(bat_area)
-            if flag_in_bat:
+            flag_bat_in = self.get_flag_in_bat(bat_area)
+            if flag_bat_in:
                 step_reward += self.bump_reward
                 done = True
 
