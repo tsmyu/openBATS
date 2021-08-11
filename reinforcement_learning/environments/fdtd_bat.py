@@ -93,7 +93,8 @@ class LidarBat(object):
         self.dt = dt  # [s]
 
         self.body_weight = 23e-3  # [kg]
-        self.size = 7e-2  # [m]
+        self.total_length = 15e-3  # [m]
+        self.wing_span = 40e-3  # [m]
 
         self.emit = False
 
@@ -143,7 +144,7 @@ class LidarBat(object):
             len(self.pulse):]
 
         return corr_left, corr_right
-    
+
     def convert_to_fdtdmap(self):
         dl = self.Ears.dl
         bat_vec_fdtd = []
@@ -159,7 +160,8 @@ class LidarBat(object):
         # check if echoes' data are in database
         bat_vec_fdtd = self.convert_to_fdtdmap()
         if self.Ears.check_data_in_database(bat_vec_fdtd):
-            print(f"data already existed x:{bat_vec_fdtd[0]} y:{bat_vec_fdtd[1]}")
+            print(
+                f"data already existed x:{bat_vec_fdtd[0]} y:{bat_vec_fdtd[1]}")
             pass
         else:
             print(
