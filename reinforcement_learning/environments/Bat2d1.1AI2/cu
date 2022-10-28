@@ -1,6 +1,0 @@
-#!/bin/sh
-
-file=$1
-infile="$file".cu
-outfile="$file".exe
-nvcc $infile -I /opt/openMPI/include -L /opt/openMPI/lib -lmpi -arch sm_52 -O2 -o $outfile -Xcompiler -fopenmp
