@@ -1,3 +1,4 @@
+from distutils.log import error
 import math
 import numpy as np
 
@@ -101,6 +102,13 @@ def rotation_direction(v0, v1):
     outer = v0[0] * v1[1] - v1[0] * v0[1]
     return 1 if outer >= 0 else -1
 
+class EYE(object):
+    def __init__(self, NUM_EYES, i):
+        # 進行方向に対して左右30°，181本（NUM_EYES）
+        self.OffSetAngle = -math.pi / 6 + i * (math.pi / 6) / (NUM_EYES-1)
+        self.SightDistance = 0
+        self.obj           = -1
+        self.FOV           = 500.0
 class LidarBat(object):
     def __init__(self, init_angle, init_x, init_y, init_speed, dt):
         self.angle = init_angle
@@ -115,86 +123,64 @@ class LidarBat(object):
         self.total_length = 15e-2  # [m]
         self.wing_span = 40e-2  # [m]
 
+        NUM_EYES = 181
+        self.eyes = [EYE(NUM_EYES, i) for i in range(0, NUM_EYES)]
+
         self.n_memory = 5  # number of states
-        self.state = np.array([[0, np.inf] for i in range(self.n_memory)])
+        self.state = np.array([[0]*NUM_EYES for i in range(self.n_memory)])
         self.emit = False
 
-        self.lidar_length = 10
-        self.lidar_left_angle = (math.pi / 6) / 2
-        self.lidar_right_angle = -(math.pi / 6) / 2
-        self.lidar_range = np.array([
-            self.lidar_left_angle, self.lidar_right_angle])  # [rad]
+        # self.lidar_length = 10
+        # self.lidar_left_angle = (math.pi / 6) / 2
+        # self.lidar_right_angle = -(math.pi / 6) / 2
+        # self.lidar_range = np.array([
+        #     self.lidar_left_angle, self.lidar_right_angle])  # [rad]
     
-
-    def emit_pulse(self, lidar_angle, obstacle_segments):
-        lidar_vec = cos_sin(lidar_angle) * self.lidar_length
-        left_lidar_seg, right_lidar_seg = self._lidar_segments(lidar_vec)
-        left_lidar_vec = left_lidar_seg.p1.unpack() - left_lidar_seg.p0.unpack()
-        right_lidar_vec = right_lidar_seg.p1.unpack() - right_lidar_seg.p0.unpack()
-        cs0 = cos_similarity(left_lidar_vec, right_lidar_vec)
-
+    def detect_points(self, lidar_seg, obstacle_segments):
         detected_points = []
         for s in obstacle_segments:
-            edge_vec0 = s.p0.unpack() - self.bat_vec
-            edge_vec1 = s.p1.unpack() - self.bat_vec
-
-            cs1 = cos_similarity(edge_vec0, left_lidar_vec)
-            cs2 = cos_similarity(edge_vec0, right_lidar_vec)
-            cs3 = cos_similarity(edge_vec1, left_lidar_vec)
-            cs4 = cos_similarity(edge_vec1, right_lidar_vec)
-
-            left_c_p  = cal_cross_point(left_lidar_seg, s)
-            right_c_p = cal_cross_point(right_lidar_seg, s)
-            is_left_cross  = (is_point_in_segment(left_c_p, s) and 
-                              is_point_in_segment(left_c_p, left_lidar_seg))
-            is_right_cross = (is_point_in_segment(right_c_p, s) and 
-                              is_point_in_segment(right_c_p, right_lidar_seg))
-
-            new_seg = None
-            if is_left_cross and is_right_cross:
-                new_seg = Segment(left_c_p, right_c_p)
-            elif is_left_cross:
-                if cs1 > cs0 and cs2 > cs0:
-                    new_seg = Segment(left_c_p, s.p0)
-                if cs3 > cs0 and cs4 > cs0:
-                    new_seg = Segment(left_c_p, s.p1)
-            elif is_right_cross:
-                if cs1 > cs0 and cs2 > cs0:
-                    new_seg = Segment(s.p0, right_c_p)
-                if cs3 > cs0 and cs4 > cs0:
-                    new_seg = Segment(s.p1, right_c_p)
-            else:
-                if cs1 > cs0 and cs2 > cs0 and cs3 > cs0 and cs4 > cs0:
-                    new_seg = s
-            if new_seg is not None:
-                detected_points.append(new_seg.p0)
-                detected_points.append(new_seg.p1)
+            c_p  = cal_cross_point(lidar_seg, s)
+            is_cross  = (is_point_in_segment(c_p, s) and 
+                              is_point_in_segment(c_p, lidar_seg))
+            if is_cross:
+                detected_points.append(c_p)
         
+        return detected_points
+    
+    def calc_min_detect_length(self, detected_points, e):
         min_length = np.inf
-        nearest_point_vec = None
-        for p in detected_points:
-            detected_vec = p.unpack() - self.bat_vec
-            detected_length = np.linalg.norm(detected_vec)
-            if min_length > detected_length:
-                min_length = detected_length
-                nearest_point_vec = detected_vec
-        if nearest_point_vec is None:
-            observation = np.array([0, np.inf])
+        if len(detected_points) == 0:
+            detected_length = e.FOV * 2
         else:
-            observation = rotate_vector(nearest_point_vec, -self.angle) 
-        observation /= self.lidar_length
+            for p in detected_points:
+                detected_vec = p.unpack() - self.bat_vec
+                detected_length = np.linalg.norm(detected_vec)
+                if min_length > detected_length:
+                    min_length = detected_length
+        
+        return round(min_length / e.FOV, 2)
+
+
+    def emit_pulse(self, lidar_angle, obstacle_segments):
+        obs_length_list = []
+        for e in self.eyes:
+            lidar_vec = cos_sin(lidar_angle) * e.FOV
+            lidar_seg = self._lidar_segments(lidar_vec)
+            detected_points = self.detect_points(lidar_seg, obstacle_segments)
+            min_length = self.calc_min_detect_length(detected_points, e)
+            obs_length_list.append(min_length)
+
+        observation = obs_length_list
         self._update_state(observation)
+
         return observation
 
     def _lidar_segments(self, lidar_vec):
         lidar_vec = rotate_vector(lidar_vec, self.angle)
-        v_left    = rotate_vector(lidar_vec, self.lidar_left_angle)
-        v_right   = rotate_vector(lidar_vec, self.lidar_right_angle)
-        v_left, v_right = v_left + self.bat_vec, v_right + self.bat_vec
         bat_p = Point(*self.bat_vec)
-        left_p = Point(*v_left)
-        right_p = Point(*v_right)
-        return Segment(bat_p, left_p), Segment(bat_p, right_p)
+        eye_p = Point(*lidar_vec)
+
+        return Segment(bat_p, eye_p)
 
     def _update_state(self, new_observation):
         self.state[1:] = self.state[:-1]

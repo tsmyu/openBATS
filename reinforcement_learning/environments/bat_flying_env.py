@@ -119,7 +119,7 @@ class BatFlyingEnv(gym.Env):
 
         # self.goal_area = () if goal_area is None else goal_area
         self.max_flying_angle = math.pi / 18  # [rad]
-        self.max_pulse_angle = math.pi / 4  # [rad]
+        # self.max_pulse_angle = math.pi / 4  # [rad]
         self.straight_angle = math.pi * 0  # [rad]
 
         # env settings
@@ -144,8 +144,8 @@ class BatFlyingEnv(gym.Env):
         #     -high,
         #     high,
         #     dtype=np.float32)
-        high = np.ones((2, 81, 12245), dtype=int)
-        low = np.zeros((2, 81, 12245), dtype=int)
+        high = np.ones((2, 81, 181), dtype=int)
+        low = np.zeros((2, 81, 181), dtype=int)
         self.observation_space = spaces.Box(np.array(
             [low]*self.bat.n_memory), np.array([high]*self.bat.n_memory), dtype=int)
 
@@ -248,7 +248,7 @@ class BatFlyingEnv(gym.Env):
                 step_reward += self.flying_angle_reward * np.abs(flying_angle)
                 self.bat.move(flying_angle * self.max_flying_angle)
                 self.bat.emit_pulse(
-                    pulse_angle * self.max_pulse_angle, self.walls)
+                    pulse_angle, self.walls)
                 self.bat.emit = True
                 self.last_pulse_angle = pulse_angle
                 step_reward += self.pulse_reward

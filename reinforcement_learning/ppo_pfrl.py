@@ -1,41 +1,41 @@
 
-import argparse #argpars-実行する引数を解析し、プログラム内部で使えるようにする
-import functools #functools-高階関数-他の関数に影響できる
+import argparse
+import functools 
 
-import gym #gym-強化学習のシミュレーション用のプラットフォーム
-import gym.spaces #gymの環境
-import numpy as np #numpy-数値演算ライブラリ
-import torch #機械学習ライブラリ
-from torch import nn #nn-ニューラルネットワークライブラリ
+import gym
+import gym.spaces
+import numpy as np
+import torch
+from torch import nn
 
-import pfrl #torch向けの深層強化学習ライブラリ
-from pfrl.agents import PPO #PPO-pfrlのライブラリ
-from pfrl import experiments #experiments-pfrlでの実行？
-from pfrl import utils #utils-pfrlのユーティリティモジュールを拡張...
+import pfrl
+from pfrl.agents import PPO
+from pfrl import experiments
+from pfrl import utils
 
-import environments #シミュレーション環境を導入
+import environments
 
 
 def main():
     '''
     ArgumentParserの設定
     '''
-    import logging #loggingモジュール(ログを出力)の導入
-    torch.cuda.empty_cache() #メモリの使用量の更新
+    import logging
+    torch.cuda.empty_cache()
 
-    parser = argparse.ArgumentParser() #パーサー(構文解析を起こなうプログラム)を作る('実行時に指定できる引数', 型, 引数が設定されていないとき, helpで何を指定するのか分かる)
+    parser = argparse.ArgumentParser()
     parser.add_argument('--env', type=str,
-                        default='LidarBat-v0', help='Bat simulation env') #シミュレーション環境
+                        default='LidarBat-v0', help='Bat simulation env')
     parser.add_argument('--arch', type=str, default='FFGaussian',
                         choices=('FFSoftmax', 'FFMellowmax',
-                                 'FFGaussian')) #関数の種類？グラフの表し方？
-    parser.add_argument('--bound-mean', action='store_true') #有意水準？？？
+                                 'FFGaussian'))
+    parser.add_argument('--bound-mean', action='store_true')
     parser.add_argument('--seed', type=int, default=0,
-                        help='Random seed [0, 2 ** 32)') #エージェントの探索
+                        help='Random seed [0, 2 ** 32)')
     parser.add_argument('--outdir', type=str, default='data/ppo',
                         help='Directory path to save output files.'
-                             ' If it does not exist, it will be created.') #出力ファイルのパス
-    parser.add_argument('--steps', type=int, default=10 ** 6) #100万回の探索
+                             ' If it does not exist, it will be created.')
+    parser.add_argument('--steps', type=int, default=10 ** 6)
     parser.add_argument('--eval-interval', type=int, default=10000) #1万回ずつエージェントを評価する
     parser.add_argument('--eval-n-runs', type=int, default=10) #各評価で10回をサンプリング？
     parser.add_argument('--reward-scale-factor', type=float, default=1e-2) #報酬の大きさを決める要素...
@@ -43,8 +43,8 @@ def main():
     parser.add_argument('--render', action='store_true', default=False) #出力=>図示
     parser.add_argument('--lr', type=float, default=3e-4) #lr=learning rate?
     parser.add_argument('--weight-decay', type=float, default=0.0) #過剰適合のリスクを減らすための重み減衰？？？
-    parser.add_argument('--demo', action='store_true', default=False) #デモ
-    parser.add_argument('--load', type=str, default='') #ロード
+    parser.add_argument('--demo', action='store_true', default=False)
+    parser.add_argument('--load', type=str, default='')
     parser.add_argument("--load-pretrained",
                         action="store_true", default=False) #以前の学習をロード
     parser.add_argument('--logger-level', type=int, default=logging.INFO) #デバッグ確認
@@ -64,19 +64,19 @@ def main():
     parser.add_argument('--batchsize', type=int, default=64) #--batch-sizeとの違い...
     parser.add_argument('--epochs', type=int, default=10) #エポック数：１つの訓練データを何回繰り返して学習させるか
     parser.add_argument('--entropy-coef', type=float, default=0.0) #エントロピー係数：損失関数に加える→探索が行われなくなるのを防ぐ
-    parser.add_argument('--gpu', type=int, default=1)
+    parser.add_argument('--gpu', type=int, default=0)
     args = parser.parse_args() #引数を解析
 
-    logging.basicConfig(level=args.logger_level) #ログの表示方法の１つ
+    logging.basicConfig(level=args.logger_level)
     # Set a random seed used in PFRL
-    utils.set_random_seed(args.seed) #ランダムに探す...
+    utils.set_random_seed(args.seed)
     # Set different random seeds for different subprocesses.
     # If seed=0 and processes=4, subprocess seeds are [0, 1, 2, 3].
     # If seed=1 and processes=4, subprocess seeds are [4, 5, 6, 7].
-    process_seeds = np.arange(args.num_envs) + args.seed * args.num_envs #探索プロセスに関わる引数たち
+    process_seeds = np.arange(args.num_envs) + args.seed * args.num_envs
     assert process_seeds.max() < 2 ** 32 #条件をテスト
 
-    args.outdir = experiments.prepare_output_dir(args, args.outdir) #ファイルへ書き込み
+    args.outdir = experiments.prepare_output_dir(args, args.outdir)
 
     def make_env(process_idx, test):
         '''
