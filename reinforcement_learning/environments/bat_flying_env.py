@@ -399,14 +399,15 @@ class BatFlyingEnv(gym.Env):
 
         if self.bat.emit == True:
             if draw_pulse_direction == True:
-                pulse_length = 0.5
-                pulse_vec = pulse_length * cos_sin(self.last_pulse_angle)
-                pulse_vec = rotate_vector(
-                    pulse_vec, self.bat.angle) + self.bat.bat_vec
-                x0, y0 = self.bat.bat_vec * scale
-                x1, y1 = pulse_vec * scale
-                line = self.viewer.draw_line([x0, y0], [x1, y1])
-                self.viewer.add_geom(line)
+                # pulse_length = 0.5
+                # pulse_vec = pulse_length * cos_sin(self.last_pulse_angle)
+                for pulse_vec in self.bat.eyes.vec:
+                    pulse_vec = rotate_vector(
+                        pulse_vec, self.bat.angle) + self.bat.bat_vec
+                    x0, y0 = self.bat.bat_vec * scale
+                    x1, y1 = pulse_vec * scale
+                    line = self.viewer.draw_line([x0, y0], [x1, y1])
+                    self.viewer.add_geom(line)
 
             if draw_echo_source == True:
                 radius = 4  # pixel

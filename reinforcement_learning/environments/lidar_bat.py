@@ -109,6 +109,7 @@ class EYE(object):
         self.SightDistance = 0
         self.obj           = -1
         self.FOV           = 500.0
+        self.vec = self.FOV * cos_sin(self.OffSetAngle)
 class LidarBat(object):
     def __init__(self, init_angle, init_x, init_y, init_speed, dt):
         self.angle = init_angle
