@@ -108,7 +108,7 @@ class EYE(object):
         self.OffSetAngle = -math.pi / 6 + i * (math.pi / 6) / (NUM_EYES-1)
         self.SightDistance = 0
         self.obj           = -1
-        self.FOV           = 500.0
+        self.FOV           = 10 # TODO 
         self.vec = self.FOV * cos_sin(self.OffSetAngle)
 class LidarBat(object):
     def __init__(self, init_angle, init_x, init_y, init_speed, dt):
@@ -128,8 +128,9 @@ class LidarBat(object):
         self.eyes = [EYE(NUM_EYES, i) for i in range(0, NUM_EYES)]
 
         self.n_memory = 5  # number of states
-        self.state = np.array([[0]*NUM_EYES for i in range(self.n_memory)])
+        self.state = np.array([[0]*NUM_EYES for i in range(self.n_memory)], dtype=np.float32)
         self.emit = False
+        self.pulse_count = 0
 
         # self.lidar_length = 10
         # self.lidar_left_angle = (math.pi / 6) / 2
@@ -149,7 +150,7 @@ class LidarBat(object):
         return detected_points
     
     def calc_min_detect_length(self, detected_points, e):
-        min_length = np.inf
+        min_length = 1e5
         if len(detected_points) == 0:
             detected_length = e.FOV * 2
         else:
@@ -165,7 +166,7 @@ class LidarBat(object):
     def emit_pulse(self, lidar_angle, obstacle_segments):
         obs_length_list = []
         for e in self.eyes:
-            lidar_vec = cos_sin(lidar_angle) * e.FOV
+            lidar_vec = cos_sin(lidar_angle+e.OffSetAngle) * e.FOV
             lidar_seg = self._lidar_segments(lidar_vec)
             detected_points = self.detect_points(lidar_seg, obstacle_segments)
             min_length = self.calc_min_detect_length(detected_points, e)
@@ -174,7 +175,7 @@ class LidarBat(object):
         observation = obs_length_list
         self._update_state(observation)
 
-        return observation
+        # return observation
 
     def _lidar_segments(self, lidar_vec):
         lidar_vec = rotate_vector(lidar_vec, self.angle)
@@ -186,6 +187,8 @@ class LidarBat(object):
     def _update_state(self, new_observation):
         self.state[1:] = self.state[:-1]
         self.state[0] = new_observation
+        print(f"new observation: {new_observation}")
+        print(f"self.state: {self.state[0]}")
 
     def move(self, angle):
         self.v_vec = rotate_vector(self.v_vec, angle)

@@ -52,8 +52,8 @@ class BatFlyingEnv(gym.Env):
 
     def __init__(
             self,
-            world_width=4.5,
-            world_height=1.5,
+            world_width=6.0,
+            world_height=4.5,
             discrete_length=0.01,
             dt=0.005,
             bat=None,
@@ -144,8 +144,10 @@ class BatFlyingEnv(gym.Env):
         #     -high,
         #     high,
         #     dtype=np.float32)
-        high = np.ones((2, 81, 181), dtype=int)
-        low = np.zeros((2, 81, 181), dtype=int)
+        # high = np.ones((2, 81, 181), dtype=int)
+        # low = np.zeros((2, 81, 181), dtype=int)
+        high = np.ones((181), dtype=int)
+        low = np.zeros((181), dtype=int)
         self.observation_space = spaces.Box(np.array(
             [low]*self.bat.n_memory), np.array([high]*self.bat.n_memory), dtype=int)
 
@@ -298,14 +300,16 @@ class BatFlyingEnv(gym.Env):
             done = True
 
         if self.bat.emit:
-            self.count += 1
+            self.bat.pulse_count += 1
         if done:
-            print("pulse count:", self.count)
+            print("pulse count:", self.bat.pulse_count)
 
         print(f"state:\n{self.bat.state}")
 
         #　一個前のbat_angleを更新する
         self.previous_bat_angle = flying_angle
+
+        self.bat.emit = False
 
         return self.state, step_reward, done, {}
 
@@ -319,8 +323,8 @@ class BatFlyingEnv(gym.Env):
         return self.state
 
     def _reset_bat(self):
-        low = np.array([-math.pi/12, 0.1, 0.7])
-        high = np.array([math.pi/12, 0.2, 0.8])
+        low = np.array([-math.pi/12, 0.1, 0.1])
+        high = np.array([math.pi/12, 4.4, 4.4])
         init_bat_params = self.np_random.uniform(low=low, high=high)
         init_speed = 5
         self.bat = LidarBat(*init_bat_params, init_speed, self.dt)
@@ -401,7 +405,8 @@ class BatFlyingEnv(gym.Env):
             if draw_pulse_direction == True:
                 # pulse_length = 0.5
                 # pulse_vec = pulse_length * cos_sin(self.last_pulse_angle)
-                for pulse_vec in self.bat.eyes.vec:
+                for e in self.bat.eyes:
+                    pulse_vec = e.vec
                     pulse_vec = rotate_vector(
                         pulse_vec, self.bat.angle) + self.bat.bat_vec
                     x0, y0 = self.bat.bat_vec * scale

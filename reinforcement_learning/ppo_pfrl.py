@@ -170,7 +170,7 @@ def main():
         model,
         opt,
         obs_normalizer=obs_normalizer,
-        gpu=args.gpu,
+        # gpu=args.gpu,
         update_interval=args.update_interval,
         minibatch_size=args.batch_size,
         epochs=args.epochs,

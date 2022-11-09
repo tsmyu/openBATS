@@ -25,8 +25,8 @@ def main():
         for t in range(1000):
             print(f'----step {t}----')
             # print(f'bat angle: {env.bat.angle *180 / math.pi:2f} [degree]')
-            print('observation:')
-            print(observation)
+            # print('observation:')
+            # print(observation)
             action = env.action_space.sample()
             action[0] = 0
             # action[1] = math.pi/2
