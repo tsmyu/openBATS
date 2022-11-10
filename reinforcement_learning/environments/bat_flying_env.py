@@ -74,12 +74,20 @@ class BatFlyingEnv(gym.Env):
 
         self.lower_bound_freq_emit_pulse = 0.3
 
-        self.flying_angle_reward = -10.0
-        self.pulse_reward = -0.0001
-        self.pulse_angle_reward = -0.0001
+        self.flying_angle_reward = 0
+        self.pulse_reward = 0
+        self.pulse_angle_reward = 0
         self.bump_reward = -100
-        self.low_speed_reward = -100
+        self.low_speed_reward = 0
         self.fliyng_reward = 1
+
+        # self.flying_angle_reward = -10.0
+        # self.pulse_reward = -0.0001
+        # self.pulse_angle_reward = -0.0001
+        # self.bump_reward = -100
+        # self.low_speed_reward = -100
+        # self.fliyng_reward = 1
+
         self.previous_bat_angle = 0
 
         # walls settings
@@ -238,6 +246,7 @@ class BatFlyingEnv(gym.Env):
         step_reward = self.fliyng_reward
         done = False
         flying_angle, pulse_angle, pulse_proba = action
+        self.bat.emit = False
 
         bat_p0 = Point(*self.bat.bat_vec)
         self.bat.move(self.straight_angle)
@@ -304,12 +313,11 @@ class BatFlyingEnv(gym.Env):
         if done:
             print("pulse count:", self.bat.pulse_count)
 
-        print(f"state:\n{self.bat.state}")
+        # print(f"state:\n{self.bat.state}")
 
         #　一個前のbat_angleを更新する
         self.previous_bat_angle = flying_angle
 
-        self.bat.emit = False
 
         return self.state, step_reward, done, {}
 
@@ -403,16 +411,22 @@ class BatFlyingEnv(gym.Env):
 
         if self.bat.emit == True:
             if draw_pulse_direction == True:
-                # pulse_length = 0.5
-                # pulse_vec = pulse_length * cos_sin(self.last_pulse_angle)
-                for e in self.bat.eyes:
-                    pulse_vec = e.vec
-                    pulse_vec = rotate_vector(
+                pulse_length = 0.5
+                pulse_vec = pulse_length * cos_sin(self.last_pulse_angle)
+                pulse_vec = rotate_vector(
                         pulse_vec, self.bat.angle) + self.bat.bat_vec
-                    x0, y0 = self.bat.bat_vec * scale
-                    x1, y1 = pulse_vec * scale
-                    line = self.viewer.draw_line([x0, y0], [x1, y1])
-                    self.viewer.add_geom(line)
+                x0, y0 = self.bat.bat_vec * scale
+                x1, y1 = pulse_vec * scale
+                line = self.viewer.draw_line([x0, y0], [x1, y1])
+                self.viewer.add_geom(line)
+                # for e in self.bat.eyes:
+                #     pulse_vec = e.vec
+                #     pulse_vec = rotate_vector(
+                #         pulse_vec, self.bat.angle) + self.bat.bat_vec
+                #     x0, y0 = self.bat.bat_vec * scale
+                #     x1, y1 = pulse_vec * scale
+                #     line = self.viewer.draw_line([x0, y0], [x1, y1])
+                #     self.viewer.add_geom(line)
 
             if draw_echo_source == True:
                 radius = 4  # pixel

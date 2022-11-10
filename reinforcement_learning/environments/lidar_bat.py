@@ -187,8 +187,6 @@ class LidarBat(object):
     def _update_state(self, new_observation):
         self.state[1:] = self.state[:-1]
         self.state[0] = new_observation
-        print(f"new observation: {new_observation}")
-        print(f"self.state: {self.state[0]}")
 
     def move(self, angle):
         self.v_vec = rotate_vector(self.v_vec, angle)
