@@ -251,25 +251,30 @@ class BatFlyingEnv(gym.Env):
         bat_p0 = Point(*self.bat.bat_vec)
         self.bat.move(self.straight_angle)
 
-        # freq emit pulse [0.3, 0.8]
+        
         self.spend_time_from_pulse += self.dt
+        step_reward += self.flying_angle_reward * np.abs(flying_angle)
+        self.bat.move(flying_angle * self.max_flying_angle)
         if self.spend_time_from_pulse >= self.min_IPI:
             if pulse_proba >= 0.5:
                 print("pulse_emit")
-                step_reward += self.flying_angle_reward * np.abs(flying_angle)
-                self.bat.move(flying_angle * self.max_flying_angle)
                 self.bat.emit_pulse(
                     pulse_angle, self.walls)
                 self.bat.emit = True
                 self.last_pulse_angle = pulse_angle
-                step_reward += self.pulse_reward
-                step_reward += self.pulse_angle_reward * np.abs(pulse_angle)
+                
                 self.spend_time_from_pulse = 0.0
-                self._update_observation()
+                
             else:
                 self.bat.emit = False
+                self.last_pulse_angle = 0.0
         else:
             self.bat.emit = False
+            self.last_pulse_angle = 0.0
+        
+        step_reward += self.pulse_reward
+        step_reward += self.pulse_angle_reward * np.abs(pulse_angle)
+        self._update_observation()
 
         bat_p1 = Point(*self.bat.bat_vec)
         bat_position_p0 = self.get_square_points(

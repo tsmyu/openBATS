@@ -127,9 +127,9 @@ def main():
     obs_size = obs_space.low.size #状態における最小値
     action_size = action_space.low.size #行動の最小値
     policy = torch.nn.Sequential(
-        nn.Linear(obs_size, 64),
+        nn.Linear(obs_size, 128),
         nn.Tanh(),
-        nn.Linear(64, 64),
+        nn.Linear(128, 64),
         nn.Tanh(),
         nn.Linear(64, action_size),
         pfrl.policies.GaussianHeadWithStateIndependentCovariance(
@@ -141,9 +141,9 @@ def main():
     ) #モデル（ネットワーク）を構築（中身？？？？？？？）
 
     vf = torch.nn.Sequential(
-        nn.Linear(obs_size, 64),
+        nn.Linear(obs_size, 128),
         nn.Tanh(),
-        nn.Linear(64, 64),
+        nn.Linear(128, 64),
         nn.Tanh(),
         nn.Linear(64, 1),
     )
