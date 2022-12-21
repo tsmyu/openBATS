@@ -138,7 +138,7 @@ def main():
             var_func=lambda x: torch.exp(2 * x),  # Parameterize log std
             var_param_init=0,  # log std = 0 => std = 1
         ),
-    ) #モデル（ネットワーク）を構築（中身？？？？？？？）
+    ) 
 
     vf = torch.nn.Sequential(
         nn.Linear(obs_size, 128),

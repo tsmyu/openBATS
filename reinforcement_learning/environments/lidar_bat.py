@@ -124,11 +124,11 @@ class LidarBat(object):
         self.total_length = 15e-2  # [m]
         self.wing_span = 40e-2  # [m]
 
-        NUM_EYES = 181
-        self.eyes = [EYE(NUM_EYES, i) for i in range(0, NUM_EYES)]
+        self.NUM_EYES = 181
+        self.eyes = [EYE(self.NUM_EYES, i) for i in range(0, self.NUM_EYES)]
 
         self.n_memory = 5  # number of states
-        self.state = np.array([[0]*NUM_EYES for i in range(self.n_memory)], dtype=np.float32)
+        self.state =  np.array([[0]*(self.NUM_EYES+1) for i in range(self.n_memory)], dtype=np.float32)
         self.emit = False
         self.pulse_count = 0
 
@@ -161,6 +161,16 @@ class LidarBat(object):
                     min_length = detected_length
         
         return round(min_length / e.FOV, 2)
+    
+    def update(self, flying_velocity, lidar_angle, obstacle_sefments):
+        if self.emit:
+            observation = self.emit_pulse(lidar_angle, obstacle_sefments)
+            observation = [flying_velocity] + observation
+        else:
+            observation = [2]*self.NUM_EYES
+            observation = [flying_velocity] + observation
+
+        self._update_state(observation)
 
 
     def emit_pulse(self, lidar_angle, obstacle_segments):
@@ -173,7 +183,7 @@ class LidarBat(object):
             obs_length_list.append(min_length)
 
         observation = obs_length_list
-        self._update_state(observation)
+        return observation
 
         # return observation
 
@@ -185,10 +195,12 @@ class LidarBat(object):
         return Segment(bat_p, eye_p)
 
     def _update_state(self, new_observation):
-        self.state[1:] = self.state[:-1]
-        self.state[0] = new_observation
+        self.state[2:] = self.state[1:-1]
+        self.state[1] = new_observation
 
-    def move(self, angle):
+    def move(self, speed, angle):
+        self.v_x, self.v_y = speed * cos_sin(angle)  # [m/s]
+        self.v_vec = np.array([self.v_x, self.v_y])
         self.v_vec = rotate_vector(self.v_vec, angle)
         self.bat_vec += self.v_vec * self.dt
         self._cal_angle()

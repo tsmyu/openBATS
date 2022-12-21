@@ -23,17 +23,18 @@ class BatFlyingEnv(gym.Env):
         the nearest obstacle when emits a pulse.
 
     Observation:
-        Type: Box(2)
+        Type: Box(181)
         Num  Observation     Min      Max
-        0    echo distance  0        Inf
-        1    echo direction -180 deg 180 deg
+        181    echo distance  0        1
+        
 
     Actions:
-        Type: Box(3)
+        Type: Box(4)
         Num   Action
         1     Flying direction
-        2     Pulse direction
-        3     Emit Pulse
+        2     velocity
+        3     Pulse direction
+        4     Emit Pulse
 
     Reward:
         Reword is 1 for every step take, including the termination step
@@ -70,16 +71,17 @@ class BatFlyingEnv(gym.Env):
         self.dt = 0.005  # [s]
         # time from emitting pulse [s]
         self.spend_time_from_pulse = 0.1
-        self.min_IPI = 0.1
+        self.min_IPI = 0.05
 
         self.lower_bound_freq_emit_pulse = 0.3
 
-        self.flying_angle_reward = 0
+        self.flying_angle_reward = -0.1
         self.pulse_reward = 0
         self.pulse_angle_reward = 0
-        self.bump_reward = -100
+        self.bump_reward = -10000
         self.low_speed_reward = 0
-        self.fliyng_reward = 1
+        self.flying_reward = 0
+        self.flying_speed_reward = 1
 
         # self.flying_angle_reward = -10.0
         # self.pulse_reward = -0.0001
@@ -89,6 +91,7 @@ class BatFlyingEnv(gym.Env):
         # self.fliyng_reward = 1
 
         self.previous_bat_angle = 0
+        self.previous_bat_speed = 3 # [m/s]
 
         # walls settings
         margin = 0.01
@@ -131,8 +134,8 @@ class BatFlyingEnv(gym.Env):
         self.straight_angle = math.pi * 0  # [rad]
 
         # env settings
-        self.action_low = np.array([-1.0, -1.0, 0])
-        self.action_high = np.ones(3)
+        self.action_low = np.array([-1.0, 0.01, -1.0, 0])
+        self.action_high = np.array([1.0, 12.0, 1.0, 1.0])
         self.action_space = spaces.Box(
             self.action_low,
             self.action_high,
@@ -154,8 +157,8 @@ class BatFlyingEnv(gym.Env):
         #     dtype=np.float32)
         # high = np.ones((2, 81, 181), dtype=int)
         # low = np.zeros((2, 81, 181), dtype=int)
-        high = np.ones((181), dtype=int)
-        low = np.zeros((181), dtype=int)
+        high = np.ones((182), dtype=int)*2
+        low = np.zeros((182), dtype=int)
         self.observation_space = spaces.Box(np.array(
             [low]*self.bat.n_memory), np.array([high]*self.bat.n_memory), dtype=int)
 
@@ -237,39 +240,57 @@ class BatFlyingEnv(gym.Env):
                     break
 
         return False
+    
+    def clip_angle(self, flying_angle, flying_velocity):
+        if abs(math.degrees(flying_angle*self.max_flying_angle)) > 20/(flying_velocity)**2:
+            if flying_angle < 0:
+                flying_angle = -math.radians(10/(flying_velocity)**2)/ self.max_flying_angle
+            else:
+                flying_angle = math.radians(10/(flying_velocity)**2)/ self.max_flying_angle
+        return flying_angle
+    
+    def clip_speed(self, flying_velocity):
+        flying_velocity = np.clip(flying_velocity, self.previous_bat_speed*0.5, self.previous_bat_speed*1.5)
+
+        return flying_velocity
 
     def step(self, action):
         '''
         stepが刻まれると飛行・パルス放射・旋回角度による報酬が与えられる
         '''
         action = np.clip(action, self.action_low, self.action_high)
-        step_reward = self.fliyng_reward
+        step_reward = self.flying_reward
         done = False
-        flying_angle, pulse_angle, pulse_proba = action
+        flying_angle, flying_velocity, pulse_angle, pulse_proba = action
+        flying_velocity = self.clip_speed(flying_velocity)
+        # flying_angle = self.clip_angle(flying_angle, flying_velocity)
+        step_reward += self.flying_speed_reward* flying_velocity
         self.bat.emit = False
 
         bat_p0 = Point(*self.bat.bat_vec)
-        self.bat.move(self.straight_angle)
+        self.bat.move(flying_velocity, self.straight_angle)
 
         
         self.spend_time_from_pulse += self.dt
         step_reward += self.flying_angle_reward * np.abs(flying_angle)
-        self.bat.move(flying_angle * self.max_flying_angle)
+        self.bat.move(flying_velocity, flying_angle * self.max_flying_angle)
         if self.spend_time_from_pulse >= self.min_IPI:
             if pulse_proba >= 0.5:
-                print("pulse_emit")
-                self.bat.emit_pulse(
-                    pulse_angle, self.walls)
+                # self.bat.emit_pulse(
+                #     pulse_angle, self.walls)
                 self.bat.emit = True
+                self.bat.update(flying_velocity, pulse_angle, self.walls)
                 self.last_pulse_angle = pulse_angle
                 
                 self.spend_time_from_pulse = 0.0
                 
             else:
                 self.bat.emit = False
+                self.bat.update(flying_velocity, pulse_angle, self.walls)
                 self.last_pulse_angle = 0.0
         else:
             self.bat.emit = False
+            self.bat.update(flying_velocity, pulse_angle, self.walls)
             self.last_pulse_angle = 0.0
         
         step_reward += self.pulse_reward
@@ -310,7 +331,7 @@ class BatFlyingEnv(gym.Env):
             # done = True
 
         self.t += self.dt
-        if 5 < self.t:
+        if 20 < self.t:
             done = True
 
         if self.bat.emit:
@@ -322,6 +343,7 @@ class BatFlyingEnv(gym.Env):
 
         #　一個前のbat_angleを更新する
         self.previous_bat_angle = flying_angle
+        self.previous_bat_speed = flying_velocity
 
 
         return self.state, step_reward, done, {}
@@ -333,6 +355,7 @@ class BatFlyingEnv(gym.Env):
         self.spend_time_from_pulse = 0.1
         self.close()
         self._update_observation()
+
         return self.state
 
     def _reset_bat(self):
@@ -341,7 +364,6 @@ class BatFlyingEnv(gym.Env):
         init_bat_params = self.np_random.uniform(low=low, high=high)
         init_speed = 5
         self.bat = LidarBat(*init_bat_params, init_speed, self.dt)
-        self._update_observation()
 
     def _reset_walls(self):
         pass
@@ -368,7 +390,7 @@ class BatFlyingEnv(gym.Env):
 
     def _update_observation(self):
         obs = np.copy(self.bat.state)
-        obs = np.clip(obs, -1, 1)
+        obs = np.clip(obs, 0, 2)
         self.state = np.ravel(obs).astype(np.float32)
 
     def render(self, mode='human', screen_width=1000):
